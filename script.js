@@ -1,6 +1,5 @@
 // ==================== CONFIG ====================
-//const DATA_PATH = "data/merged_predictions_v2.csv";
-const DATA_PATH = "https://github.com/rrjjbbccorreia/CSCE-5320-plots/releases/download/v1.0/merged_predictions_v2.csv";
+const DATA_PATH = "data/merged_predictions_v2_web.csv";
 let globalData = [];
 let currentTicker = null;
 let currentTarget = "T1";
