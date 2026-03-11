@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Entry vs Future Prices</title>
+
+    <!-- External Styles -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Plotly & CSV Parser -->
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  </head>
+
+  <body>
+    <h1>📈 Predicted vs Real Future Prices</h1>
+
+    <!-- Dropdown and Toggle -->
+    <div class="controls">
+      <label for="tickerSelect">Select Security:</label>
+      <select id="tickerSelect"></select>
+      <button id="toggleBtn">Switch Target (T1 / T2)</button>
+    </div>
+
+    <!-- Chart Container -->
+    <div id="chart"></div>
+
+    <!-- Navigation Buttons -->
+    <div class="chart-buttons">
+      <h3>Select one of the chart options:</h3>
+      <button onclick="window.location='roa_chart.html'">Entry Price vs ROA</button>
+      <button onclick="window.location='ni_rev_roe.html'">NI + Revenue vs ROE</button>
+      <button onclick="window.location='fcf_asset.html'">FCF/Revenue & Asset Turnover</button>
+      <button onclick="window.location='ni_rev_change.html'">NI & Revenue Changes</button>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
