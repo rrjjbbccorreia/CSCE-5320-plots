@@ -11,6 +11,110 @@ body {
   min-height: 100vh;
 }
 
+/* ===== Company Header ===== */
+.company-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 30px 20px 20px;
+  border-bottom: 1px solid #3a3a3a;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.company-title {
+  font-size: 38px;
+  font-weight: 700;
+  color: #00b4d8;
+  margin: 0 0 8px 0;
+  letter-spacing: 1px;
+  text-shadow: 0 0 30px rgba(0, 180, 216, 0.3);
+}
+
+.company-tagline {
+  font-size: 16px;
+  color: #aaa;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* ===== YouTube Section ===== */
+.youtube-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-left: 4px solid #ff0000;
+  border-radius: 12px;
+  padding: 20px 28px;
+  margin-bottom: 35px;
+  width: 100%;
+  max-width: 1100px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.youtube-icon {
+  font-size: 40px;
+  color: #ff0000;
+  flex-shrink: 0;
+  background: rgba(255, 0, 0, 0.1);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.youtube-content {
+  flex: 1;
+}
+
+.youtube-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f5f5f5;
+  margin: 0 0 8px 0;
+}
+
+.youtube-desc {
+  font-size: 14px;
+  color: #aaa;
+  margin: 0 0 14px 0;
+  line-height: 1.6;
+}
+
+.youtube-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(145deg, #ff4444, #cc0000);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+}
+
+.youtube-btn:hover {
+  background: linear-gradient(145deg, #ff6666, #ee0000);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+}
+
+/* ===== Chart Heading ===== */
+.chart-heading {
+  text-align: center;
+  color: #00b4d8;
+  font-weight: 600;
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+
+
 /* ===== Title ===== */
 h1 {
   text-align: center;
@@ -182,4 +286,120 @@ button:active {
 
 .chart-buttons button:active {
   transform: scale(0.97);
+}
+
+/* ===== Stock Data Table ===== */
+.stock-table-wrapper {
+  width: 95%;
+  max-width: 1100px;
+  margin: 0 auto 25px auto;
+}
+
+.stock-table-title {
+  color: #00b4d8;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+.stock-table thead tr {
+  background: #00b4d8;
+  color: #fff;
+}
+
+.stock-table th {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.stock-table td {
+  padding: 10px 20px;
+  font-size: 14px;
+  color: #ddd;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.stock-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.stock-table tbody tr:hover {
+  background: #333;
+  transition: background 0.2s ease;
+}
+
+/* ===== Portfolio Images Section ===== */
+.images-section {
+  width: 95%;
+  max-width: 1100px;
+  margin: 40px auto 10px auto;
+  text-align: center;
+}
+
+.images-title {
+  color: #00b4d8;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.image-card {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  max-width: 500px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.image-label {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0 0 12px 0;
+  font-weight: 500;
+}
+
+.portfolio-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ===== Company Email ===== */
+.company-email {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #00b4d8;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+.company-email:hover {
+  color: #00d4ff;
+  text-decoration: underline;
 }

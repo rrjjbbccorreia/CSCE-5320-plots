@@ -71,8 +71,89 @@ function toggleTarget() {
   drawChart(currentTicker, currentTarget);
 }
 
+// ============ FETCH & DISPLAY STOCK TABLE ============
+async function fetchStockTable(ticker) {
+  const tableContainer = document.getElementById("stock-table-container");
+  tableContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading market data...</p>";
+
+  try {
+    const proxyUrl = "https://api.allorigins.win/get?url=";
+    const yahooUrl = encodeURIComponent(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`
+    );
+
+    const response = await fetch(proxyUrl + yahooUrl);
+    const json = await response.json();
+    const data = JSON.parse(json.contents);
+
+    const timestamps = data.chart.result[0].timestamp;
+    const closes = data.chart.result[0].indicators.quote[0].close;
+    const volumes = data.chart.result[0].indicators.quote[0].volume;
+
+    // Get last 10 trading days
+    const last10 = timestamps.slice(-10).map((ts, i) => {
+      const idx = timestamps.length - 10 + i;
+      return {
+        date: new Date(ts * 1000).toLocaleDateString("en-US", {
+          year: "numeric", month: "short", day: "numeric"
+        }),
+        close: closes[idx] ? closes[idx].toFixed(2) : "N/A",
+        volume: volumes[idx] ? volumes[idx].toLocaleString() : "N/A"
+      };
+    }).reverse(); // most recent first
+
+    // Build table HTML
+    let html = `
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Closing Price</th>
+            <th>Volume</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${last10.map(row => `
+            <tr>
+              <td>${row.date}</td>
+              <td>$${row.close}</td>
+              <td>${row.volume}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    tableContainer.innerHTML = `
+      <h3 class="stock-table-title">📊 ${ticker} — Last 10 Trading Days</h3>
+      ${html}
+    `;
+
+  } catch (err) {
+    console.error("Stock data fetch error:", err);
+    console.log("Ticker attempted:", ticker);
+    
+    // Log the raw response to see what Yahoo returned
+    try {
+      const proxyUrl = "https://api.allorigins.win/get?url=";
+      const yahooUrl = encodeURIComponent(
+        `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`
+      );
+      const response = await fetch(proxyUrl + yahooUrl);
+      const json = await response.json();
+      console.log("Raw response for", ticker, ":", json.contents);
+    } catch (e) {
+      console.log("Could not fetch debug info:", e);
+    }
+
+    tableContainer.innerHTML = "<p style='color:#ff6b6b;text-align:center'>Unable to load market data for " + ticker + "</p>";
+  }
+}
+
+
 // ============ DRAW CHART ============
 function drawChart(ticker, target) {
+  fetchStockTable(ticker); // ADD THIS LINE
   const df = globalData.filter((d) => d["name of security"] === ticker);
   if (df.length === 0) return;
 

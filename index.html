@@ -3,19 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive Entry vs Future Prices</title>
+    <title>Correia Investment Solutions</title>
 
     <!-- External Styles -->
     <link rel="stylesheet" href="style.css" />
 
     <!-- Plotly & CSV Parser -->
     <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   </head>
 
   <body>
-    <h1>📈 Predicted vs Real Future Prices</h1>
+
+    <!-- ===== Company Header ===== -->
+    <div class="company-header">
+      <h1 class="company-title">Correia Investment Solutions</h1>
+      <p class="company-tagline">Data-Driven Insights for Smarter Investing and AI Models that Help Predict Directions</p>
+      <a href="mailto:richcorreia.cfa@correiainvestmentsolutions.com" class="company-email">
+        richcorreia.cfa@correiainvestmentsolutions.com
+      </a>
+    </div>
+
+    <!-- ===== YouTube Section ===== -->
+    <div class="youtube-section">
+      <div class="youtube-icon">▶</div>
+      <div class="youtube-content">
+        <h2 class="youtube-title">Free Finance & Investing Education</h2>
+        <p class="youtube-desc">
+          Expand your financial knowledge with our YouTube channel — featuring in-depth videos 
+          on investing strategies, financial analysis, and market insights to help you make 
+          more informed investment decisions.
+        </p>
+        <a 
+          href="https://www.youtube.com/channel/UC14YDZ4QVl5CKm8Y_TYwxKA" 
+          target="_blank" 
+          class="youtube-btn">
+          Visit Our YouTube Channel →
+        </a>
+      </div>
+    </div>
+
+    <!-- ===== Chart Title ===== -->
+    <h2 class="chart-heading">📈 Predicted vs Real Future Prices</h2>
 
     <!-- Dropdown and Toggle -->
     <div class="controls">
@@ -24,8 +53,28 @@
       <button id="toggleBtn">Switch Target (T1 / T2)</button>
     </div>
 
+    <!-- Stock Data Table -->
+    <div id="stock-table-container" class="stock-table-wrapper"></div>
+
     <!-- Chart Container -->
     <div id="chart"></div>
+
+
+    <!-- ===== Portfolio Images Section ===== -->
+    <div class="images-section">
+      <h3 class="images-title">📊 Portfolio Performance Snapshots</h3>
+      <div class="images-grid">
+        <div class="image-card">
+          <p class="image-label">Returns — March 11, 2026</p>
+          <img src="data/return_2026-03-11.png" alt="Return - YTD and over 12 months" class="portfolio-img" />
+        </div>
+        <div class="image-card">
+          <p class="image-label">Portfolio — March 12, 2026</p>
+          <img src="data/portfolio_2026-03-12.png" alt="Portfolio" class="portfolio-img" />
+        </div>
+      </div>
+    </div>
+
 
     <!-- Navigation Buttons -->
     <div class="chart-buttons">
