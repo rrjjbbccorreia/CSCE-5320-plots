@@ -403,3 +403,60 @@ button:active {
   color: #00d4ff;
   text-decoration: underline;
 }
+/* ===== AI Model Description Section ===== */
+.model-description {
+  width: 95%;
+  max-width: 1100px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-left: 4px solid #00b4d8;
+  border-radius: 12px;
+  padding: 24px 32px;
+  margin-bottom: 35px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+}
+
+.model-description-title {
+  color: #00b4d8;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.model-description-text {
+  color: #bbb;
+  font-size: 15px;
+  line-height: 1.85;
+  margin: 0;
+  text-align: justify;
+}
+/* ===== Portfolio Description Section ===== */
+.portfolio-description {
+  width: 95%;
+  max-width: 1100px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-left: 4px solid #4e9af1;
+  border-radius: 12px;
+  padding: 24px 32px;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+}
+
+.portfolio-description-title {
+  color: #4e9af1;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.portfolio-description-text {
+  color: #bbb;
+  font-size: 15px;
+  line-height: 1.85;
+  margin: 0;
+  text-align: justify;
+}
