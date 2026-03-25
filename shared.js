@@ -1,5 +1,5 @@
 // Shared utilities for all chart pages
-const DATA_PATH = "data/merged_predictions_v2_web_032426.csv";
+const DATA_PATH = "data/merged_predictions_v2_web.csv";
 let globalData = [];
 let currentTicker = null;
 
