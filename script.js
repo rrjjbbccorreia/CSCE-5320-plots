@@ -236,7 +236,7 @@ async function drawChart(ticker, target) {
     x: entryDateFiltered,
     y: entryPriceFiltered,
     mode: "lines+markers",
-    name: "Entry Price",
+    name: "Past Entry Price or todays price",
     line: { color: "black", width: 2 },
   };
 
@@ -244,7 +244,7 @@ async function drawChart(ticker, target) {
     x: trueDateFiltered,
     y: truePriceFiltered,
     mode: "lines+markers",
-    name: `Real Price (${target})`,
+    name: `Real Price  (${target})`,
     line: { color: target === "T1" ? "green" : "blue" },
   };
 
