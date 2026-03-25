@@ -152,13 +152,60 @@ async function fetchStockTable(ticker) {
 
 
 // ============ DRAW CHART ============
-function drawChart(ticker, target) {
+async function drawChart(ticker, target) {
   fetchStockTable(ticker); // ADD THIS LINE
   const df = globalData.filter((d) => d["name of security"] === ticker);
   if (df.length === 0) return;
 
+  // const entryDate = df.map((d) => new Date(d["entry date"]));
+  // const entryPrice = df.map((d) => +d["entry price"]);
+
   const entryDate = df.map((d) => new Date(d["entry date"]));
   const entryPrice = df.map((d) => +d["entry price"]);
+
+  // Check if any entry prices are missing or zero
+  const hasMissingEntryPrices = entryPrice.some(
+    (v) => v === null || v === 0 || isNaN(v)
+  );
+
+  // If missing entry prices exist, fetch latest price from Yahoo and fill them in
+  if (hasMissingEntryPrices) {
+    try {
+      const proxyUrl = "https://api.allorigins.win/get?url=";
+      const yahooUrl = encodeURIComponent(
+        `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`
+      );
+      const response = await fetch(proxyUrl + yahooUrl);
+      const json = await response.json();
+      const yahooData = JSON.parse(json.contents);
+      const latestCloses = yahooData.chart.result[0].indicators.quote[0].close;
+
+      // Get the most recent valid closing price
+      const latestPrice = [...latestCloses].reverse().find(
+        (v) => v !== null && v !== 0 && !isNaN(v)
+      );
+
+      if (latestPrice) {
+        // Fill in missing entry prices with latest Yahoo price
+        for (let i = 0; i < entryPrice.length; i++) {
+          if (entryPrice[i] === null || entryPrice[i] === 0 || isNaN(entryPrice[i])) {
+            entryPrice[i] = latestPrice;
+          }
+        }
+        console.log(`Filled missing entry prices for ${ticker} with latest price: $${latestPrice.toFixed(2)}`);
+      }
+    } catch (err) {
+      console.warn(`Could not fetch latest price for ${ticker}:`, err);
+    }
+  }
+
+  // Plot only valid entry prices
+  const validEntryIndices = entryPrice
+    .map((v, i) => (v !== null && v !== 0 && !isNaN(v) ? i : null))
+    .filter((i) => i !== null);
+
+  const entryDateFiltered = validEntryIndices.map((i) => entryDate[i]);
+  const entryPriceFiltered = validEntryIndices.map((i) => entryPrice[i]);
 
   const tgtDate = df.map((d) =>
     new Date(d[`target ${target === "T1" ? "1" : "2"} date`])
@@ -186,8 +233,8 @@ function drawChart(ticker, target) {
 
   // ----- Traces -----
   const entryTrace = {
-    x: entryDate,
-    y: entryPrice,
+    x: entryDateFiltered,
+    y: entryPriceFiltered,
     mode: "lines+markers",
     name: "Entry Price",
     line: { color: "black", width: 2 },
