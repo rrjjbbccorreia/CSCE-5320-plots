@@ -1,5 +1,5 @@
 // ==================== CONFIG ====================
-const DATA_PATH = "data/merged_predictions_v2_web.csv";
+const DATA_PATH = "data/merged_predictions_v2_web_032526.csv";
 let globalData = [];
 let currentTicker = null;
 let currentTarget = "T1";
@@ -167,8 +167,20 @@ function drawChart(ticker, target) {
   const yTrue = df.map((d) => +d[`y_true_h${target === "T1" ? "1" : "2"}`]);
   const std = df.map((d) => +d[`std_h${target === "T1" ? "1" : "2"}`]);
 
+  // Only include rows where y_true actually exists (non-zero, non-null, non-NaN)
+  const validTrueIndices = yTrue
+    .map((v, i) => (v !== null && v !== 0 && !isNaN(v) ? i : null))
+    .filter((i) => i !== null);
+
+  const trueDateFiltered = validTrueIndices.map((i) => tgtDate[i]);
+  const truePriceFiltered = validTrueIndices.map((i) =>
+    entryPrice[i] * Math.exp(yTrue[i])
+  );
+
+
+
   const predPrice = entryPrice.map((v, i) => v * Math.exp(mu[i]));
-  const truePrice = entryPrice.map((v, i) => v * Math.exp(yTrue[i]));
+  //const truePrice = entryPrice.map((v, i) => v * Math.exp(yTrue[i]));
   const predLo = entryPrice.map((v, i) => v * Math.exp(mu[i] - 1.645 * std[i]));
   const predHi = entryPrice.map((v, i) => v * Math.exp(mu[i] + 1.645 * std[i]));
 
@@ -182,10 +194,10 @@ function drawChart(ticker, target) {
   };
 
   const trueTrace = {
-    x: tgtDate,
-    y: truePrice,
+    x: trueDateFiltered,
+    y: truePriceFiltered,
     mode: "lines+markers",
-    name: `Real Future Price (${target})`,
+    name: `Real Price (${target})`,
     line: { color: target === "T1" ? "green" : "blue" },
   };
 
