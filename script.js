@@ -72,9 +72,16 @@ function toggleTarget() {
 }
 
 // ============ FETCH & DISPLAY STOCK TABLE ============
-async function fetchStockTable(ticker) {
+
+async function fetchStockTable(ticker, retryCount = 0) {
+  const maxRetries = 3;
   const tableContainer = document.getElementById("stock-table-container");
-  tableContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading market data...</p>";
+  
+  if (retryCount === 0) {
+    tableContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading market data...</p>";
+  } else {
+    tableContainer.innerHTML = `<p style='color:#aaa;text-align:center'>Loading market data... (attempt ${retryCount + 1} of ${maxRetries})</p>`;
+  }
 
   try {
     const proxyUrl = "https://api.allorigins.win/get?url=";
@@ -82,7 +89,15 @@ async function fetchStockTable(ticker) {
       `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`
     );
 
-    const response = await fetch(proxyUrl + yahooUrl);
+    // Add a timeout so we don't wait forever
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(proxyUrl + yahooUrl, { 
+      signal: controller.signal 
+    });
+    clearTimeout(timeout);
+
     const json = await response.json();
     const data = JSON.parse(json.contents);
 
@@ -100,7 +115,7 @@ async function fetchStockTable(ticker) {
         close: closes[idx] ? closes[idx].toFixed(2) : "N/A",
         volume: volumes[idx] ? volumes[idx].toLocaleString() : "N/A"
       };
-    }).reverse(); // most recent first
+    }).reverse();
 
     // Build table HTML
     let html = `
@@ -130,23 +145,28 @@ async function fetchStockTable(ticker) {
     `;
 
   } catch (err) {
-    console.error("Stock data fetch error:", err);
-    console.log("Ticker attempted:", ticker);
-    
-    // Log the raw response to see what Yahoo returned
-    try {
-      const proxyUrl = "https://api.allorigins.win/get?url=";
-      const yahooUrl = encodeURIComponent(
-        `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`
-      );
-      const response = await fetch(proxyUrl + yahooUrl);
-      const json = await response.json();
-      console.log("Raw response for", ticker, ":", json.contents);
-    } catch (e) {
-      console.log("Could not fetch debug info:", e);
-    }
 
-    tableContainer.innerHTML = "<p style='color:#ff6b6b;text-align:center'>Unable to load market data for " + ticker + "</p>";
+    if (retryCount < maxRetries - 1) {
+      // Wait 2 seconds then retry automatically
+      console.warn(`Attempt ${retryCount + 1} failed for ${ticker}, retrying in 2s...`);
+      setTimeout(() => fetchStockTable(ticker, retryCount + 1), 2000);
+    } else {
+      // All retries exhausted — show error with manual retry button
+      console.error(`All ${maxRetries} attempts failed for ${ticker}:`, err);
+      tableContainer.innerHTML = `
+        <div style="text-align:center; padding: 12px;">
+          <p style="color:#ff6b6b; margin-bottom: 10px;">
+            Unable to load market data for ${ticker}
+          </p>
+          <button 
+            onclick="fetchStockTable('${ticker}')" 
+            style="padding: 8px 16px; cursor: pointer; background: #00b4d8; 
+                   color: white; border: none; border-radius: 6px; font-size: 14px;">
+            🔄 Retry
+          </button>
+        </div>
+      `;
+    }
   }
 }
 
@@ -162,40 +182,77 @@ async function drawChart(ticker, target) {
 
   const entryDate = df.map((d) => new Date(d["entry date"]));
   const entryPrice = df.map((d) => +d["entry price"]);
+  const today = new Date();
 
   // Check if any entry prices are missing or zero
   const hasMissingEntryPrices = entryPrice.some(
     (v) => v === null || v === 0 || isNaN(v)
   );
 
-  // If missing entry prices exist, fetch latest price from Yahoo and fill them in
   if (hasMissingEntryPrices) {
     try {
       const proxyUrl = "https://api.allorigins.win/get?url=";
+
+      // Fetch last 6 months of daily prices to cover all possible entry dates
       const yahooUrl = encodeURIComponent(
-        `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`
+        `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`
       );
       const response = await fetch(proxyUrl + yahooUrl);
       const json = await response.json();
       const yahooData = JSON.parse(json.contents);
-      const latestCloses = yahooData.chart.result[0].indicators.quote[0].close;
+      const result = yahooData.chart.result[0];
 
-      // Get the most recent valid closing price
-      const latestPrice = [...latestCloses].reverse().find(
-        (v) => v !== null && v !== 0 && !isNaN(v)
+      const timestamps = result.timestamp;
+      const closes = result.indicators.quote[0].close;
+
+      // Build a map of date string -> closing price for quick lookup
+      const priceByDate = {};
+      timestamps.forEach((ts, i) => {
+        if (closes[i] !== null && !isNaN(closes[i])) {
+          const dateStr = new Date(ts * 1000).toISOString().split("T")[0];
+          priceByDate[dateStr] = closes[i];
+        }
+      });
+
+      // Get the latest available price as fallback for future entry dates
+      const latestPrice = [...closes].reverse().find(
+        (v) => v !== null && !isNaN(v)
       );
 
-      if (latestPrice) {
-        // Fill in missing entry prices with latest Yahoo price
-        for (let i = 0; i < entryPrice.length; i++) {
-          if (entryPrice[i] === null || entryPrice[i] === 0 || isNaN(entryPrice[i])) {
+      // Fill in missing entry prices
+      for (let i = 0; i < entryPrice.length; i++) {
+        if (entryPrice[i] === null || entryPrice[i] === 0 || isNaN(entryPrice[i])) {
+          
+          const entryDateObj = entryDate[i];
+          const entryDateStr = entryDateObj.toISOString().split("T")[0];
+
+          if (entryDateObj <= today) {
+            // Entry date is in the past — find exact or closest date in history
+            if (priceByDate[entryDateStr]) {
+              // Exact match found
+              entryPrice[i] = priceByDate[entryDateStr];
+              console.log(`${ticker} row ${i}: exact price on ${entryDateStr} = $${entryPrice[i].toFixed(2)}`);
+            } else {
+              // Find closest available trading date
+              const allDates = Object.keys(priceByDate).sort();
+              const closest = allDates.reduce((prev, curr) => {
+                return Math.abs(new Date(curr) - entryDateObj) 
+                  Math.abs(new Date(prev) - entryDateObj)
+                  ? curr
+                  : prev;
+              });
+              entryPrice[i] = priceByDate[closest];
+              console.log(`${ticker} row ${i}: no exact match for ${entryDateStr}, using closest date ${closest} = $${entryPrice[i].toFixed(2)}`);
+            }
+          } else {
+            // Entry date is in the future — use latest available price
             entryPrice[i] = latestPrice;
+            console.log(`${ticker} row ${i}: future entry date ${entryDateStr}, using latest price = $${latestPrice.toFixed(2)}`);
           }
         }
-        console.log(`Filled missing entry prices for ${ticker} with latest price: $${latestPrice.toFixed(2)}`);
       }
     } catch (err) {
-      console.warn(`Could not fetch latest price for ${ticker}:`, err);
+      console.warn(`Could not fetch historical prices for ${ticker}:`, err);
     }
   }
 
@@ -228,15 +285,41 @@ async function drawChart(ticker, target) {
 
   const predPrice = entryPrice.map((v, i) => v * Math.exp(mu[i]));
   //const truePrice = entryPrice.map((v, i) => v * Math.exp(yTrue[i]));
-  const predLo = entryPrice.map((v, i) => v * Math.exp(mu[i] - 1.645 * std[i]));
-  const predHi = entryPrice.map((v, i) => v * Math.exp(mu[i] + 1.645 * std[i]));
+  // const predLo = entryPrice.map((v, i) => v * Math.exp(mu[i] - 1.645 * std[i]));
+  // const predHi = entryPrice.map((v, i) => v * Math.exp(mu[i] + 1.645 * std[i]));
+
+  // Sort all target date points together to prevent inversion
+  const ciPoints = tgtDate.map((date, i) => ({
+    date,
+    hi: entryPrice[i] * Math.exp(mu[i] + 1.645 * std[i]),
+    lo: entryPrice[i] * Math.exp(mu[i] - 1.645 * std[i])
+  }))
+  .filter((p) => 
+    p.date instanceof Date && !isNaN(p.date) &&
+    p.hi !== null && !isNaN(p.hi) &&
+    p.lo !== null && !isNaN(p.lo) &&
+    p.hi > 0 && p.lo > 0
+  )
+  .sort((a, b) => a.date - b.date);
+
+  // Debug — log to confirm hi is always above lo
+  ciPoints.forEach((p, i) => {
+    if (p.hi < p.lo) {
+      console.warn(`CI inversion at index ${i}, date ${p.date}, hi=${p.hi}, lo=${p.lo}`);
+    }
+  });
+
+  const ciDates = ciPoints.map((p) => p.date);
+  const ciHi = ciPoints.map((p) => Math.max(p.hi, p.lo));
+  const ciLo = ciPoints.map((p) => Math.min(p.hi, p.lo));
 
   // ----- Traces -----
+
   const entryTrace = {
     x: entryDateFiltered,
     y: entryPriceFiltered,
     mode: "lines+markers",
-    name: "Past Entry Price or todays price",
+    name: "Past Entry Price<br>or Today's Price<br>(entry date in future)",
     line: { color: "black", width: 2 },
   };
 
@@ -257,10 +340,10 @@ async function drawChart(ticker, target) {
   };
 
   const ciTrace = {
-    x: [...tgtDate, ...tgtDate.slice().reverse()],
-    y: [...predHi, ...predLo.slice().reverse()],
+    x: [...ciDates, ...ciDates.slice().reverse()],
+    y: [...ciHi, ...ciLo.slice().reverse()],
     fill: "toself",
-    fillcolor: target === "T1" ? "rgba(255,165,0,0.15)" : "rgba(255,0,0,0.15)",
+    fillcolor: "rgba(30, 144, 255, 0.2)",
     line: { width: 0 },
     name: `90% CI (${target})`,
   };
