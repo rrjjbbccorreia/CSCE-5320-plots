@@ -361,3 +361,69 @@ async function drawChart(ticker, target) {
     responsive: true,
   });
 }
+
+// ============ SPREADSHEET PREVIEW ============
+async function loadSpreadsheetPreview() {
+  const tabsContainer = document.getElementById("previewTabs");
+  const sheetContainer = document.getElementById("spreadsheet-container");
+
+  if (!tabsContainer) return;
+
+  try {
+    // Load SheetJS from CDN
+    if (typeof XLSX === "undefined") {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    sheetContainer.innerHTML = "<p style='color:#aaa;text-align:center;padding:20px;'>Loading spreadsheet...</p>";
+
+    const response = await fetch("data/Retirement analysis_PROT14v2_p.xlsm");
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+    // Build sheet tabs
+    tabsContainer.innerHTML = "";
+    workbook.SheetNames.forEach((name, index) => {
+      const tab = document.createElement("button");
+      tab.className = "preview-tab" + (index === 0 ? " active" : "");
+      tab.textContent = name;
+      tab.onclick = () => {
+        document.querySelectorAll(".preview-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        renderSheet(workbook, name, sheetContainer);
+      };
+      tabsContainer.appendChild(tab);
+    });
+
+    // Render first sheet by default
+    renderSheet(workbook, workbook.SheetNames[0], sheetContainer);
+
+  } catch (err) {
+    console.error("Spreadsheet preview error:", err);
+    sheetContainer.innerHTML = "<p style='color:#ff6b6b;text-align:center;padding:20px;'>Unable to load spreadsheet preview.</p>";
+  }
+}
+
+function renderSheet(workbook, sheetName, container) {
+  const sheet = workbook.Sheets[sheetName];
+  const html = XLSX.utils.sheet_to_html(sheet, { editable: false });
+  container.innerHTML = html;
+
+  // Apply dark theme styling to generated table
+  const table = container.querySelector("table");
+  if (table) {
+    table.style.borderCollapse = "collapse";
+    table.style.width = "100%";
+    table.style.fontSize = "13px";
+    table.style.color = "#ccc";
+  }
+}
+
+// Auto load preview on page load
+loadSpreadsheetPreview();

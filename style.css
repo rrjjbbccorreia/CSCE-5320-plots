@@ -460,3 +460,141 @@ button:active {
   margin: 0;
   text-align: justify;
 }
+
+/* ===== Retirement Section ===== */
+.retirement-section {
+  width: 95%;
+  max-width: 1100px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-left: 4px solid #00c896;
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+}
+
+.retirement-title {
+  color: #00c896;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.retirement-desc {
+  color: #bbb;
+  font-size: 15px;
+  line-height: 1.85;
+  margin: 0 0 24px 0;
+  text-align: justify;
+}
+
+.retirement-download-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(145deg, #00c896, #009e75);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 200, 150, 0.3);
+  margin-bottom: 32px;
+  display: block;
+  text-align: center;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.retirement-download-btn:hover {
+  background: linear-gradient(145deg, #00e6aa, #00b888);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 200, 150, 0.4);
+}
+
+/* ===== Spreadsheet Preview ===== */
+.spreadsheet-preview {
+  margin-top: 32px;
+  border-top: 1px solid #3a3a3a;
+  padding-top: 24px;
+}
+
+.preview-title {
+  color: #00c896;
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.preview-desc {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+.preview-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.preview-tab {
+  padding: 8px 16px;
+  background: #333;
+  color: #ccc;
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.preview-tab:hover {
+  background: #444;
+  color: #fff;
+}
+
+.preview-tab.active {
+  background: #00c896;
+  color: white;
+  border-color: #00c896;
+}
+
+.spreadsheet-container {
+  width: 100%;
+  overflow-x: auto;
+  background: #1e1e1e;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  min-height: 200px;
+}
+
+.spreadsheet-container table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.spreadsheet-container th {
+  background: #00c896;
+  color: white;
+  padding: 8px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.spreadsheet-container td {
+  padding: 7px 12px;
+  border-bottom: 1px solid #2e2e2e;
+  color: #ccc;
+  white-space: nowrap;
+}
+
+.spreadsheet-container tr:hover td {
+  background: #2a2a2a;
+}
