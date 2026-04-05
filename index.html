@@ -43,6 +43,29 @@
       </div>
     </div>
 
+    <!-- ===== ChatGPT Financial Prompt Tool ===== -->
+    <div class="chatgpt-section">
+      <h2 class="chatgpt-title">💬 AI Financial Question Builder</h2>
+
+      <p class="chatgpt-desc">
+        Ask detailed financial questions using structured prompts powered by AI. 
+        Enter your question below and generate a professional-grade prompt you can use in ChatGPT.
+      </p>
+
+      <textarea id="userQuestion" placeholder="Example: Analyze Apple stock based on fundamentals and valuation..." rows="4"></textarea>
+
+      <button onclick="generatePrompt()" class="chatgpt-btn">
+        Generate AI Prompt →
+      </button>
+
+      <textarea id="generatedPrompt" rows="6" readonly placeholder="Your structured prompt will appear here..."></textarea>
+
+      <button onclick="openChatGPT()" class="chatgpt-btn secondary">
+        Open in ChatGPT →
+      </button>
+    </div>
+
+
     <!-- ===== AI Model Description Section ===== -->
     <div class="model-description">
       <h2 class="model-description-title">🤖 About the AI Predictive Model</h2>

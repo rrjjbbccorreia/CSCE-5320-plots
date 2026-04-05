@@ -427,3 +427,43 @@ function renderSheet(workbook, sheetName, container) {
 
 // Auto load preview on page load
 loadSpreadsheetPreview();
+
+function generatePrompt() {
+  const userInput = document.getElementById("userQuestion").value;
+
+  if (!userInput) {
+    alert("Please enter a question.");
+    return;
+  }
+
+  const structuredPrompt = `
+You are a professional financial analyst.
+
+Analyze the following request in detail:
+
+"${userInput}"
+
+Provide:
+1. Fundamental analysis (revenue, earnings, margins)
+2. Valuation metrics (PE, PS, intrinsic value if possible)
+3. Risks and macro considerations
+4. Short-term vs long-term outlook
+5. Investment recommendation with reasoning
+
+Be detailed, structured, and data-driven.
+  `;
+
+  document.getElementById("generatedPrompt").value = structuredPrompt;
+}
+
+function openChatGPT() {
+  const prompt = document.getElementById("generatedPrompt").value;
+
+  if (!prompt) {
+    alert("Generate a prompt first.");
+    return;
+  }
+
+  const url = `https://chat.openai.com/?prompt=${encodeURIComponent(prompt)}`;
+  window.open(url, "_blank");
+}
