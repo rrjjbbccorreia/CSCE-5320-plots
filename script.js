@@ -467,3 +467,106 @@ function openChatGPT() {
   const url = `https://chat.openai.com/?prompt=${encodeURIComponent(prompt)}`;
   window.open(url, "_blank");
 }
+
+// ============ Q2 FUNDAMENTAL PICKS ============
+const Q2_PICKS = [
+  "ALB", "SPG", "ETR", "COST", "MU",
+  "SYF", "EXPD", "CEG", "NRG", "ARE",
+  "CTAS", "DECK", "DD", "AMCR","ACN",
+  "FDS", "PLTR", "PSX"
+];
+
+async function loadQ2Picks() {
+  const grid = document.getElementById("picksGrid");
+  if (!grid) return;
+
+  // Build initial cards with loading state
+  grid.innerHTML = Q2_PICKS.map(ticker => `
+    <div class="pick-card" id="pick-${ticker}">
+      <div class="pick-ticker">${ticker}</div>
+      <div class="pick-price" id="price-${ticker}">
+        <span style="color:#aaa;font-size:13px;">Loading...</span>
+      </div>
+      <div class="pick-change" id="change-${ticker}"></div>
+      <button class="pick-btn" onclick="loadChart('${ticker}')">
+        View Chart
+      </button>
+    </div>
+  `).join("");
+
+  // Fetch price for each ticker
+  for (const ticker of Q2_PICKS) {
+    fetchPickPrice(ticker);
+  }
+}
+
+async function fetchPickPrice(ticker, retryCount = 0) {
+  const maxRetries = 3;
+  try {
+    const proxyUrl = "https://api.allorigins.win/get?url=";
+    const yahooUrl = encodeURIComponent(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`
+    );
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const response = await fetch(proxyUrl + yahooUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    const json = await response.json();
+    const data = JSON.parse(json.contents);
+    const result = data.chart.result[0];
+
+    const closes = result.indicators.quote[0].close;
+    const validCloses = closes.filter((v) => v !== null && !isNaN(v));
+    const latestPrice = validCloses[validCloses.length - 1];
+    const prevPrice = validCloses[validCloses.length - 2];
+    const change = latestPrice - prevPrice;
+    const changePct = (change / prevPrice) * 100;
+    const isPositive = change >= 0;
+
+    document.getElementById(`price-${ticker}`).innerHTML = `
+      <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
+    `;
+    document.getElementById(`change-${ticker}`).innerHTML = `
+      <span class="pick-change-value ${isPositive ? "positive" : "negative"}">
+        ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)} 
+        (${isPositive ? "+" : ""}${changePct.toFixed(2)}%)
+      </span>
+    `;
+
+    // Highlight card based on performance
+    const card = document.getElementById(`pick-${ticker}`);
+    card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+
+  } catch (err) {
+    if (retryCount < maxRetries - 1) {
+      setTimeout(() => fetchPickPrice(ticker, retryCount + 1), 2000);
+    } else {
+      document.getElementById(`price-${ticker}`).innerHTML =
+        "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+    }
+  }
+}
+
+function loadChart(ticker) {
+  // Switch the main chart dropdown to selected ticker
+  const select = document.getElementById("tickerSelect");
+  if (select) {
+    const options = Array.from(select.options);
+    const match = options.find((o) => o.value === ticker);
+    if (match) {
+      select.value = ticker;
+      currentTicker = ticker;
+      localStorage.setItem("selectedTicker", ticker);
+      drawChart(ticker, currentTarget);
+      // Scroll up to chart
+      document.getElementById("chart").scrollIntoView({ behavior: "smooth" });
+    } else {
+      alert(`${ticker} is not available in the current dataset.`);
+    }
+  }
+}
+
+// Load picks on page start
+loadQ2Picks();

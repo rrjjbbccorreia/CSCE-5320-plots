@@ -638,3 +638,114 @@ button:active {
 .chatgpt-btn.secondary {
   background: #2962ff;
 }
+
+/* ===== Q2 Fundamental Picks Section ===== */
+.picks-section {
+  width: 95%;
+  max-width: 1100px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-left: 4px solid #f0a500;
+  border-radius: 12px;
+  padding: 24px 32px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+}
+
+.picks-title {
+  color: #f0a500;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.picks-desc {
+  color: #bbb;
+  font-size: 14px;
+  line-height: 1.75;
+  margin: 0 0 20px 0;
+  text-align: justify;
+}
+
+.picks-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+/* ===== Individual Pick Card ===== */
+.pick-card {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  padding: 16px 20px;
+  text-align: center;
+  width: 140px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pick-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.pick-card.pick-positive {
+  border-top: 3px solid #00c896;
+}
+
+.pick-card.pick-negative {
+  border-top: 3px solid #ff4d4d;
+}
+
+.pick-ticker {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f0a500;
+  letter-spacing: 1px;
+}
+
+.pick-price-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f5f5f5;
+}
+
+.pick-change-value {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pick-change-value.positive {
+  color: #00c896;
+}
+
+.pick-change-value.negative {
+  color: #ff4d4d;
+}
+
+.pick-btn {
+  margin-top: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  background: linear-gradient(145deg, #f0a500, #c47f00);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.pick-btn:hover {
+  background: linear-gradient(145deg, #ffb733, #e09200);
+  transform: translateY(-1px);
+}
