@@ -749,3 +749,122 @@ button:active {
   background: linear-gradient(145deg, #ffb733, #e09200);
   transform: translateY(-1px);
 }
+
+/* ===== Company Profile ===== */
+.company-profile-wrapper {
+  width: 95%;
+  max-width: 1100px;
+  margin: 0 auto 20px auto;
+}
+
+.company-profile {
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  padding: 20px 28px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.profile-company-name {
+  color: #00b4d8;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.profile-sector {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.profile-meta-item {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.profile-link {
+  color: #00b4d8;
+  text-decoration: none;
+}
+
+.profile-link:hover {
+  text-decoration: underline;
+}
+
+.profile-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.profile-stat {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 100px;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f5f5f5;
+}
+
+.profile-description {
+  font-size: 14px;
+  color: #bbb;
+  line-height: 1.75;
+  margin: 0;
+  text-align: justify;
+}
+
+.profile-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 8px;
+  border-radius: 4px;
+  background: white;
+  padding: 2px;
+}
+
+.profile-exchange {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  display: block;
+}
