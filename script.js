@@ -79,6 +79,8 @@ async function fetchStockTable(ticker, retryCount = 0) {
   
   if (retryCount === 0) {
     tableContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading market data...</p>";
+      // Small delay to let page fully initialize first
+    await new Promise(resolve => setTimeout(resolve, 500));
   } else {
     tableContainer.innerHTML = `<p style='color:#aaa;text-align:center'>Loading market data... (attempt ${retryCount + 1} of ${maxRetries})</p>`;
   }
@@ -760,14 +762,17 @@ async function loadQ2Picks() {
     </div>
   `).join("");
 
+  // Wait 2 seconds for stock table and profile to finish first
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
   // Fetch price for each ticker
   //for (const ticker of Q2_PICKS) {
   //  fetchPickPrice(ticker);
   //}
-  // Fetch price for each ticker with a 300ms delay between each
+  // Fetch price for each ticker with a 750ms delay between each
   // to avoid hitting rate limits
   for (let i = 0; i < Q2_PICKS.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, i * 500));
+    await new Promise(resolve => setTimeout(resolve, i * 750));
     fetchPickPrice(Q2_PICKS[i]);
   }
 }
