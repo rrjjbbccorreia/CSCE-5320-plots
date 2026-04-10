@@ -178,27 +178,22 @@ const FMP_API_KEY = "6FzEHlHT2TqzNgzMErLTWpf3Xhuh1SMZ";
 async function fetchCompanyProfile(ticker, retryCount = 0) {
   const maxRetries = 3;
   const profileContainer = document.getElementById("company-profile-container");
-  profileContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading company profile...</p>";
+  
+  if (retryCount === 0) {
+    profileContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading company profile...</p>";
+  }
 
   try {
-    // Use FMP stable free endpoint
-    const url = `https://financialmodelingprep.com/api/v3/profile/${ticker}?apikey=${FMP_API_KEY}`;
-    console.log("Fetching:", url);
+    const response = await fetch(
+      `https://financialmodelingprep.com/api/v3/profile/${ticker}?apikey=${FMP_API_KEY}`
+    );
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
+    console.log("FMP profile status:", response.status);
 
-    console.log("Response status:", response.status);
-
-    if (response.status === 403) {
-      // FMP blocking localhost — use fallback static display
-      throw new Error("403 - FMP blocking localhost, will work on GitHub Pages");
-    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const profileData = await response.json();
-    console.log("Profile data:", profileData);
+    console.log("FMP profile data:", profileData);
 
     if (!profileData || profileData.length === 0) {
       throw new Error("No profile data returned");
@@ -216,14 +211,18 @@ async function fetchCompanyProfile(ticker, retryCount = 0) {
 
     const fmtNum = (val) => val ? Number(val).toLocaleString() : "N/A";
     const fmtDec = (val) => val ? Number(val).toFixed(2) : "N/A";
-    const fmtPct = (val, price) => (val && price) ? ((val / price) * 100).toFixed(2) + "%" : "N/A";
+    const fmtPct = (val, price) => (val && price) 
+      ? ((val / price) * 100).toFixed(2) + "%" 
+      : "N/A";
 
     profileContainer.innerHTML = `
       <div class="company-profile">
         <div class="profile-header">
           <div class="profile-name-block">
             <h3 class="profile-company-name">
-              ${p.image ? `<img src="${p.image}" class="profile-logo" alt="${ticker}" onerror="this.style.display='none'" />` : ""}
+              ${p.image 
+                ? `<img src="${p.image}" class="profile-logo" alt="${ticker}" onerror="this.style.display='none'" />` 
+                : ""}
               ${p.companyName || ticker}
             </h3>
             <span class="profile-sector">
@@ -275,7 +274,7 @@ async function fetchCompanyProfile(ticker, retryCount = 0) {
             <span class="stat-value">${fmtNum(p.volAvg)}</span>
           </div>
           <div class="profile-stat">
-            <span class="stat-label">Dividend</span>
+            <span class="stat-label">Dividend Yield</span>
             <span class="stat-value">${fmtPct(p.lastDiv, p.price)}</span>
           </div>
         </div>
@@ -296,25 +295,17 @@ async function fetchCompanyProfile(ticker, retryCount = 0) {
       setTimeout(() => fetchCompanyProfile(ticker, retryCount + 1), 2000);
     } else {
       console.error(`Could not load profile for ${ticker}:`, err);
-
-      // Show a clean placeholder instead of an error
-      // This will work properly once deployed to GitHub Pages
       profileContainer.innerHTML = `
-        <div class="company-profile">
-          <div class="profile-header">
-            <div class="profile-name-block">
-              <h3 class="profile-company-name">${ticker}</h3>
-              <span class="profile-sector">
-                Company profile will load when deployed to GitHub Pages
-              </span>
-            </div>
-          </div>
-          <p class="profile-description" style="color:#888;font-style:italic;">
-            Company profile data is unavailable in local development mode due to 
-            API access restrictions. This section will display full company 
-            information including sector, key statistics, and business description 
-            when the site is live on GitHub Pages.
+        <div style="text-align:center; padding: 12px;">
+          <p style="color:#ff6b6b; margin-bottom: 10px;">
+            Unable to load company profile for ${ticker}
           </p>
+          <button 
+            onclick="fetchCompanyProfile('${ticker}')"
+            style="padding: 8px 16px; cursor: pointer; background: #00b4d8;
+                   color: white; border: none; border-radius: 6px; font-size: 14px;">
+            🔄 Retry
+          </button>
         </div>
       `;
     }
