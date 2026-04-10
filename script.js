@@ -761,8 +761,14 @@ async function loadQ2Picks() {
   `).join("");
 
   // Fetch price for each ticker
-  for (const ticker of Q2_PICKS) {
-    fetchPickPrice(ticker);
+  //for (const ticker of Q2_PICKS) {
+  //  fetchPickPrice(ticker);
+  //}
+  // Fetch price for each ticker with a 300ms delay between each
+  // to avoid hitting rate limits
+  for (let i = 0; i < Q2_PICKS.length; i++) {
+    await new Promise(resolve => setTimeout(resolve, i * 400));
+    fetchPickPrice(Q2_PICKS[i]);
   }
 }
 
