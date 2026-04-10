@@ -173,118 +173,241 @@ async function fetchStockTable(ticker, retryCount = 0) {
 
 // ============ FETCH & DISPLAY COMPANY PROFILE ============
 
-const FMP_API_KEY = "6FzEHlHT2TqzNgzMErLTWpf3Xhuh1SMZ";
+// ============ TICKER TO COMPANY NAME MAP ============
+const TICKER_MAP = {
+  A: "Agilent Technologies", AA: "Alcoa", AAPL: "Apple Inc",
+  ABBV: "AbbVie", ABT: "Abbott Laboratories", ACN: "Accenture",
+  ADBE: "Adobe Inc", ADI: "Analog Devices", ADM: "Archer-Daniels-Midland",
+  ADP: "ADP Inc", ADSK: "Autodesk", AEE: "Ameren",
+  AEP: "American Electric Power", AES: "AES Corporation", AFL: "Aflac",
+  AIG: "American International Group", AIZ: "Assurant", AJG: "Arthur J. Gallagher",
+  AKAM: "Akamai Technologies", ALB: "Albemarle", ALGN: "Align Technology",
+  ALL: "Allstate", AMAT: "Applied Materials", AMGN: "Amgen",
+  AMP: "Ameriprise Financial", AMT: "American Tower", AMZN: "Amazon",
+  ANET: "Arista Networks", AON: "Aon", AOS: "A. O. Smith",
+  APA: "APA Corporation", APD: "Air Products and Chemicals", APH: "Amphenol",
+  APTV: "Aptiv", ARE: "Alexandria Real Estate", ATO: "Atmos Energy",
+  AVB: "AvalonBay Communities", AVGO: "Broadcom", AVY: "Avery Dennison",
+  AWK: "American Water Works", AXON: "Axon Enterprise", AXP: "American Express",
+  AZO: "AutoZone", BA: "Boeing", BALL: "Ball Corporation",
+  BAC: "Bank of America", BBWI: "Bath Body Works", BBY: "Best Buy",
+  BDX: "Becton Dickinson", BEN: "Franklin Resources", BF: "Brown-Forman",
+  BIO: "Bio-Rad Laboratories", BIIB: "Biogen", BK: "Bank of New York Mellon",
+  BKNG: "Booking Holdings", BKR: "Baker Hughes", BMY: "Bristol-Myers Squibb",
+  BR: "Broadridge Financial", BRK: "Berkshire Hathaway", BSX: "Boston Scientific",
+  BWA: "BorgWarner", BXP: "BXP Inc", C: "Citigroup",
+  CAG: "Conagra Brands", CAH: "Cardinal Health", CARR: "Carrier Global",
+  CAT: "Caterpillar", CB: "Chubb", CBOE: "Cboe Global Markets",
+  CBRE: "CBRE Group", CCI: "Crown Castle", CCL: "Carnival Corporation",
+  CDNS: "Cadence Design Systems", CDW: "CDW Corporation", CE: "Celanese",
+  CEG: "Constellation Energy", CF: "CF Industries", CFG: "Citizens Financial",
+  CHD: "Church Dwight", CHRW: "C.H. Robinson", CHTR: "Charter Communications",
+  CI: "Cigna", CINF: "Cincinnati Financial", CL: "Colgate-Palmolive",
+  CLX: "Clorox", CMA: "Comerica", CMCSA: "Comcast",
+  CME: "CME Group", CMG: "Chipotle Mexican Grill", CMI: "Cummins",
+  CMS: "CMS Energy", CNC: "Centene", CNP: "CenterPoint Energy",
+  COF: "Capital One", COO: "Cooper Companies", COP: "ConocoPhillips",
+  COST: "Costco", CPB: "Campbell Soup", CPRT: "Copart",
+  CPT: "Camden Property Trust", CRL: "Charles River Laboratories", CRM: "Salesforce",
+  CSCO: "Cisco Systems", CSGP: "CoStar Group", CSX: "CSX Corporation",
+  CTAS: "Cintas", CTLT: "Catalent", CTRA: "Coterra Energy",
+  CTSH: "Cognizant", CTVA: "Corteva", CVS: "CVS Health",
+  CVX: "Chevron", CZR: "Caesars Entertainment", D: "Dominion Energy",
+  DAL: "Delta Air Lines", DD: "DuPont", DE: "Deere Company",
+  DFS: "Discover Financial", DG: "Dollar General", DGX: "Quest Diagnostics",
+  DHI: "D.R. Horton", DHR: "Danaher", DIS: "Walt Disney",
+  DLR: "Digital Realty", DLTR: "Dollar Tree", DOV: "Dover Corporation",
+  DOW: "Dow Inc", DPZ: "Dominos Pizza", DRI: "Darden Restaurants",
+  DTE: "DTE Energy", DUK: "Duke Energy", DVA: "DaVita",
+  DVN: "Devon Energy", DXCM: "DexCom", EA: "Electronic Arts",
+  EBAY: "eBay", ECL: "Ecolab", ED: "Consolidated Edison",
+  EFX: "Equifax", EIX: "Edison International", EL: "Estee Lauder",
+  EMN: "Eastman Chemical", EMR: "Emerson Electric", ENPH: "Enphase Energy",
+  EOG: "EOG Resources", EPAM: "EPAM Systems", EQIX: "Equinix",
+  EQR: "Equity Residential", EQT: "EQT Corporation", ES: "Eversource Energy",
+  ESS: "Essex Property Trust", ETN: "Eaton", ETR: "Entergy",
+  ETSY: "Etsy", EVRG: "Evergy", EW: "Edwards Lifesciences",
+  EXC: "Exelon", EXR: "Extra Space Storage", F: "Ford Motor",
+  FANG: "Diamondback Energy", FAST: "Fastenal", FCX: "Freeport-McMoRan",
+  FDS: "FactSet Research", FDX: "FedEx", FE: "FirstEnergy",
+  FFIV: "F5 Inc", FIS: "Fidelity National Information", FITB: "Fifth Third Bancorp",
+  FLT: "Fleetcor Technologies", FMC: "FMC Corporation", FOX: "Fox Corporation",
+  FRT: "Federal Realty", FTNT: "Fortinet", FTV: "Fortive",
+  GD: "General Dynamics", GE: "GE Aerospace", GEHC: "GE HealthCare",
+  GEN: "Gen Digital", GILD: "Gilead Sciences", GIS: "General Mills",
+  GL: "Globe Life", GLW: "Corning", GM: "General Motors",
+  GNRC: "Generac Holdings", GOOG: "Alphabet", GOOGL: "Alphabet",
+  GPC: "Genuine Parts", GPN: "Global Payments", GPS: "Gap Inc",
+  GRMN: "Garmin", GS: "Goldman Sachs", GWW: "W.W. Grainger",
+  HAL: "Halliburton", HAS: "Hasbro", HBAN: "Huntington Bancshares",
+  HCA: "HCA Healthcare", HD: "Home Depot", HES: "Hess Corporation",
+  HIG: "Hartford Financial", HII: "Huntington Ingalls", HLT: "Hilton Worldwide",
+  HOLX: "Hologic", HON: "Honeywell", HPE: "Hewlett Packard Enterprise",
+  HPQ: "HP Inc", HRL: "Hormel Foods", HSIC: "Henry Schein",
+  HST: "Host Hotels", HSY: "Hershey", HUM: "Humana",
+  HWM: "Howmet Aerospace", IBM: "IBM", ICE: "Intercontinental Exchange",
+  IDXX: "IDEXX Laboratories", IEX: "IDEX Corporation", IFF: "International Flavors",
+  ILMN: "Illumina", INCY: "Incyte", INTC: "Intel",
+  INTU: "Intuit", INVH: "Invitation Homes", IP: "International Paper",
+  IPG: "Interpublic Group", IQV: "IQVIA Holdings", IR: "Ingersoll Rand",
+  IRM: "Iron Mountain", ISRG: "Intuitive Surgical", IT: "Gartner",
+  ITW: "Illinois Tool Works", IVZ: "Invesco", J: "Jacobs Solutions",
+  JBHT: "J.B. Hunt Transport", JBL: "Jabil", JCI: "Johnson Controls",
+  JKHY: "Jack Henry Associates", JNJ: "Johnson Johnson", JNPR: "Juniper Networks",
+  JPM: "JPMorgan Chase", K: "Kellanova", KEY: "KeyCorp",
+  KEYS: "Keysight Technologies", KHC: "Kraft Heinz", KIM: "Kimco Realty",
+  KLAC: "KLA Corporation", KMB: "Kimberly-Clark", KMI: "Kinder Morgan",
+  KMX: "CarMax", KO: "Coca-Cola", KR: "Kroger",
+  L: "Loews Corporation", LDOS: "Leidos", LEN: "Lennar",
+  LH: "Laboratory Corporation", LHX: "L3Harris Technologies", LIN: "Linde",
+  LKQ: "LKQ Corporation", LLY: "Eli Lilly", LMT: "Lockheed Martin",
+  LNT: "Alliant Energy", LOW: "Lowes", LRCX: "Lam Research",
+  LULU: "Lululemon Athletica", LUV: "Southwest Airlines", LVS: "Las Vegas Sands",
+  LW: "Lamb Weston", LYB: "LyondellBasell", LYV: "Live Nation",
+  MA: "Mastercard", MAA: "Mid-America Apartment", MAR: "Marriott International",
+  MAS: "Masco", MCD: "McDonalds", MCHP: "Microchip Technology",
+  MCK: "McKesson", MCO: "Moodys", MDLZ: "Mondelez International",
+  MDT: "Medtronic", MET: "MetLife", META: "Meta Platforms",
+  MGM: "MGM Resorts", MHK: "Mohawk Industries", MKC: "McCormick",
+  MKTX: "MarketAxess", MLM: "Martin Marietta Materials", MMC: "Marsh McLennan",
+  MMM: "3M Company", MNST: "Monster Beverage", MO: "Altria Group",
+  MOS: "Mosaic Company", MPC: "Marathon Petroleum", MPWR: "Monolithic Power",
+  MRK: "Merck", MRNA: "Moderna", MRO: "Marathon Oil",
+  MS: "Morgan Stanley", MSCI: "MSCI Inc", MSFT: "Microsoft",
+  MSI: "Motorola Solutions", MTB: "M&T Bank", MTCH: "Match Group",
+  MTD: "Mettler-Toledo", MU: "Micron Technology", NCLH: "Norwegian Cruise Line",
+  NDAQ: "Nasdaq", NEE: "NextEra Energy", NEM: "Newmont",
+  NFLX: "Netflix", NI: "NiSource", NKE: "Nike",
+  NOC: "Northrop Grumman", NOW: "ServiceNow", NRG: "NRG Energy",
+  NSC: "Norfolk Southern", NTAP: "NetApp", NTRS: "Northern Trust",
+  NUE: "Nucor", NVDA: "Nvidia", NVR: "NVR Inc",
+  NWS: "News Corporation", O: "Realty Income", ODFL: "Old Dominion Freight",
+  OKE: "ONEOK", OMC: "Omnicom Group", ON: "ON Semiconductor",
+  ORCL: "Oracle", ORLY: "OReilly Automotive", OTIS: "Otis Worldwide",
+  OXY: "Occidental Petroleum", PANW: "Palo Alto Networks", PARA: "Paramount Global",
+  PAYC: "Paycom Software", PAYX: "Paychex", PCAR: "PACCAR",
+  PCG: "PG&E", PEAK: "Healthpeak Properties", PEG: "Public Service Enterprise",
+  PEP: "PepsiCo", PFE: "Pfizer", PFG: "Principal Financial",
+  PG: "Procter Gamble", PGR: "Progressive Corporation", PH: "Parker Hannifin",
+  PHM: "PulteGroup", PKG: "Packaging Corporation", PLD: "Prologis",
+  PM: "Philip Morris", PNC: "PNC Financial", PNR: "Pentair",
+  PNW: "Pinnacle West", PODD: "Insulet Corporation", POOL: "Pool Corporation",
+  PPG: "PPG Industries", PPL: "PPL Corporation", PRU: "Prudential Financial",
+  PSA: "Public Storage", PSX: "Phillips 66", PTC: "PTC Inc",
+  PWR: "Quanta Services", PXD: "Pioneer Natural Resources", PYPL: "PayPal",
+  QCOM: "Qualcomm", QRVO: "Qorvo", RCL: "Royal Caribbean",
+  REG: "Regency Centers", REGN: "Regeneron", RF: "Regions Financial",
+  RJF: "Raymond James", RL: "Ralph Lauren", RMD: "ResMed",
+  ROK: "Rockwell Automation", ROL: "Rollins", ROP: "Roper Technologies",
+  ROST: "Ross Stores", RSG: "Republic Services", RTX: "RTX Corporation",
+  SBAC: "SBA Communications", SBUX: "Starbucks", SCHW: "Charles Schwab",
+  SHW: "Sherwin-Williams", SJM: "J.M. Smucker", SLB: "SLB",
+  SMCI: "Super Micro Computer", SNA: "Snap-on", SNPS: "Synopsys",
+  SO: "Southern Company", SPG: "Simon Property Group", SPGI: "S&P Global",
+  SRE: "Sempra", STE: "STERIS", STLD: "Steel Dynamics",
+  STT: "State Street", STX: "Seagate Technology", STZ: "Constellation Brands",
+  SW: "Smurfit Westrock", SWK: "Stanley Black Decker", SWKS: "Skyworks Solutions",
+  SYF: "Synchrony Financial", SYK: "Stryker", SYY: "Sysco",
+  T: "AT&T", TAP: "Molson Coors", TDG: "TransDigm Group",
+  TDY: "Teledyne Technologies", TECH: "Bio-Techne", TEL: "TE Connectivity",
+  TER: "Teradyne", TFC: "Truist Financial", TFX: "Teleflex",
+  TGT: "Target", TJX: "TJX Companies", TMO: "Thermo Fisher Scientific",
+  TMUS: "T-Mobile", TPL: "Texas Pacific Land", TPR: "Tapestry",
+  TRGP: "Targa Resources", TRMB: "Trimble", TROW: "T. Rowe Price",
+  TRV: "Travelers Companies", TSCO: "Tractor Supply", TSLA: "Tesla",
+  TSN: "Tyson Foods", TT: "Trane Technologies", TTWO: "Take-Two Interactive",
+  TXN: "Texas Instruments", TYL: "Tyler Technologies", UAL: "United Airlines",
+  UDR: "UDR Inc", UHS: "Universal Health Services", ULTA: "Ulta Beauty",
+  UNH: "UnitedHealth Group", UNP: "Union Pacific", UPS: "United Parcel Service",
+  URI: "United Rentals", USB: "U.S. Bancorp", V: "Visa",
+  VFC: "VF Corporation", VICI: "VICI Properties", VLO: "Valero Energy",
+  VMC: "Vulcan Materials", VNO: "Vornado Realty", VRSK: "Verisk Analytics",
+  VRSN: "VeriSign", VRTX: "Vertex Pharmaceuticals", VTR: "Ventas",
+  VTRS: "Viatris", VZ: "Verizon", WAB: "Wabtec",
+  WAT: "Waters Corporation", WBA: "Walgreens Boots Alliance", WBD: "Warner Bros Discovery",
+  WDC: "Western Digital", WEC: "WEC Energy", WELL: "Welltower",
+  WFC: "Wells Fargo", WHR: "Whirlpool", WM: "Waste Management",
+  WMB: "Williams Companies", WMT: "Walmart", WRB: "W.R. Berkley",
+  WRK: "WestRock", WST: "West Pharmaceutical", WTW: "Willis Towers Watson",
+  WY: "Weyerhaeuser", WYNN: "Wynn Resorts", XEL: "Xcel Energy",
+  XOM: "ExxonMobil", XRAY: "Dentsply Sirona", XYL: "Xylem",
+  YUM: "Yum Brands", ZBH: "Zimmer Biomet", ZBRA: "Zebra Technologies",
+  ZION: "Zions Bancorporation", ZTS: "Zoetis"
+};
 
 async function fetchCompanyProfile(ticker, retryCount = 0) {
   const maxRetries = 3;
   const profileContainer = document.getElementById("company-profile-container");
-  
+
   if (retryCount === 0) {
     profileContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading company profile...</p>";
   }
 
   try {
-    const response = await fetch(
-      `https://financialmodelingprep.com/api/v3/profile/${ticker}?apikey=${FMP_API_KEY}`
-    );
+    // Resolve company name from map or use ticker directly
+    const companyName = TICKER_MAP[ticker] || ticker;
+    console.log(`Looking up Wikipedia for ${ticker} as "${companyName}"`);
 
-    console.log("FMP profile status:", response.status);
+    // Try multiple Wikipedia page name formats
+    const attempts = [
+      companyName,
+      `${companyName} (company)`,
+      `${ticker} (company)`,
+      ticker
+    ];
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    let wikiData = null;
 
-    const profileData = await response.json();
-    console.log("FMP profile data:", profileData);
+    for (const attempt of attempts) {
+      const encoded = encodeURIComponent(attempt);
+      const wikiRes = await fetch(
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encoded}`,
+        { headers: { "Accept": "application/json" } }
+      );
 
-    if (!profileData || profileData.length === 0) {
-      throw new Error("No profile data returned");
+      if (wikiRes.ok) {
+        const data = await wikiRes.json();
+        if (data.type !== "disambiguation" && data.extract) {
+          wikiData = data;
+          console.log(`Wikipedia matched "${attempt}" for ${ticker}`);
+          break;
+        }
+      }
     }
 
-    const p = profileData[0];
+    if (!wikiData) throw new Error(`No Wikipedia page found for ${ticker}`);
 
-    const fmt = (val) => {
-      if (!val || isNaN(val)) return "N/A";
-      if (val >= 1e12) return `$${(val / 1e12).toFixed(2)}T`;
-      if (val >= 1e9)  return `$${(val / 1e9).toFixed(2)}B`;
-      if (val >= 1e6)  return `$${(val / 1e6).toFixed(2)}M`;
-      return `$${val.toFixed(2)}`;
-    };
-
-    const fmtNum = (val) => val ? Number(val).toLocaleString() : "N/A";
-    const fmtDec = (val) => val ? Number(val).toFixed(2) : "N/A";
-    const fmtPct = (val, price) => (val && price) 
-      ? ((val / price) * 100).toFixed(2) + "%" 
-      : "N/A";
+    const description = wikiData.extract || "No description available.";
+    const thumbnail = wikiData.thumbnail?.source || null;
+    const pageUrl = wikiData.content_urls?.desktop?.page || "#";
 
     profileContainer.innerHTML = `
       <div class="company-profile">
         <div class="profile-header">
           <div class="profile-name-block">
             <h3 class="profile-company-name">
-              ${p.image 
-                ? `<img src="${p.image}" class="profile-logo" alt="${ticker}" onerror="this.style.display='none'" />` 
+              ${thumbnail
+                ? `<img src="${thumbnail}" class="profile-logo"
+                    alt="${ticker}" onerror="this.style.display='none'" />`
                 : ""}
-              ${p.companyName || ticker}
+              ${wikiData.title || companyName}
             </h3>
             <span class="profile-sector">
-              ${p.sector || "N/A"} ${p.industry ? "· " + p.industry : ""}
-            </span>
-            <span class="profile-exchange">
-              📍 ${p.exchangeShortName || "N/A"} &nbsp;|&nbsp; ${p.country || "N/A"}
+              <a href="${pageUrl}" target="_blank" class="profile-link">
+                View full Wikipedia page →
+              </a>
             </span>
           </div>
           <div class="profile-meta">
-            ${p.website ? `
-              <span class="profile-meta-item">🌐 
-                <a href="${p.website}" target="_blank" class="profile-link">
-                  ${p.website.replace("https://","").replace("http://","")}
-                </a>
-              </span>` : ""}
-            <span class="profile-meta-item">👥 Employees: ${fmtNum(p.fullTimeEmployees)}</span>
-            <span class="profile-meta-item">📅 IPO: ${p.ipoDate || "N/A"}</span>
+            <span class="profile-meta-item">
+              🏷️ Ticker: <strong style="color:#00b4d8">${ticker}</strong>
+            </span>
           </div>
         </div>
-
-        <div class="profile-stats-row">
-          <div class="profile-stat">
-            <span class="stat-label">Market Cap</span>
-            <span class="stat-value">${fmt(p.mktCap)}</span>
-          </div>
-          <div class="profile-stat">
-            <span class="stat-label">Price</span>
-            <span class="stat-value">$${fmtDec(p.price)}</span>
-          </div>
-          <div class="profile-stat">
-            <span class="stat-label">P/E Ratio</span>
-            <span class="stat-value">${fmtDec(p.pe)}</span>
-          </div>
-          <div class="profile-stat">
-            <span class="stat-label">52W High</span>
-            <span class="stat-value">$${fmtDec(p["52WeekHigh"])}</span>
-          </div>
-          <div class="profile-stat">
-            <span class="stat-label">52W Low</span>
-            <span class="stat-value">$${fmtDec(p["52WeekLow"])}</span>
-          </div>
-          <div class="profile-stat">
-            <span class="stat-label">Beta</span>
-            <span class="stat-value">${fmtDec(p.beta)}</span>
-          </div>
-          <div class="profile-stat">
-            <span class="stat-label">Avg Volume</span>
-            <span class="stat-value">${fmtNum(p.volAvg)}</span>
-          </div>
-          <div class="profile-stat">
-            <span class="stat-label">Dividend Yield</span>
-            <span class="stat-value">${fmtPct(p.lastDiv, p.price)}</span>
-          </div>
-        </div>
-
         <p class="profile-description">
-          ${p.description
-            ? p.description.length > 600
-              ? p.description.substring(0, 600) + "..."
-              : p.description
-            : "No description available."}
+          ${description.length > 800
+            ? description.substring(0, 800) + "..."
+            : description}
         </p>
       </div>
     `;
@@ -300,7 +423,7 @@ async function fetchCompanyProfile(ticker, retryCount = 0) {
           <p style="color:#ff6b6b; margin-bottom: 10px;">
             Unable to load company profile for ${ticker}
           </p>
-          <button 
+          <button
             onclick="fetchCompanyProfile('${ticker}')"
             style="padding: 8px 16px; cursor: pointer; background: #00b4d8;
                    color: white; border: none; border-radius: 6px; font-size: 14px;">
