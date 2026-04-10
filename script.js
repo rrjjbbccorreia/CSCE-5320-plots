@@ -765,15 +765,68 @@ async function loadQ2Picks() {
   // Wait 2 seconds for stock table and profile to finish first
   await new Promise(resolve => setTimeout(resolve, 2000));
 
-  // Fetch price for each ticker
-  //for (const ticker of Q2_PICKS) {
-  //  fetchPickPrice(ticker);
-  //}
-  // Fetch price for each ticker with a 750ms delay between each
-  // to avoid hitting rate limits
+  // Initial staggered fetch for all picks
   for (let i = 0; i < Q2_PICKS.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, i * 750));
+    await new Promise(resolve => setTimeout(resolve, i * 400));
     fetchPickPrice(Q2_PICKS[i]);
+  }
+
+  // ===== RETRY LOOP =====
+  // Wait for all initial fetches to complete then check for failures
+  const totalInitialTime = Q2_PICKS.length * 400 + 3000;
+  await new Promise(resolve => setTimeout(resolve, totalInitialTime));
+
+  let maxRetryRounds = 3;
+  let retryRound = 1;
+
+  while (retryRound <= maxRetryRounds) {
+    // Find any picks that show "Unavailable"
+    const failedTickers = Q2_PICKS.filter(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
+      return priceEl && priceEl.innerHTML.includes("Unavailable");
+    });
+
+    // If no failures break out of loop
+    if (failedTickers.length === 0) {
+      console.log("All picks loaded successfully!");
+      break;
+    }
+
+    console.log(`Retry round ${retryRound} — retrying ${failedTickers.length} failed picks:`, failedTickers);
+
+    // Update failed cards to show retrying message
+    failedTickers.forEach(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
+      if (priceEl) {
+        priceEl.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying...</span>`;
+      }
+    });
+
+    // Wait 3 seconds between retry rounds
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Retry each failed ticker with a stagger
+    for (let i = 0; i < failedTickers.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, i * 500));
+      fetchPickPrice(failedTickers[i]);
+    }
+
+    // Wait for this round of retries to complete
+    await new Promise(resolve => setTimeout(resolve, failedTickers.length * 500 + 3000));
+
+    retryRound++;
+  }
+
+  // Final check — log any still unavailable after all retries
+  const stillFailed = Q2_PICKS.filter(ticker => {
+    const priceEl = document.getElementById(`price-${ticker}`);
+    return priceEl && priceEl.innerHTML.includes("Unavailable");
+  });
+
+  if (stillFailed.length > 0) {
+    console.warn("Still unavailable after all retry rounds:", stillFailed);
+  } else {
+    console.log("All picks successfully loaded after retries!");
   }
 }
 
