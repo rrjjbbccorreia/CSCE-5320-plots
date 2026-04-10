@@ -767,7 +767,7 @@ async function loadQ2Picks() {
   // Fetch price for each ticker with a 300ms delay between each
   // to avoid hitting rate limits
   for (let i = 0; i < Q2_PICKS.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, i * 400));
+    await new Promise(resolve => setTimeout(resolve, i * 500));
     fetchPickPrice(Q2_PICKS[i]);
   }
 }
