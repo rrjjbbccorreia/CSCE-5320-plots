@@ -45,7 +45,7 @@
 
     <!-- ===== ChatGPT Financial Prompt Tool ===== -->
     <div class="chatgpt-section">
-      <h2 class="chatgpt-title">💬 AI Financial Question Builder</h2>
+      <h2 class="chatgpt-title">AI Financial Question Builder</h2>
 
       <p class="chatgpt-desc">
         Ask detailed financial questions using structured prompts powered by AI. 
@@ -93,7 +93,7 @@
     </div>
 
     <!-- ===== Chart Title ===== -->
-    <h2 class="chart-heading">📈 Predicted vs Real Future Prices</h2>
+    <h2 class="chart-heading">Predicted vs Real Future Prices</h2>
 
     <!-- Dropdown and Toggle -->
     <div class="controls">
@@ -152,7 +152,7 @@
 
     <!-- ===== Portfolio Images Section ===== -->
     <div class="images-section">
-      <h3 class="images-title">📊 Portfolio Performance Snapshots</h3>
+      <h3 class="images-title">Portfolio Performance Snapshots</h3>
       <div class="images-grid">
         <div class="image-card">
           <p class="image-label">Returns — March 11, 2026</p>
@@ -176,8 +176,11 @@
     </div>
 
     <!-- ===== Retirement Analysis Section ===== -->
+    <!-- ===== Retirement Analysis Section ===== -->
+    <!-- ===== Retirement Analysis Section ===== -->
     <div class="retirement-section">
-      <h2 class="retirement-title">📊 Retirement & Financial Scenario Analysis Tool</h2>
+      <h2 class="retirement-title">Retirement & Financial Scenario Analysis Tool</h2>
+      
       <p class="retirement-desc">
         The spreadsheet available for download below is a comprehensive financial planning tool 
         designed to take you from simple to complex financial analysis — giving you a clear picture 
@@ -191,18 +194,121 @@
         the outer years of retirement, where the compounding effects of early decisions become 
         most apparent and where financial security matters most. Simply input your current 
         financial details, define your assumptions, and let the model do the rest — giving you 
-        the clarity and confidence to make better financial decisions today for a more secure tomorrow. The
-        .xlsm file requires macros to be enabled in MS Excel for it to run properly.  
+        the clarity and confidence to make better financial decisions today for a more secure tomorrow.
       </p>
-      <a href="data/Retirement analysis_PROT14v2_p.xlsm" 
+
+      <!-- Monte Carlo Section -->
+      <div class="retirement-monte-carlo">
+        <h3 class="retirement-subtitle">Monte Carlo Retirement Simulations</h3>
+        <p class="retirement-desc">
+          The Analysis sheet includes three built-in simulations that run thousands of Monte Carlo 
+          iterations against your inputs to stress-test your retirement plan. Each simulation uses 
+          a 15% failure threshold — meaning the plan is considered viable when the probability of 
+          running out of money falls below that level.
+        </p>
+
+        <!-- Simulation 1 -->
+        <div class="simulation-card">
+          <div class="simulation-header">
+            <span class="simulation-number">1</span>
+            <h4 class="simulation-title">When can I retire?</h4>
+          </div>
+          <p class="simulation-desc">
+            Uses your current savings rate and portfolio to find the earliest age at which your 
+            plan is viable. Starting from your target retirement age, the model runs full Monte 
+            Carlo iterations and advances the retirement age one year at a time until the failure 
+            probability drops below 15%. The result tells you the earliest realistic retirement 
+            age and estimates the legacy you are likely to leave behind — both under average 
+            conditions and through strategic investment.
+          </p>
+        </div>
+
+        <!-- Simulation 2 -->
+        <div class="simulation-card">
+          <div class="simulation-header">
+            <span class="simulation-number">2</span>
+            <h4 class="simulation-title">How much do I need to save?</h4>
+          </div>
+          <p class="simulation-desc">
+            Locks in your target retirement age and finds the minimum annual contributions needed 
+            to make it work. If your current savings rate already passes the threshold, the 
+            simulation confirms your plan is on track. Otherwise it increases both your deferred 
+            tax and taxable contributions by 10% per step — up to the IRS annual limit of $26,000 
+            for deferred accounts — and reruns the model until the failure rate falls below 15%. 
+            The result shows exactly how much you need to set aside each year to retire on schedule.
+          </p>
+        </div>
+
+        <!-- Simulation 3 -->
+        <div class="simulation-card">
+          <div class="simulation-header">
+            <span class="simulation-number">3</span>
+            <h4 class="simulation-title">Can I retire earlier?</h4>
+          </div>
+          <p class="simulation-desc">
+            Lets you enter a younger target retirement age and immediately tests whether your 
+            current savings can support it. If not, it applies the same 10% step-up logic as 
+            Simulation 2 to find the savings level that makes the earlier age achievable. The 
+            result gives you a clear, actionable savings target paired with projected legacy 
+            values — so you can decide whether retiring earlier is worth the increased 
+            contribution required.
+          </p>
+        </div>
+      </div>
+
+      <!-- Enabling Macros Section -->
+      <div class="retirement-macros">
+        <h3 class="retirement-subtitle">Enabling Macros in Microsoft Excel</h3>
+        <p class="retirement-desc">
+          The <code class="inline-code">.xlsm</code> file requires macros to be enabled before 
+          the simulations can run. Follow the steps for your version of Excel:
+        </p>
+
+        <div class="macro-platforms">
+
+          <!-- Windows -->
+          <div class="macro-platform-card">
+            <h4 class="macro-platform-title">On Windows</h4>
+            <ol class="macro-steps">
+              <li>Open the file. Excel will show a yellow security bar at the top reading 
+                <em>"Macros have been disabled."</em></li>
+              <li>Click <strong>Enable Content</strong> in that bar. The simulations are now active.</li>
+              <li>If you do not see the bar, go to <strong>File → Options → Trust Center → 
+                Trust Center Settings → Macro Settings</strong> and select 
+                <strong>Enable all macros</strong>, then reopen the file.</li>
+            </ol>
+          </div>
+
+          <!-- Mac -->
+          <div class="macro-platform-card">
+            <h4 class="macro-platform-title">On Mac</h4>
+            <ol class="macro-steps">
+              <li>Open the file. A dialog may appear warning that macros are disabled.</li>
+              <li>Click <strong>Enable Macros</strong>. If the dialog does not appear, go to 
+                <strong>Excel → Preferences → Security</strong> and enable macros from there.</li>
+              <li>Save the file after enabling to retain the setting for future sessions.</li>
+            </ol>
+          </div>
+
+        </div>
+
+        <p class="macro-note">
+          ⚠️ If you are on a managed corporate device, your IT policy may restrict macros. 
+          In that case, contact your IT department to whitelist the file or adjust macro 
+          security settings.
+        </p>
+      </div>
+
+      <!-- Download Button -->
+      <a href="data/Retirement analysis_PROT14v3_p.xlsm" 
         download 
         class="retirement-download-btn">
         ⬇️ Download Retirement Analysis Spreadsheet
       </a>
 
-      <!-- ===== Spreadsheet Preview Section ===== -->
+      <!-- Spreadsheet Preview Section -->
       <div class="spreadsheet-preview">
-        <h3 class="preview-title">Preview the Spreadsheet</h3>
+        <h3 class="preview-title">📋 Preview the Spreadsheet</h3>
         <p class="preview-desc">
           Select a sheet below to preview its contents directly on this page.
         </p>
@@ -218,3 +324,5 @@
     <script src="script.js"></script>
   </body>
 </html>
+
+
