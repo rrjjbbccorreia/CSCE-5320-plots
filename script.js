@@ -771,39 +771,65 @@ async function loadQ2Picks() {
     fetchPickPrice(Q2_PICKS[i]);
   }
 
-  // ===== RETRY LOOP =====
-  // Wait for all initial fetches to complete then check for failures
+  // Wait for all initial fetches to complete
   const totalInitialTime = Q2_PICKS.length * 400 + 3000;
   await new Promise(resolve => setTimeout(resolve, totalInitialTime));
 
-  let maxRetryRounds = 3;
+  // ===== INFINITE RETRY LOOP =====
+  // Keeps running until ALL tickers are loaded — no round limit
   let retryRound = 1;
+  const maxRoundsWithNoProgress = 5; // safety stop if nothing is improving
+  let roundsWithNoProgress = 0;
+  let lastFailedCount = Q2_PICKS.length;
 
-  while (retryRound <= maxRetryRounds) {
-    // Find any picks that show "Unavailable"
+  while (true) {
+    // Find any picks still showing Unavailable or Loading
     const failedTickers = Q2_PICKS.filter(ticker => {
       const priceEl = document.getElementById(`price-${ticker}`);
-      return priceEl && priceEl.innerHTML.includes("Unavailable");
+      return priceEl && (
+        priceEl.innerHTML.includes("Unavailable") ||
+        priceEl.innerHTML.includes("Loading")
+      );
     });
 
-    // If no failures break out of loop
+    // All done — exit loop
     if (failedTickers.length === 0) {
-      console.log("All picks loaded successfully!");
+      console.log("✅ All picks loaded successfully!");
       break;
     }
 
-    console.log(`Retry round ${retryRound} — retrying ${failedTickers.length} failed picks:`, failedTickers);
+    // Check if we are making progress
+    if (failedTickers.length >= lastFailedCount) {
+      roundsWithNoProgress++;
+      console.warn(`No progress round ${roundsWithNoProgress}/${maxRoundsWithNoProgress} — still ${failedTickers.length} unavailable`);
+    } else {
+      // Progress was made — reset counter
+      roundsWithNoProgress = 0;
+      console.log(`Progress made — ${failedTickers.length} still remaining`);
+    }
 
-    // Update failed cards to show retrying message
+    // Safety stop — if nothing is improving after several rounds give up
+    if (roundsWithNoProgress >= maxRoundsWithNoProgress) {
+      console.warn("⚠️ Stopping retries — no progress after", maxRoundsWithNoProgress, "rounds");
+      console.warn("Still unavailable:", failedTickers);
+      break;
+    }
+
+    lastFailedCount = failedTickers.length;
+
+    console.log(`Retry round ${retryRound} — retrying ${failedTickers.length} tickers:`, failedTickers);
+
+    // Update failed cards to show retrying status
     failedTickers.forEach(ticker => {
       const priceEl = document.getElementById(`price-${ticker}`);
       if (priceEl) {
-        priceEl.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying...</span>`;
+        priceEl.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
       }
     });
 
-    // Wait 3 seconds between retry rounds
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Wait between rounds — gets slightly longer each round to back off
+    const waitTime = Math.min(3000 + retryRound * 500, 10000);
+    await new Promise(resolve => setTimeout(resolve, waitTime));
 
     // Retry each failed ticker with a stagger
     for (let i = 0; i < failedTickers.length; i++) {
@@ -811,22 +837,10 @@ async function loadQ2Picks() {
       fetchPickPrice(failedTickers[i]);
     }
 
-    // Wait for this round of retries to complete
+    // Wait for this round to complete
     await new Promise(resolve => setTimeout(resolve, failedTickers.length * 500 + 3000));
 
     retryRound++;
-  }
-
-  // Final check — log any still unavailable after all retries
-  const stillFailed = Q2_PICKS.filter(ticker => {
-    const priceEl = document.getElementById(`price-${ticker}`);
-    return priceEl && priceEl.innerHTML.includes("Unavailable");
-  });
-
-  if (stillFailed.length > 0) {
-    console.warn("Still unavailable after all retry rounds:", stillFailed);
-  } else {
-    console.log("All picks successfully loaded after retries!");
   }
 }
 
