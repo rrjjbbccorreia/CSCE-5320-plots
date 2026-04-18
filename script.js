@@ -651,7 +651,7 @@ async function loadSpreadsheetPreview() {
 
     sheetContainer.innerHTML = "<p style='color:#aaa;text-align:center;padding:20px;'>Loading spreadsheet...</p>";
 
-    const response = await fetch("data/Retirement analysis_PROT14v3_p.xlsm");
+    const response = await fetch("data/Retirement analysis_PROT14v4_p.xlsm");
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
