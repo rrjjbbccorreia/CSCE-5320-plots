@@ -15,13 +15,26 @@
 
   <body>
 
+
+
     <!-- ===== Company Header ===== -->
     <div class="company-header">
-      <h1 class="company-title">Correia Investment Solutions</h1>
-      <p class="company-tagline">Data-Driven Insights and AI-Powered Predictions — empowering individuals to invest in their knowledge, take control of their financial planning, and build lasting independence for their future</p>
-      <a href="mailto:richcorreia.cfa@correiainvestmentsolutions.com" class="company-email">
-        richcorreia.cfa@correiainvestmentsolutions.com
-      </a>
+      <div class="company-header-top">
+        <img src="data/CIS brand 2.webp" 
+            alt="Correia Investment Solutions Logo" 
+            class="company-logo"
+            onerror="this.style.display='none'" />
+        <div class="company-header-text">
+          <h1 class="company-title">Correia Investment Solutions</h1>
+          <p class="company-tagline">AI-Powered Investment Intelligence for the Modern Investor — 
+            equipping you with the tools, knowledge, and confidence to take control of 
+            your financial future
+          </p>
+          <a href="mailto:richcorreia.cfa@correiainvestmentsolutions.com" class="company-email">
+            richcorreia.cfa@correiainvestmentsolutions.com
+          </a>
+        </div>
+      </div>
     </div>
 
     <!-- ===== YouTube Section ===== -->
@@ -126,7 +139,7 @@
 
     <!-- ===== Portfolio Description Section ===== -->
     <div class="portfolio-description">
-      <h2 class="portfolio-description-title">About the Portfolio Strategy</h2>
+      <h2 class="portfolio-description-title">About the Portfolio Strategy Below Based on 2 to 4 Week Changes</h2>
       <p class="portfolio-description-text">
         The portfolios displayed below are constructed using a sophisticated combination of technical 
         indicators and macroeconomic variables, layered on top of a purpose-built AI model designed 
@@ -156,15 +169,32 @@
       <div class="images-grid">
         <div class="image-card">
           <p class="image-label">Returns — March 11, 2026</p>
-          <img src="data/return_2026-03-16.png" alt="Return - YTD and over 12 months" class="portfolio-img" />
+          <img src="data/return_2026-04-20.png" alt="Return - YTD and over 12 months" class="portfolio-img" />
         </div>
         <div class="image-card">
           <p class="image-label">Portfolio — March 12, 2026</p>
-          <img src="data/portfolio_2026-03-16.png" alt="Portfolio" class="portfolio-img" />
+          <img src="data/portfolio_2026-04-20.png" alt="Portfolio" class="portfolio-img" />
         </div>
       </div>
     </div>
 
+    <!-- ===== Tactical Portfolio Picks Section ===== -->
+    <div class="picks-section tactical-picks-section">
+      <h2 class="picks-title" style="color: #00c896;">
+        Tactical Rotation Portfolio Picks for 4/20/26
+      </h2>
+      <p class="picks-desc">
+        The securities listed below represent our current tactical rotation portfolio — a 
+        higher-frequency strategy that refreshes every two to four weeks to adapt to shifting 
+        market dynamics, sector momentum, and macroeconomic signals. Unlike the fundamental 
+        picks which are held through the quarter, these selections are actively managed to 
+        capture short-to-medium term opportunities across equities, commodities, and 
+        sector ETFs. Greater portfolio turnover is an intentional feature of this strategy, 
+        allowing it to respond more rapidly to changing conditions and reduce exposure to 
+        deteriorating trends while rotating into emerging ones.
+      </p>
+      <div class="picks-grid" id="tacticalPicksGrid"></div>
+    </div>
 
     <!-- Navigation Buttons -->
     <div class="chart-buttons">

@@ -744,6 +744,12 @@ const Q2_PICKS = [
   "FDS", "PLTR", "PSX"
 ];
 
+const TACTICAL_PICKS = [
+  "NVR", "CARR", "PODD", "PTC", "MU",
+  "HSY", "ZBRA", "STE", "APP", "VRTX",
+  "XME", "XLE", "IGE", "COPX", "BN", "UCO"
+];
+
 async function loadQ2Picks() {
   const grid = document.getElementById("picksGrid");
   if (!grid) return;
@@ -893,6 +899,170 @@ async function fetchPickPrice(ticker, retryCount = 0) {
   }
 }
 
+// ============ TACTICAL ROTATION PICKS ============
+async function loadTacticalPicks() {
+  const grid = document.getElementById("tacticalPicksGrid");
+  if (!grid) return;
+
+  // Build initial cards with loading state
+  grid.innerHTML = TACTICAL_PICKS.map(ticker => `
+    <div class="pick-card tactical-card" id="tactical-pick-${ticker}">
+      <div class="pick-ticker" style="color:#00c896">${ticker}</div>
+      <div class="pick-price" id="tactical-price-${ticker}">
+        <span style="color:#aaa;font-size:13px;">Loading...</span>
+      </div>
+      <div class="pick-change" id="tactical-change-${ticker}"></div>
+      <button class="pick-btn tactical-btn" onclick="loadChart('${ticker}')">
+        View Chart
+      </button>
+    </div>
+  `).join("");
+
+  // Wait for fundamental picks AND all their retries to fully complete
+  // before starting tactical picks fetches
+  await waitForFundamentalPicksComplete();
+
+  console.log("Starting tactical picks fetch...");
+
+  // Initial staggered fetch for all tactical picks
+  for (let i = 0; i < TACTICAL_PICKS.length; i++) {
+    await new Promise(resolve => setTimeout(resolve, i * 400));
+    fetchTacticalPrice(TACTICAL_PICKS[i]);
+  }
+
+  // Wait for initial fetches to complete
+  const totalInitialTime = TACTICAL_PICKS.length * 400 + 3000;
+  await new Promise(resolve => setTimeout(resolve, totalInitialTime));
+
+  // Infinite retry loop — same pattern as fundamental picks
+  let retryRound = 1;
+  const maxRoundsWithNoProgress = 5;
+  let roundsWithNoProgress = 0;
+  let lastFailedCount = TACTICAL_PICKS.length;
+
+  while (true) {
+    const failedTickers = TACTICAL_PICKS.filter(ticker => {
+      const priceEl = document.getElementById(`tactical-price-${ticker}`);
+      return priceEl && (
+        priceEl.innerHTML.includes("Unavailable") ||
+        priceEl.innerHTML.includes("Loading")
+      );
+    });
+
+    if (failedTickers.length === 0) {
+      console.log("✅ All tactical picks loaded successfully!");
+      break;
+    }
+
+    if (failedTickers.length >= lastFailedCount) {
+      roundsWithNoProgress++;
+      console.warn(`Tactical — no progress round ${roundsWithNoProgress}/${maxRoundsWithNoProgress}`);
+    } else {
+      roundsWithNoProgress = 0;
+      console.log(`Tactical — progress made, ${failedTickers.length} still remaining`);
+    }
+
+    if (roundsWithNoProgress >= maxRoundsWithNoProgress) {
+      console.warn("⚠️ Tactical picks — stopping retries, no progress after", maxRoundsWithNoProgress, "rounds");
+      break;
+    }
+
+    lastFailedCount = failedTickers.length;
+    console.log(`Tactical retry round ${retryRound} — retrying:`, failedTickers);
+
+    failedTickers.forEach(ticker => {
+      const priceEl = document.getElementById(`tactical-price-${ticker}`);
+      if (priceEl) {
+        priceEl.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
+      }
+    });
+
+    const waitTime = Math.min(3000 + retryRound * 500, 10000);
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+
+    for (let i = 0; i < failedTickers.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, i * 500));
+      fetchTacticalPrice(failedTickers[i]);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, failedTickers.length * 500 + 3000));
+    retryRound++;
+  }
+}
+
+// ============ WAIT FOR FUNDAMENTAL PICKS TO COMPLETE ============
+async function waitForFundamentalPicksComplete() {
+  console.log("Waiting for fundamental picks to complete...");
+  
+  // Check every 2 seconds if fundamental picks are all done
+  while (true) {
+    const stillPending = Q2_PICKS.filter(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
+      return priceEl && (
+        priceEl.innerHTML.includes("Loading") ||
+        priceEl.innerHTML.includes("Retrying")
+      );
+    });
+
+    if (stillPending.length === 0) {
+      console.log("✅ Fundamental picks complete — starting tactical picks");
+      break;
+    }
+
+    console.log(`Waiting... ${stillPending.length} fundamental picks still loading`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+}
+
+// ============ FETCH TACTICAL PICK PRICE ============
+async function fetchTacticalPrice(ticker, retryCount = 0) {
+  const maxRetries = 3;
+  try {
+    const proxyUrl = "https://api.allorigins.win/get?url=";
+    const yahooUrl = encodeURIComponent(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`
+    );
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const response = await fetch(proxyUrl + yahooUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    const json = await response.json();
+    const data = JSON.parse(json.contents);
+    const result = data.chart.result[0];
+
+    const closes = result.indicators.quote[0].close;
+    const validCloses = closes.filter((v) => v !== null && !isNaN(v));
+    const latestPrice = validCloses[validCloses.length - 1];
+    const prevPrice = validCloses[validCloses.length - 2];
+    const change = latestPrice - prevPrice;
+    const changePct = (change / prevPrice) * 100;
+    const isPositive = change >= 0;
+
+    document.getElementById(`tactical-price-${ticker}`).innerHTML = `
+      <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
+    `;
+    document.getElementById(`tactical-change-${ticker}`).innerHTML = `
+      <span class="pick-change-value ${isPositive ? "positive" : "negative"}">
+        ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)}
+        (${isPositive ? "+" : ""}${changePct.toFixed(2)}%)
+      </span>
+    `;
+
+    const card = document.getElementById(`tactical-pick-${ticker}`);
+    card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+
+  } catch (err) {
+    if (retryCount < maxRetries - 1) {
+      setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), 2000);
+    } else {
+      document.getElementById(`tactical-price-${ticker}`).innerHTML =
+        "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+    }
+  }
+}
+
 function loadChart(ticker) {
   // Switch the main chart dropdown to selected ticker
   const select = document.getElementById("tickerSelect");
@@ -914,3 +1084,5 @@ function loadChart(ticker) {
 
 // Load picks on page start
 loadQ2Picks();
+loadTacticalPicks();
+setTimeout(() => loadSpreadsheetPreview(), 3000);

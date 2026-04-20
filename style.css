@@ -12,13 +12,34 @@ body {
 }
 
 /* ===== Company Header ===== */
+/* ===== Company Header ===== */
 .company-header {
-  text-align: center;
+  width: 100%;
+  max-width: 1100px;
   margin-bottom: 30px;
   padding: 30px 20px 20px;
   border-bottom: 1px solid #3a3a3a;
-  width: 100%;
-  max-width: 1100px;
+  box-sizing: border-box;
+}
+
+.company-header-top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.company-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.company-header-text {
+  flex: 1;
+  min-width: 250px;
 }
 
 .company-title {
@@ -31,10 +52,26 @@ body {
 }
 
 .company-tagline {
-  font-size: 16px;
+  font-size: 15px;
   color: #aaa;
-  margin: 0;
-  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.3px;
+  line-height: 1.6;
+}
+
+.company-email {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 14px;
+  color: #00b4d8;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+.company-email:hover {
+  color: #00d4ff;
+  text-decoration: underline;
 }
 
 /* ===== YouTube Section ===== */
@@ -1000,4 +1037,21 @@ button:active {
   border-radius: 4px;
   font-family: monospace;
   font-size: 13px;
+}
+
+/* ===== Tactical Picks Section ===== */
+.tactical-picks-section {
+  border-left: 4px solid #00c896;
+}
+
+.tactical-btn {
+  background: linear-gradient(145deg, #00c896, #009e75) !important;
+}
+
+.tactical-btn:hover {
+  background: linear-gradient(145deg, #00e6aa, #00b888) !important;
+}
+
+.tactical-card {
+  border-top-color: #00c896 !important;
 }
