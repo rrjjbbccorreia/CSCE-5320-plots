@@ -906,7 +906,7 @@ async function loadQ2Picks() {
   // ===== INFINITE RETRY LOOP =====
   // Keeps running until ALL tickers are loaded — no round limit
   let retryRound = 1;
-  const maxRoundsWithNoProgress = 5; // safety stop if nothing is improving
+  const maxRoundsWithNoProgress = 10; // safety stop if nothing is improving
   let roundsWithNoProgress = 0;
   let lastFailedCount = Q2_PICKS.length;
 
@@ -1202,7 +1202,7 @@ async function waitForFundamentalPicksComplete() {
 
 // ============ FETCH TACTICAL PICK PRICE ============
 async function fetchTacticalPrice(ticker, retryCount = 0) {
-  const maxRetries = 3;
+  const maxRetries = 8;
   try {
 
     // ===== CHECK CACHE FIRST =====
