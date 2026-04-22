@@ -76,51 +76,72 @@ function toggleTarget() {
 async function fetchStockTable(ticker, retryCount = 0) {
   const maxRetries = 3;
   const tableContainer = document.getElementById("stock-table-container");
-  
+
   if (retryCount === 0) {
     tableContainer.innerHTML = "<p style='color:#aaa;text-align:center'>Loading market data...</p>";
-      // Small delay to let page fully initialize first
     await new Promise(resolve => setTimeout(resolve, 500));
   } else {
     tableContainer.innerHTML = `<p style='color:#aaa;text-align:center'>Loading market data... (attempt ${retryCount + 1} of ${maxRetries})</p>`;
   }
 
   try {
-    const proxyUrl = "https://api.allorigins.win/get?url=";
-    const yahooUrl = encodeURIComponent(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`
-    );
+    const yahooChartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`;
 
-    // Add a timeout so we don't wait forever
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    async function proxyFetch(url) {
+      const proxies = [
+        async () => {
+          const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`,
+            { signal: AbortSignal.timeout(15000) });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        },
+        async () => {
+          const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+            { signal: AbortSignal.timeout(15000) });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const j = await r.json();
+          return JSON.parse(j.contents);
+        },
+        async () => {
+          const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+            { signal: AbortSignal.timeout(15000) });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        },
+      ];
 
-    const response = await fetch(proxyUrl + yahooUrl, { 
-      signal: controller.signal 
-    });
-    clearTimeout(timeout);
+      for (let p = 0; p < proxies.length; p++) {
+        try {
+          const data = await proxies[p]();
+          console.log(`${ticker} stock table — Proxy ${p + 1} succeeded`);
+          return data;
+        } catch (e) {
+          console.warn(`${ticker} stock table — Proxy ${p + 1} failed: ${e.message}`);
+          if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+      throw new Error("All proxies failed");
+    }
 
-    const json = await response.json();
-    const data = JSON.parse(json.contents);
+    const chartData = await proxyFetch(yahooChartUrl);
 
-    const timestamps = data.chart.result[0].timestamp;
-    const closes = data.chart.result[0].indicators.quote[0].close;
-    const volumes = data.chart.result[0].indicators.quote[0].volume;
+    const timestamps = chartData.chart.result[0].timestamp;
+    const closes     = chartData.chart.result[0].indicators.quote[0].close;
+    const volumes    = chartData.chart.result[0].indicators.quote[0].volume;
 
-    // Get last 10 trading days
     const last10 = timestamps.slice(-10).map((ts, i) => {
       const idx = timestamps.length - 10 + i;
       return {
-        date: new Date(ts * 1000).toLocaleDateString("en-US", {
-          year: "numeric", month: "short", day: "numeric"
-        }),
-        close: closes[idx] ? closes[idx].toFixed(2) : "N/A",
+        date:   new Date(ts * 1000).toLocaleDateString("en-US", {
+                  year: "numeric", month: "short", day: "numeric"
+                }),
+        close:  closes[idx]  ? closes[idx].toFixed(2)       : "N/A",
         volume: volumes[idx] ? volumes[idx].toLocaleString() : "N/A"
       };
     }).reverse();
 
-    // Build table HTML
-    let html = `
+    tableContainer.innerHTML = `
+      <h3 class="stock-table-title">${ticker} — Last 10 Trading Days</h3>
       <table class="stock-table">
         <thead>
           <tr>
@@ -141,28 +162,20 @@ async function fetchStockTable(ticker, retryCount = 0) {
       </table>
     `;
 
-    tableContainer.innerHTML = `
-      <h3 class="stock-table-title">📊 ${ticker} — Last 10 Trading Days</h3>
-      ${html}
-    `;
-
   } catch (err) {
-
     if (retryCount < maxRetries - 1) {
-      // Wait 2 seconds then retry automatically
       console.warn(`Attempt ${retryCount + 1} failed for ${ticker}, retrying in 2s...`);
       setTimeout(() => fetchStockTable(ticker, retryCount + 1), 2000);
     } else {
-      // All retries exhausted — show error with manual retry button
       console.error(`All ${maxRetries} attempts failed for ${ticker}:`, err);
       tableContainer.innerHTML = `
         <div style="text-align:center; padding: 12px;">
           <p style="color:#ff6b6b; margin-bottom: 10px;">
             Unable to load market data for ${ticker}
           </p>
-          <button 
-            onclick="fetchStockTable('${ticker}')" 
-            style="padding: 8px 16px; cursor: pointer; background: #00b4d8; 
+          <button
+            onclick="fetchStockTable('${ticker}')"
+            style="padding: 8px 16px; cursor: pointer; background: #00b4d8;
                    color: white; border: none; border-radius: 6px; font-size: 14px;">
             🔄 Retry
           </button>
@@ -853,39 +866,64 @@ async function loadQ2Picks() {
 async function fetchPickPrice(ticker, retryCount = 0) {
   const maxRetries = 3;
   try {
-    const proxyUrl = "https://api.allorigins.win/get?url=";
-    const yahooUrl = encodeURIComponent(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`
-    );
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    const response = await fetch(proxyUrl + yahooUrl, { signal: controller.signal });
-    clearTimeout(timeout);
+    // Try proxies in order — corsproxy.io first as it is most reliable
+    const proxies = [
+      async () => {
+        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`, 
+          { signal: AbortSignal.timeout(15000) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      },
+      async () => {
+        const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
+        return JSON.parse(j.contents);
+      },
+      async () => {
+        const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      },
+    ];
 
-    const json = await response.json();
-    const data = JSON.parse(json.contents);
-    const result = data.chart.result[0];
+    let data = null;
+    for (let p = 0; p < proxies.length; p++) {
+      try {
+        data = await proxies[p]();
+        console.log(`${ticker} — Proxy ${p + 1} succeeded`);
+        break;
+      } catch (e) {
+        console.warn(`${ticker} — Proxy ${p + 1} failed: ${e.message}`);
+        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 1000));
+      }
+    }
 
-    const closes = result.indicators.quote[0].close;
+    if (!data) throw new Error("All proxies failed");
+
+    const result     = data.chart.result[0];
+    const closes     = result.indicators.quote[0].close;
     const validCloses = closes.filter((v) => v !== null && !isNaN(v));
     const latestPrice = validCloses[validCloses.length - 1];
-    const prevPrice = validCloses[validCloses.length - 2];
-    const change = latestPrice - prevPrice;
-    const changePct = (change / prevPrice) * 100;
-    const isPositive = change >= 0;
+    const prevPrice   = validCloses[validCloses.length - 2];
+    const change      = latestPrice - prevPrice;
+    const changePct   = (change / prevPrice) * 100;
+    const isPositive  = change >= 0;
 
     document.getElementById(`price-${ticker}`).innerHTML = `
       <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
     `;
     document.getElementById(`change-${ticker}`).innerHTML = `
       <span class="pick-change-value ${isPositive ? "positive" : "negative"}">
-        ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)} 
+        ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)}
         (${isPositive ? "+" : ""}${changePct.toFixed(2)}%)
       </span>
     `;
 
-    // Highlight card based on performance
     const card = document.getElementById(`pick-${ticker}`);
     card.classList.add(isPositive ? "pick-positive" : "pick-negative");
 
@@ -1018,27 +1056,53 @@ async function waitForFundamentalPicksComplete() {
 async function fetchTacticalPrice(ticker, retryCount = 0) {
   const maxRetries = 3;
   try {
-    const proxyUrl = "https://api.allorigins.win/get?url=";
-    const yahooUrl = encodeURIComponent(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`
-    );
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    const response = await fetch(proxyUrl + yahooUrl, { signal: controller.signal });
-    clearTimeout(timeout);
+    // Try proxies in order — corsproxy.io first as it is most reliable
+    const proxies = [
+      async () => {
+        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      },
+      async () => {
+        const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
+        return JSON.parse(j.contents);
+      },
+      async () => {
+        const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      },
+    ];
 
-    const json = await response.json();
-    const data = JSON.parse(json.contents);
-    const result = data.chart.result[0];
+    let data = null;
+    for (let p = 0; p < proxies.length; p++) {
+      try {
+        data = await proxies[p]();
+        console.log(`${ticker} tactical — Proxy ${p + 1} succeeded`);
+        break;
+      } catch (e) {
+        console.warn(`${ticker} tactical — Proxy ${p + 1} failed: ${e.message}`);
+        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 1000));
+      }
+    }
 
-    const closes = result.indicators.quote[0].close;
+    if (!data) throw new Error("All proxies failed");
+
+    const result      = data.chart.result[0];
+    const closes      = result.indicators.quote[0].close;
     const validCloses = closes.filter((v) => v !== null && !isNaN(v));
     const latestPrice = validCloses[validCloses.length - 1];
-    const prevPrice = validCloses[validCloses.length - 2];
-    const change = latestPrice - prevPrice;
-    const changePct = (change / prevPrice) * 100;
-    const isPositive = change >= 0;
+    const prevPrice   = validCloses[validCloses.length - 2];
+    const change      = latestPrice - prevPrice;
+    const changePct   = (change / prevPrice) * 100;
+    const isPositive  = change >= 0;
 
     document.getElementById(`tactical-price-${ticker}`).innerHTML = `
       <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
