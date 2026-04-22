@@ -782,12 +782,12 @@ async function loadQ2Picks() {
 
   // Initial staggered fetch for all picks
   for (let i = 0; i < Q2_PICKS.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, i * 600));
+    await new Promise(resolve => setTimeout(resolve, i * 400));
     fetchPickPrice(Q2_PICKS[i]);
   }
 
   // Wait for all initial fetches to complete
-  const totalInitialTime = Q2_PICKS.length * 400 + 3000;
+  const totalInitialTime = Q2_PICKS.length * 400 + 5000;
   await new Promise(resolve => setTimeout(resolve, totalInitialTime));
 
   // ===== INFINITE RETRY LOOP =====
