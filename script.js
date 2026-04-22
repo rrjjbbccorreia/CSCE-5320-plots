@@ -777,12 +777,12 @@ async function loadQ2Picks() {
     </div>
   `).join("");
 
-  // Wait 2 seconds for stock table and profile to finish first
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // Wait 3 seconds for stock table and profile to finish first
+  await new Promise(resolve => setTimeout(resolve, 3000));
 
   // Initial staggered fetch for all picks
   for (let i = 0; i < Q2_PICKS.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, i * 400));
+    await new Promise(resolve => setTimeout(resolve, i * 600));
     fetchPickPrice(Q2_PICKS[i]);
   }
 
@@ -897,11 +897,17 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
     if (!data) throw new Error("All proxies failed");
 
-    const result     = data.chart.result[0];
-    const closes     = result.indicators.quote[0].close;
+    const result      = data.chart.result[0];
+    const meta        = result.meta || {};
+    const closes      = result.indicators.quote[0].close;
     const validCloses = closes.filter((v) => v !== null && !isNaN(v));
-    const latestPrice = validCloses[validCloses.length - 1];
-    const prevPrice   = validCloses[validCloses.length - 2];
+
+    // Use real-time market price if available, otherwise fall back to last close
+    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+
+    // Previous close for change calculation
+    const prevPrice   = meta.chartPreviousClose || validCloses[validCloses.length - 2];
+
     const change      = latestPrice - prevPrice;
     const changePct   = (change / prevPrice) * 100;
     const isPositive  = change >= 0;
@@ -1084,10 +1090,16 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     if (!data) throw new Error("All proxies failed");
 
     const result      = data.chart.result[0];
+    const meta        = result.meta || {};
     const closes      = result.indicators.quote[0].close;
     const validCloses = closes.filter((v) => v !== null && !isNaN(v));
-    const latestPrice = validCloses[validCloses.length - 1];
-    const prevPrice   = validCloses[validCloses.length - 2];
+
+    // Use real-time market price if available, otherwise fall back to last close
+    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+
+    // Previous close for change calculation
+    const prevPrice   = meta.chartPreviousClose || validCloses[validCloses.length - 2];
+
     const change      = latestPrice - prevPrice;
     const changePct   = (change / prevPrice) * 100;
     const isPositive  = change >= 0;
