@@ -89,12 +89,7 @@ async function fetchStockTable(ticker, retryCount = 0) {
 
     async function proxyFetch(url) {
       const proxies = [
-        async () => {
-          const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`,
-            { signal: AbortSignal.timeout(15000) });
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          return r.json();
-        },
+        // Proxy 1 — allorigins
         async () => {
           const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
             { signal: AbortSignal.timeout(15000) });
@@ -102,8 +97,9 @@ async function fetchStockTable(ticker, retryCount = 0) {
           const j = await r.json();
           return JSON.parse(j.contents);
         },
+        // Proxy 2 — corsproxy.io
         async () => {
-          const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+          const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`,
             { signal: AbortSignal.timeout(15000) });
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           return r.json();
@@ -870,12 +866,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
     // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
-      async () => {
-        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`, 
-          { signal: AbortSignal.timeout(15000) });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      },
+      // Proxy 1 — allorigins (working most reliably from your domain)
       async () => {
         const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
           { signal: AbortSignal.timeout(15000) });
@@ -883,8 +874,9 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
+      // Proxy 2 — corsproxy.io (fallback)
       async () => {
-        const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`,
+        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
           { signal: AbortSignal.timeout(15000) });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -1060,12 +1052,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
 
     // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
-      async () => {
-        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
-          { signal: AbortSignal.timeout(15000) });
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      },
+      // Proxy 1 — allorigins (working most reliably from your domain)
       async () => {
         const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
           { signal: AbortSignal.timeout(15000) });
@@ -1073,8 +1060,9 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
+      // Proxy 2 — corsproxy.io (fallback)
       async () => {
-        const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yahooUrl)}`,
+        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
           { signal: AbortSignal.timeout(15000) });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();

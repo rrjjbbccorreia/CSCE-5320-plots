@@ -40,19 +40,14 @@ const maxNoProgress  = 5;
 // ==================== PROXY LIST ====================
 // Tried in order — first success wins
 const PROXY_BUILDERS = [
-  // Proxy 1 — corsproxy.io (most reliable, works on localhost and deployed)
-  (url) => ({
-    fetchUrl: `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    parseResponse: async (r) => r.json()
-  }),
-  // Proxy 2 — allorigins (fallback, sometimes rate limits)
+  // Proxy 1 — allorigins
   (url) => ({
     fetchUrl: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
     parseResponse: async (r) => { const j = await r.json(); return JSON.parse(j.contents); }
   }),
-  // Proxy 3 — codetabs (second fallback)
+  // Proxy 2 — corsproxy.io
   (url) => ({
-    fetchUrl: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    fetchUrl: `https://corsproxy.io/?${encodeURIComponent(url)}`,
     parseResponse: async (r) => r.json()
   }),
 ];
