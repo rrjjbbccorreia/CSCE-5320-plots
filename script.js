@@ -927,7 +927,9 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
   } catch (err) {
     if (retryCount < maxRetries - 1) {
-      setTimeout(() => fetchPickPrice(ticker, retryCount + 1), 2000);
+      // Increase wait time with each retry — 3s, 6s, 9s
+      const waitTime = (retryCount + 1) * 3000;
+      setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
       document.getElementById(`price-${ticker}`).innerHTML =
         "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
@@ -1119,7 +1121,9 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
 
   } catch (err) {
     if (retryCount < maxRetries - 1) {
-      setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), 2000);
+      // Increase wait time with each retry — 3s, 6s, 9s
+      const waitTime = (retryCount + 1) * 3000;
+      setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
     } else {
       document.getElementById(`tactical-price-${ticker}`).innerHTML =
         "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
