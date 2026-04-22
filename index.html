@@ -135,6 +135,25 @@
         quantitative screening process.
       </p>
       <div class="picks-grid" id="picksGrid"></div>
+      <!-- Q2 Calculator Button -->
+      <div class="calc-launcher-section" style="margin-top:20px;">
+        <h3 class="calc-launcher-title" style="font-size:16px;">
+          Q2 Portfolio Share Calculator
+        </h3>
+        <p class="calc-launcher-desc">
+          Calculate the number of shares to purchase for each Q2 fundamental pick 
+          based on an equal-weight distribution of your equity allocation.
+        </p>
+        <div id="q2CalcBtnStatus" class="calc-btn-status">
+          ⏳ Waiting for Q2 prices to load...
+        </div>
+        <button id="q2CalcBtn"
+                onclick="openQ2Calculator()"
+                class="calc-launch-btn"
+                disabled>
+          Open Q2 Calculator
+        </button>
+      </div>
     </div>
 
     <!-- ===== Portfolio Description Section ===== -->
@@ -194,6 +213,28 @@
         deteriorating trends while rotating into emerging ones.
       </p>
       <div class="picks-grid" id="tacticalPicksGrid"></div>
+      <!-- Tactical Calculator Button -->
+      <div class="calc-launcher-section" style="margin-top:20px;border-left-color:#00c896;">
+        <h3 class="calc-launcher-title" style="font-size:16px;color:#00c896;">
+          Tactical Portfolio Share Calculator
+        </h3>
+        <p class="calc-launcher-desc">
+          Calculate the number of shares to purchase for each tactical rotation pick
+          based on an equal-weight distribution of your equity allocation.
+          This portfolio refreshes every 2 to 4 weeks.
+        </p>
+        <div id="tacCalcBtnStatus" class="calc-btn-status">
+          ⏳ Waiting for Tactical prices to load...
+        </div>
+        <button id="tacCalcBtn"
+                onclick="openTacticalCalculator()"
+                class="calc-launch-btn"
+                style="background:linear-gradient(145deg,#00c896,#009e75);
+                      box-shadow:0 2px 8px rgba(0,200,150,0.3);"
+                disabled>
+          Open Tactical Calculator
+        </button>
+      </div>
     </div>
 
 

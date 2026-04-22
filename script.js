@@ -1150,7 +1150,117 @@ function loadChart(ticker) {
   }
 }
 
+// ============ Q2 CALCULATOR BUTTON ============
+
+function updateQ2CalcButton() {
+  const btn      = document.getElementById("q2CalcBtn");
+  const statusEl = document.getElementById("q2CalcBtnStatus");
+  if (!btn || !statusEl) return;
+
+  const ready = Q2_PICKS.filter(ticker => {
+    const el   = document.getElementById(`price-${ticker}`);
+    const text = el ? el.innerText.trim() : "";
+    return text.startsWith("$");
+  });
+
+  if (ready.length === Q2_PICKS.length) {
+    btn.disabled      = false;
+    btn.style.opacity = "1";
+    btn.style.cursor  = "pointer";
+    statusEl.innerHTML = `✅ All ${Q2_PICKS.length} Q2 prices loaded — ready to calculate!`;
+    statusEl.style.color = "#00c896";
+  } else {
+    btn.disabled      = true;
+    btn.style.opacity = "0.5";
+    btn.style.cursor  = "not-allowed";
+    const remaining   = Q2_PICKS.length - ready.length;
+    statusEl.innerHTML = `⏳ Waiting for ${remaining} price${remaining !== 1 ? "s" : ""} to load 
+      (${ready.length}/${Q2_PICKS.length} loaded)...
+      <br><small style="color:#666">Button activates automatically when all prices are available.</small>`;
+    statusEl.style.color = "#aaa";
+    setTimeout(updateQ2CalcButton, 3000);
+  }
+}
+
+function openQ2Calculator() {
+  const ready = Q2_PICKS.filter(ticker => {
+    const el   = document.getElementById(`price-${ticker}`);
+    const text = el ? el.innerText.trim() : "";
+    return text.startsWith("$");
+  });
+
+  if (ready.length < Q2_PICKS.length) {
+    alert("Q2 prices are still loading. Please wait.");
+    return;
+  }
+
+  const params = Q2_PICKS.map(ticker => {
+    const el    = document.getElementById(`price-${ticker}`);
+    const price = parseFloat(el ? el.innerText.trim().replace("$", "") : "");
+    return `${ticker}:${isNaN(price) ? "" : price}`;
+  }).filter(p => p.split(":")[1] !== "").join(",");
+
+  window.open(`q2_calculator.html?picks=${encodeURIComponent(params)}&type=Q2%20Fundamental%20Picks`, "_blank");
+}
+
+// ============ TACTICAL CALCULATOR BUTTON ============
+
+function updateTacCalcButton() {
+  const btn      = document.getElementById("tacCalcBtn");
+  const statusEl = document.getElementById("tacCalcBtnStatus");
+  if (!btn || !statusEl) return;
+
+  const ready = TACTICAL_PICKS.filter(ticker => {
+    const el   = document.getElementById(`tactical-price-${ticker}`);
+    const text = el ? el.innerText.trim() : "";
+    return text.startsWith("$");
+  });
+
+  if (ready.length === TACTICAL_PICKS.length) {
+    btn.disabled      = false;
+    btn.style.opacity = "1";
+    btn.style.cursor  = "pointer";
+    statusEl.innerHTML = `✅ All ${TACTICAL_PICKS.length} Tactical prices loaded — ready to calculate!`;
+    statusEl.style.color = "#00c896";
+  } else {
+    btn.disabled      = true;
+    btn.style.opacity = "0.5";
+    btn.style.cursor  = "not-allowed";
+    const remaining   = TACTICAL_PICKS.length - ready.length;
+    statusEl.innerHTML = `⏳ Waiting for ${remaining} price${remaining !== 1 ? "s" : ""} to load 
+      (${ready.length}/${TACTICAL_PICKS.length} loaded)...
+      <br><small style="color:#666">Button activates automatically when all prices are available.</small>`;
+    statusEl.style.color = "#aaa";
+    setTimeout(updateTacCalcButton, 3000);
+  }
+}
+
+function openTacticalCalculator() {
+  const ready = TACTICAL_PICKS.filter(ticker => {
+    const el   = document.getElementById(`tactical-price-${ticker}`);
+    const text = el ? el.innerText.trim() : "";
+    return text.startsWith("$");
+  });
+
+  if (ready.length < TACTICAL_PICKS.length) {
+    alert("Tactical prices are still loading. Please wait.");
+    return;
+  }
+
+  const params = TACTICAL_PICKS.map(ticker => {
+    const el    = document.getElementById(`tactical-price-${ticker}`);
+    const price = parseFloat(el ? el.innerText.trim().replace("$", "") : "");
+    return `${ticker}:${isNaN(price) ? "" : price}`;
+  }).filter(p => p.split(":")[1] !== "").join(",");
+
+  window.open(`tactical_calculator.html?picks=${encodeURIComponent(params)}&type=Tactical%20Rotation%20Picks`, "_blank");
+}
+
+
 // Load picks on page start
 loadQ2Picks();
 loadTacticalPicks();
 setTimeout(() => loadSpreadsheetPreview(), 3000);
+
+updateQ2CalcButton();
+updateTacCalcButton();

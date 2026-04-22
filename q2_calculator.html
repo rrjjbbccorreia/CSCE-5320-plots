@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Q2 Fundamental Picks Calculator — Correia Investment Solutions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d0f;
+      --surface:  #141416;
+      --surface2: #1c1c20;
+      --border:   #2a2a30;
+      --accent:   #f0a500;
+      --cyan:     #00b4d8;
+      --green:    #00c896;
+      --red:      #ff4d6d;
+      --text:     #e8e8f0;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== Header ===== */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .header-logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+
+    .header-sub {
+      font-size: 12px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* ===== Main ===== */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 36px;
+      line-height: 1.7;
+      max-width: 800px;
+    }
+
+    /* ===== Section label ===== */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ===== Input Card ===== */
+    .input-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+    }
+
+    .amount-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .amount-label {
+      font-size: 14px;
+      color: #bbb;
+      white-space: nowrap;
+    }
+
+    .amount-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 320px;
+    }
+
+    .amount-input-wrap::before {
+      content: '$';
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    .amount-input {
+      width: 100%;
+      padding: 13px 14px 13px 30px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .amount-input:focus { border-color: var(--accent); }
+    .amount-input::placeholder { color: #444; }
+
+    .calc-btn {
+      padding: 13px 30px;
+      background: linear-gradient(135deg, var(--accent), #c47f00);
+      color: #0d0d0f;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .calc-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(240,165,0,0.35);
+    }
+
+    .calc-btn:active { transform: scale(0.98); }
+
+    /* ===== Tickers preview ===== */
+    .tickers-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .tickers-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ticker-chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(240,165,0,0.12);
+      border: 1px solid rgba(240,165,0,0.25);
+      color: var(--accent);
+    }
+
+    /* ===== Results ===== */
+    .results-section { display: none; }
+    .results-section.visible { display: block; }
+
+    .results-summary {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .summary-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 22px;
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .summary-stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .summary-stat-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 19px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    /* ===== Table ===== */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .table-heading {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .shares-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .shares-table thead tr { background: var(--surface2); }
+
+    .shares-table th {
+      padding: 11px 20px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #555;
+    }
+
+    .shares-table td {
+      padding: 13px 20px;
+      border-bottom: 1px solid #18181c;
+      font-size: 14px;
+      color: #ccc;
+      vertical-align: middle;
+    }
+
+    .shares-table tbody tr:last-child td { border-bottom: none; }
+    .shares-table tbody tr:hover td { background: rgba(255,255,255,0.015); }
+
+    .td-ticker {
+      font-family: 'DM Mono', monospace;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .td-price, .td-alloc, .td-cost, .td-remainder {
+      font-family: 'DM Mono', monospace;
+    }
+
+    .td-alloc  { color: var(--cyan); }
+    .td-cost   { color: #aaa; }
+    .td-remainder { color: #555; font-size: 12px; }
+
+    .td-shares {
+      font-family: 'DM Mono', monospace;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .td-unavailable {
+      color: var(--red);
+      font-size: 13px;
+      font-style: italic;
+    }
+
+    .total-row td {
+      border-top: 2px solid var(--border) !important;
+      background: var(--surface2) !important;
+      font-weight: 600;
+    }
+
+    /* ===== Note ===== */
+    .calc-note {
+      background: rgba(240,165,0,0.06);
+      border: 1px solid rgba(240,165,0,0.18);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #888;
+      line-height: 1.65;
+      margin-top: 16px;
+    }
+
+    .calc-note strong { color: var(--accent); }
+
+    /* ===== Action row ===== */
+    .action-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .action-btn.recalc {
+      background: rgba(240,165,0,0.15);
+      border: 1px solid rgba(240,165,0,0.3);
+      color: var(--accent);
+    }
+
+    .action-btn.recalc:hover { background: rgba(240,165,0,0.25); }
+
+    .action-btn.print {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: #bbb;
+    }
+
+    .action-btn.print:hover { border-color: var(--accent); color: var(--accent); }
+
+    @media print {
+      .page-header, .input-card, .action-row, .calc-note { display: none !important; }
+      .results-section { display: block !important; }
+      body { background: white; color: black; }
+      .shares-table th, .shares-table td { color: black !important; }
+    }
+
+    @media (max-width: 600px) {
+      .page-header { padding: 16px 20px; }
+      .main { padding: 24px 16px 60px; }
+      .input-card { padding: 20px; }
+      .amount-row { flex-direction: column; align-items: stretch; }
+      .amount-input-wrap { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <img src="data/CIS brand 2.webp" alt="CIS Logo" class="header-logo"
+         onerror="this.style.display='none'" />
+    <div>
+      <div class="header-title">Correia Investment Solutions</div>
+      <div class="header-sub">Q2 Fundamental Picks — Share Calculator</div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <h1 class="page-title">Q2 Fundamental Picks Calculator</h1>
+    <p class="page-subtitle">
+      Enter the total dollar amount you want to allocate to your Q2 fundamental picks.
+      The calculator will distribute that amount equally across all securities and calculate
+      the exact number of whole shares to purchase for each position. Share counts are
+      rounded down to preserve capital — any remainder per position is shown for reference.
+    </p>
+
+    <!-- ===== Input ===== -->
+    <div class="input-card">
+      <div class="section-label">Allocation Settings</div>
+
+      <div class="amount-row">
+        <span class="amount-label">Total allocation for Q2 picks:</span>
+        <div class="amount-input-wrap">
+          <input type="number" class="amount-input" id="portfolioAmount"
+                 placeholder="50000" min="1" step="100" />
+        </div>
+        <button class="calc-btn" onclick="runCalculation()">Calculate Shares</button>
+      </div>
+
+      <div class="tickers-label">Securities in this calculation:</div>
+      <div class="tickers-preview" id="tickersPreview"></div>
+    </div>
+
+    <!-- ===== Results ===== -->
+    <div class="results-section" id="resultsSection">
+
+      <div class="section-label">Results</div>
+
+      <div class="results-summary" id="resultsSummary"></div>
+
+      <div class="table-wrap">
+        <div class="table-heading">
+          🎯 Q2 Fundamental Picks — Share Allocation
+        </div>
+        <table class="shares-table">
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Current Price</th>
+              <th>Per-Position Allocation</th>
+              <th>Shares to Buy</th>
+              <th>Total Cost</th>
+              <th>Remainder</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="calc-note">
+        <strong>Note:</strong> Share counts are rounded <strong>down</strong> to whole shares
+        to avoid exceeding your allocation. The remainder column shows unspent cash per
+        position due to rounding — consider keeping this as cash or adding to your
+        highest-conviction position. Prices were loaded from the main page at the time
+        you opened this calculator and may not reflect real-time values.
+      </div>
+
+      <div class="action-row">
+        <button class="action-btn recalc" onclick="runCalculation()">🔄 Recalculate</button>
+        <button class="action-btn print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // ===== PARSE PRICES FROM URL =====
+    const params     = new URLSearchParams(window.location.search);
+    const picksRaw   = params.get("picks") || "";
+
+    const priceMap = {};
+    picksRaw.split(",").forEach(pair => {
+      const [ticker, price] = pair.split(":");
+      if (ticker && price && !isNaN(price)) {
+        priceMap[ticker.trim()] = parseFloat(price);
+      }
+    });
+
+    const tickers = Object.keys(priceMap);
+
+    // ===== BUILD TICKERS PREVIEW =====
+    function buildPreview() {
+      const container = document.getElementById("tickersPreview");
+      container.innerHTML = "";
+      if (tickers.length === 0) {
+        container.innerHTML = "<span style='color:#ff4d6d;font-size:13px;'>No prices found — please go back and wait for prices to load before opening this page.</span>";
+        return;
+      }
+      tickers.forEach(t => {
+        const chip = document.createElement("span");
+        chip.className = "ticker-chip";
+        chip.textContent = t;
+        container.appendChild(chip);
+      });
+    }
+
+    buildPreview();
+
+    // ===== CALCULATION =====
+    function runCalculation() {
+      const amountInput = document.getElementById("portfolioAmount");
+      const totalAmount = parseFloat(amountInput.value);
+
+      if (!totalAmount || totalAmount <= 0) {
+        amountInput.focus();
+        amountInput.style.borderColor = "#ff4d6d";
+        setTimeout(() => amountInput.style.borderColor = "", 2000);
+        return;
+      }
+
+      if (tickers.length === 0) {
+        alert("No price data available. Please close this page, wait for all prices to load on the main page, then try again.");
+        return;
+      }
+
+      const allocPerSecurity = totalAmount / tickers.length;
+      const tbody            = document.getElementById("resultsTableBody");
+      tbody.innerHTML        = "";
+
+      let grandTotal     = 0;
+      let grandRemainder = 0;
+      let unavailableCount = 0;
+
+      tickers.forEach(ticker => {
+        const price = priceMap[ticker];
+        const tr    = document.createElement("tr");
+
+        if (!price || price <= 0) {
+          unavailableCount++;
+          tr.innerHTML = `
+            <td class="td-ticker">${ticker}</td>
+            <td colspan="5" class="td-unavailable">Price unavailable — excluded from calculation</td>
+          `;
+          tbody.appendChild(tr);
+          return;
+        }
+
+        const shares    = Math.floor(allocPerSecurity / price);
+        const cost      = shares * price;
+        const remainder = allocPerSecurity - cost;
+        grandTotal      += cost;
+        grandRemainder  += remainder;
+
+        tr.innerHTML = `
+          <td class="td-ticker">${ticker}</td>
+          <td class="td-price">$${price.toFixed(2)}</td>
+          <td class="td-alloc">$${allocPerSecurity.toFixed(2)}</td>
+          <td class="td-shares">${shares.toLocaleString()}</td>
+          <td class="td-cost">$${cost.toFixed(2)}</td>
+          <td class="td-remainder">$${remainder.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Total row
+      const totalRow = document.createElement("tr");
+      totalRow.className = "total-row";
+      totalRow.innerHTML = `
+        <td colspan="3" style="color:#888;font-size:13px;">
+          Total — ${tickers.length - unavailableCount} securities
+        </td>
+        <td class="td-shares" style="font-size:15px;">—</td>
+        <td class="td-alloc">$${grandTotal.toFixed(2)}</td>
+        <td class="td-remainder" style="color:#888;">$${grandRemainder.toFixed(2)} remaining</td>
+      `;
+      tbody.appendChild(totalRow);
+
+      // Summary
+      const utilization = ((grandTotal / totalAmount) * 100).toFixed(1);
+      document.getElementById("resultsSummary").innerHTML = `
+        <div class="summary-stat">
+          <div class="summary-stat-label">Total Allocated</div>
+          <div class="summary-stat-value">$${totalAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Total Invested</div>
+          <div class="summary-stat-value">$${grandTotal.toFixed(2)}</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Cash Remaining</div>
+          <div class="summary-stat-value" style="color:#00b4d8;">$${(totalAmount - grandTotal).toFixed(2)}</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Capital Utilization</div>
+          <div class="summary-stat-value" style="color:#00c896;">${utilization}%</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Securities</div>
+          <div class="summary-stat-value">${tickers.length - unavailableCount}</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-label">Per Position</div>
+          <div class="summary-stat-value">$${allocPerSecurity.toFixed(2)}</div>
+        </div>
+      `;
+
+      document.getElementById("resultsSection").classList.add("visible");
+      document.getElementById("resultsSection").scrollIntoView({ behavior: "smooth" });
+    }
+  </script>
+
+</body>
+</html>
