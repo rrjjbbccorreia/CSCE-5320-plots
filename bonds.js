@@ -32,11 +32,12 @@ const TARGET_ETFS = [
 const ALL_ETFS = [...PERPETUAL_ETFS, ...TARGET_ETFS];
 
 // ==================== TIMING ====================
-const GAP_MS         = 2000;
-const BATCH_SIZE     = 4;
-const BATCH_PAUSE_MS = 6000;
+const GAP_MS         = 2600;
+const BATCH_SIZE     = 3;
+const BATCH_PAUSE_MS = 10000;
 const maxNoProgress  = 5;
 const INITIAL_DELAY  = 1000;   // wait 5 seconds before starting
+
 
 // ==================== PROXY LIST ====================
 // Tried in order — first success wins
