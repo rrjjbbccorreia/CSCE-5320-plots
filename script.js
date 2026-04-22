@@ -85,6 +85,20 @@ async function fetchStockTable(ticker, retryCount = 0) {
   }
 
   try {
+
+    // ===== CHECK CACHE FIRST =====
+    if (retryCount === 0) {
+      const cached = sessionStorage.getItem(`table_cache_${ticker}`);
+      if (cached) {
+        const { html, savedAt } = JSON.parse(cached);
+        if (Date.now() - savedAt < 15 * 60 * 1000) {
+          console.log(`${ticker} table — loaded from cache`);
+          tableContainer.innerHTML = html;
+          return;
+        }
+      }
+    }
+
     const yahooChartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo`;
 
     async function proxyFetch(url) {
@@ -177,6 +191,17 @@ async function fetchStockTable(ticker, retryCount = 0) {
           </button>
         </div>
       `;
+
+      // ===== SAVE TABLE TO CACHE =====
+      try {
+        sessionStorage.setItem(`table_cache_${ticker}`, JSON.stringify({
+          html: tableContainer.innerHTML,
+          savedAt: Date.now()
+        }));
+      } catch (e) {
+        console.warn("Table cache save failed:", e.message);
+      }
+
     }
   }
 }
@@ -343,7 +368,34 @@ const TICKER_MAP = {
   WY: "Weyerhaeuser", WYNN: "Wynn Resorts", XEL: "Xcel Energy",
   XOM: "ExxonMobil", XRAY: "Dentsply Sirona", XYL: "Xylem",
   YUM: "Yum Brands", ZBH: "Zimmer Biomet", ZBRA: "Zebra Technologies",
-  ZION: "Zions Bancorporation", ZTS: "Zoetis"
+  ZION: "Zions Bancorporation", ZTS: "Zoetis",
+  ARE:  "Alexandria Real Estate Equities",
+  NVR:  "NVR Inc",
+  CARR: "Carrier Global",
+  PODD: "Insulet Corporation",
+  APP:  "Applovin",
+  BN:   "Brookfield Corporation",
+  UCO:  "ProShares Ultra Bloomberg Crude Oil",
+  IGE:  "iShares North American Natural Resources ETF",
+  COPX: "Global X Copper Miners ETF",
+  XME:  "SPDR S&P Metals and Mining ETF",
+  XLE:  "Energy Select Sector SPDR Fund",
+  CEG:  "Constellation Energy",
+  NRG:  "NRG Energy",
+  MOS:  "Mosaic Company",
+  EXPD: "Expeditors International",
+  DECK: "Deckers Outdoor",
+  AMCR: "Amcor",
+  PLTR: "Palantir Technologies",
+  PSX:  "Phillips 66",
+  SYF:  "Synchrony Financial",
+  ETR:  "Entergy",
+  ALB:  "Albemarle Corporation",
+  SPG:  "Simon Property Group",
+  DD:   "DuPont de Nemours",
+  FDS:  "FactSet Research Systems",
+  ACN:  "Accenture",
+  CTAS: "Cintas Corporation"
 };
 
 async function fetchCompanyProfile(ticker, retryCount = 0) {
@@ -359,13 +411,17 @@ async function fetchCompanyProfile(ticker, retryCount = 0) {
     const companyName = TICKER_MAP[ticker] || ticker;
     console.log(`Looking up Wikipedia for ${ticker} as "${companyName}"`);
 
-    // Try multiple Wikipedia page name formats
+    // Build a richer set of search attempts
     const attempts = [
       companyName,
       `${companyName} (company)`,
       `${ticker} (company)`,
+      // Strip common suffixes and try again
+      companyName.replace(/ Inc\.?$/, "").replace(/ Corp\.?$/, "").replace(/ Corporation$/, "").replace(/ Limited$/, "").replace(/ Ltd\.?$/, "").trim(),
+      // Try just the first two words of the company name
+      companyName.split(" ").slice(0, 2).join(" "),
       ticker
-    ];
+    ].filter((v, i, arr) => v && arr.indexOf(v) === i); // remove duplicates and empty
 
     let wikiData = null;
 
@@ -386,7 +442,35 @@ async function fetchCompanyProfile(ticker, retryCount = 0) {
       }
     }
 
-    if (!wikiData) throw new Error(`No Wikipedia page found for ${ticker}`);
+    if (!wikiData) {
+      // Show a clean fallback card instead of erroring
+      const companyDisplayName = TICKER_MAP[ticker] || ticker;
+      profileContainer.innerHTML = `
+        <div class="company-profile">
+          <div class="profile-header">
+            <div class="profile-name-block">
+              <h3 class="profile-company-name">${companyDisplayName}</h3>
+              <span class="profile-sector">
+                <a href="https://finance.yahoo.com/quote/${ticker}" 
+                   target="_blank" class="profile-link">
+                  View on Yahoo Finance →
+                </a>
+              </span>
+            </div>
+            <div class="profile-meta">
+              <span class="profile-meta-item">
+                🏷️ Ticker: <strong style="color:#00b4d8">${ticker}</strong>
+              </span>
+            </div>
+          </div>
+          <p class="profile-description" style="color:#666;font-style:italic;">
+            Detailed company description not available. 
+            Click the Yahoo Finance link above for full company information.
+          </p>
+        </div>
+      `;
+      return;
+    }
 
     const description = wikiData.extract || "No description available.";
     const thumbnail = wikiData.thumbnail?.source || null;
@@ -745,6 +829,35 @@ function openChatGPT() {
   window.open(url, "_blank");
 }
 
+// ============ PRICE CACHE (sessionStorage) ============
+
+function savePrice(key, price, change, changePct, isPositive) {
+  try {
+    sessionStorage.setItem(`price_cache_${key}`, JSON.stringify({
+      price, change, changePct, isPositive,
+      savedAt: Date.now()
+    }));
+  } catch (e) {
+    console.warn("Cache save failed:", e.message);
+  }
+}
+
+function loadPrice(key) {
+  try {
+    const raw = sessionStorage.getItem(`price_cache_${key}`);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // Cache expires after 15 minutes
+    if (Date.now() - data.savedAt > 15 * 60 * 1000) {
+      sessionStorage.removeItem(`price_cache_${key}`);
+      return null;
+    }
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
 // ============ Q2 FUNDAMENTAL PICKS ============
 const Q2_PICKS = [
   "ALB", "SPG", "ETR", "COST", "MU",
@@ -859,9 +972,32 @@ async function loadQ2Picks() {
   }
 }
 
+
+
 async function fetchPickPrice(ticker, retryCount = 0) {
   const maxRetries = 3;
   try {
+
+    // ===== CHECK CACHE FIRST =====
+    if (retryCount === 0) {
+      const cached = loadPrice(`q2_${ticker}`);
+      if (cached) {
+        console.log(`${ticker} — loaded from cache`);
+        document.getElementById(`price-${ticker}`).innerHTML = `
+          <span class="pick-price-value">$${cached.price.toFixed(2)}</span>
+        `;
+        document.getElementById(`change-${ticker}`).innerHTML = `
+          <span class="pick-change-value ${cached.isPositive ? "positive" : "negative"}">
+            ${cached.isPositive ? "▲" : "▼"} $${Math.abs(cached.change).toFixed(2)}
+            (${cached.isPositive ? "+" : ""}${cached.changePct.toFixed(2)}%)
+          </span>
+        `;
+        const card = document.getElementById(`pick-${ticker}`);
+        card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
+        return;
+      }
+    }
+
     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
 
     // Try proxies in order — corsproxy.io first as it is most reliable
@@ -911,6 +1047,9 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     const change      = latestPrice - prevPrice;
     const changePct   = (change / prevPrice) * 100;
     const isPositive  = change >= 0;
+
+    // ===== SAVE TO CACHE =====
+    savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
 
     document.getElementById(`price-${ticker}`).innerHTML = `
       <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
@@ -1056,6 +1195,27 @@ async function waitForFundamentalPicksComplete() {
 async function fetchTacticalPrice(ticker, retryCount = 0) {
   const maxRetries = 3;
   try {
+
+    // ===== CHECK CACHE FIRST =====
+    if (retryCount === 0) {
+      const cached = loadPrice(`tac_${ticker}`);
+      if (cached) {
+        console.log(`${ticker} tactical — loaded from cache`);
+        document.getElementById(`tactical-price-${ticker}`).innerHTML = `
+          <span class="pick-price-value">$${cached.price.toFixed(2)}</span>
+        `;
+        document.getElementById(`tactical-change-${ticker}`).innerHTML = `
+          <span class="pick-change-value ${cached.isPositive ? "positive" : "negative"}">
+            ${cached.isPositive ? "▲" : "▼"} $${Math.abs(cached.change).toFixed(2)}
+            (${cached.isPositive ? "+" : ""}${cached.changePct.toFixed(2)}%)
+          </span>
+        `;
+        const card = document.getElementById(`tactical-pick-${ticker}`);
+        card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
+        return;
+      }
+    }
+
     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
 
     // Try proxies in order — corsproxy.io first as it is most reliable
@@ -1105,6 +1265,9 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const change      = latestPrice - prevPrice;
     const changePct   = (change / prevPrice) * 100;
     const isPositive  = change >= 0;
+
+    // ===== SAVE TO CACHE =====
+    savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
 
     document.getElementById(`tactical-price-${ticker}`).innerHTML = `
       <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
