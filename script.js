@@ -1168,21 +1168,30 @@ async function loadTacticalPicks() {
 }
 
 // ============ WAIT FOR FUNDAMENTAL PICKS TO COMPLETE ============
+// ============ WAIT FOR FUNDAMENTAL PICKS TO COMPLETE ============
 async function waitForFundamentalPicksComplete() {
   console.log("Waiting for fundamental picks to complete...");
-  
-  // Check every 2 seconds if fundamental picks are all done
+
   while (true) {
     const stillPending = Q2_PICKS.filter(ticker => {
       const priceEl = document.getElementById(`price-${ticker}`);
-      return priceEl && (
-        priceEl.innerHTML.includes("Loading") ||
-        priceEl.innerHTML.includes("Retrying")
+      if (!priceEl) return true;
+      const html = priceEl.innerHTML;
+      // Still pending if showing any loading or retrying state
+      // Unavailable and $ prices are both considered done
+      return (
+        html.includes("Loading") ||
+        html.includes("Retrying") ||
+        html.trim() === ""
       );
     });
 
     if (stillPending.length === 0) {
-      console.log("✅ Fundamental picks complete — starting tactical picks");
+      // Add an extra buffer to let the retry loop fully settle
+      // before we start hammering the proxy with tactical picks
+      console.log("Q2 picks all settled — waiting 5s buffer before starting tactical...");
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      console.log("✅ Starting tactical picks now");
       break;
     }
 
