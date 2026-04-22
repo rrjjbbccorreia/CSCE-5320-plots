@@ -1002,18 +1002,43 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
     // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
-      // Proxy 1 — allorigins (working most reliably from your domain)
+      // Proxy 1 — allorigins
       async () => {
-        const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
-          { signal: AbortSignal.timeout(15000) });
+        const r = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) }
+        );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
         return JSON.parse(j.contents);
       },
-      // Proxy 2 — corsproxy.io (fallback)
+      // Proxy 2 — corsproxy.io
       async () => {
-        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
-          { signal: AbortSignal.timeout(15000) });
+        const r = await fetch(
+          `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      },
+      // Proxy 3 — try v6 endpoint via allorigins as alternative
+      async () => {
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const r = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(v6Url)}`,
+          { signal: AbortSignal.timeout(20000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
+        return JSON.parse(j.contents);
+      },
+      // Proxy 4 — query2 via corsproxy
+      async () => {
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const r = await fetch(
+          `https://corsproxy.io/?${encodeURIComponent(v6Url)}`,
+          { signal: AbortSignal.timeout(20000) }
+        );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       },
@@ -1066,12 +1091,13 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
   } catch (err) {
     if (retryCount < maxRetries - 1) {
-      // Increase wait time with each retry — 3s, 6s, 9s
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
-      document.getElementById(`price-${ticker}`).innerHTML =
-        "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+      // Don't give up — keep retrying with longer backoff
+      console.warn(`${ticker} — all standard retries failed, entering extended retry mode...`);
+      const extendedWait = 15000; // wait 15s then try again from scratch
+      setTimeout(() => fetchPickPrice(ticker, 0), extendedWait);
     }
   }
 }
@@ -1202,7 +1228,7 @@ async function waitForFundamentalPicksComplete() {
 
 // ============ FETCH TACTICAL PICK PRICE ============
 async function fetchTacticalPrice(ticker, retryCount = 0) {
-  const maxRetries = 8;
+  const maxRetries = 10;
   try {
 
     // ===== CHECK CACHE FIRST =====
@@ -1229,18 +1255,43 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
 
     // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
-      // Proxy 1 — allorigins (working most reliably from your domain)
+      // Proxy 1 — allorigins
       async () => {
-        const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
-          { signal: AbortSignal.timeout(15000) });
+        const r = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) }
+        );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
         return JSON.parse(j.contents);
       },
-      // Proxy 2 — corsproxy.io (fallback)
+      // Proxy 2 — corsproxy.io
       async () => {
-        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
-          { signal: AbortSignal.timeout(15000) });
+        const r = await fetch(
+          `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+          { signal: AbortSignal.timeout(15000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      },
+      // Proxy 3 — try v6 endpoint via allorigins as alternative
+      async () => {
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const r = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(v6Url)}`,
+          { signal: AbortSignal.timeout(20000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
+        return JSON.parse(j.contents);
+      },
+      // Proxy 4 — query2 via corsproxy
+      async () => {
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const r = await fetch(
+          `https://corsproxy.io/?${encodeURIComponent(v6Url)}`,
+          { signal: AbortSignal.timeout(20000) }
+        );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       },
@@ -1293,12 +1344,13 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
 
   } catch (err) {
     if (retryCount < maxRetries - 1) {
-      // Increase wait time with each retry — 3s, 6s, 9s
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
     } else {
-      document.getElementById(`tactical-price-${ticker}`).innerHTML =
-        "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+      // Don't give up — keep retrying with longer backoff
+      console.warn(`${ticker} — all standard retries failed, entering extended retry mode...`);
+      const extendedWait = 15000; // wait 15s then try again from scratch
+      setTimeout(() => fetchTacticalPrice(ticker, 0), extendedWait);
     }
   }
 }
