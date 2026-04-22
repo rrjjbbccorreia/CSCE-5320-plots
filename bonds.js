@@ -34,8 +34,9 @@ const ALL_ETFS = [...PERPETUAL_ETFS, ...TARGET_ETFS];
 // ==================== TIMING ====================
 const GAP_MS         = 2000;
 const BATCH_SIZE     = 4;
-const BATCH_PAUSE_MS = 8000;
+const BATCH_PAUSE_MS = 6000;
 const maxNoProgress  = 5;
+const INITIAL_DELAY  = 1000;   // wait 5 seconds before starting
 
 // ==================== PROXY LIST ====================
 // Tried in order — first success wins
@@ -206,7 +207,10 @@ async function fetchBatch(tickers, retryRound) {
 // ==================== MAIN LOADER ====================
 
 async function loadAllETFs() {
-  console.log(`ETF fetch — ${ALL_ETFS.length} tickers, ${PROXY_BUILDERS.length} proxies available`);
+  console.log(`ETF fetch — ${ALL_ETFS.length} tickers, starting in ${INITIAL_DELAY}ms...`);
+
+  // Initial delay to let page fully load before hitting the proxy
+  await new Promise(r => setTimeout(r, INITIAL_DELAY));
 
   await fetchBatch(ALL_ETFS.map(e => e.ticker), 0);
   console.log("Pass 1 complete — checking for failures...");
