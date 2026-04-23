@@ -486,6 +486,48 @@
 
     const tickers = Object.keys(priceMap);
 
+// ==================== ALLOCATION WEIGHTS ====================
+    // Define percentage allocation for each Tactical ticker here.
+    // Values should add up to 100.
+    // If a ticker is not listed here, it falls back to equal weight.
+    const Q2_WEIGHTS = {
+      NVR:  6.25,
+      CARR: 6.25,
+      PODD: 6.25,
+      PTC:  6.25,
+      MU:   6.25,
+      HSY:  6.25,
+      ZBRA: 6.25,
+      STE:  6.25,
+      APP:  6.25,
+      VRTX: 6.25,
+      XME:  6.25,
+      XLE:  6.25,
+      IGE:  6.25,
+      COPX: 6.25,
+      BN:   6.25,
+      UCO:  6.25,
+    };
+    // ============================================================
+
+    // Validate weights — warn if they don't add to 100
+    const totalWeight = Object.values(Q2_WEIGHTS).reduce((s, v) => s + v, 0);
+    if (Math.abs(totalWeight - 100) > 0.01) {
+      console.warn(`Q2 weights sum to ${totalWeight.toFixed(2)}% — should be 100%. 
+        Normalizing automatically.`);
+    }
+
+    // Get allocation for a ticker — weight or equal fallback
+    function getAllocation(ticker, totalAmount) {
+      const weight = Q2_WEIGHTS[ticker];
+      if (weight !== undefined) {
+        // Normalize in case weights don't sum to exactly 100
+        return (weight / totalWeight) * totalAmount;
+      }
+      // Fallback to equal weight for any ticker not in the weights object
+      return totalAmount / tickers.length;
+    }
+
     // ===== BUILD TICKERS PREVIEW =====
     function buildPreview() {
       const container = document.getElementById("tickersPreview");
@@ -495,9 +537,10 @@
         return;
       }
       tickers.forEach(t => {
-        const chip = document.createElement("span");
-        chip.className = "ticker-chip";
-        chip.textContent = t;
+        const weight = Q2_WEIGHTS[t];
+        const chip   = document.createElement("span");
+        chip.className   = "ticker-chip";
+        chip.textContent = weight !== undefined ? `${t} (${weight}%)` : `${t} (equal)`;
         container.appendChild(chip);
       });
     }
@@ -521,38 +564,46 @@
         return;
       }
 
-      const allocPerSecurity = totalAmount / tickers.length;
-      const tbody            = document.getElementById("resultsTableBody");
-      tbody.innerHTML        = "";
+      const tbody = document.getElementById("resultsTableBody");
+      tbody.innerHTML = "";
 
-      let grandTotal     = 0;
-      let grandRemainder = 0;
+      let grandTotal      = 0;
+      let grandRemainder  = 0;
       let unavailableCount = 0;
 
       tickers.forEach(ticker => {
-        const price = priceMap[ticker];
-        const tr    = document.createElement("tr");
+        const price      = priceMap[ticker];
+        const allocation = getAllocation(ticker, totalAmount);
+        const tr         = document.createElement("tr");
 
         if (!price || price <= 0) {
           unavailableCount++;
           tr.innerHTML = `
             <td class="td-ticker">${ticker}</td>
-            <td colspan="5" class="td-unavailable">Price unavailable — excluded from calculation</td>
+            <td colspan="5" class="td-unavailable">
+              Price unavailable — excluded from calculation
+            </td>
           `;
           tbody.appendChild(tr);
           return;
         }
 
-        const shares    = Math.floor(allocPerSecurity / price);
+        const weight    = Q2_WEIGHTS[ticker] !== undefined
+          ? `${((Q2_WEIGHTS[ticker] / totalWeight) * 100).toFixed(1)}%`
+          : `${(100 / tickers.length).toFixed(1)}%`;
+        const shares    = Math.floor(allocation / price);
         const cost      = shares * price;
-        const remainder = allocPerSecurity - cost;
+        const remainder = allocation - cost;
         grandTotal      += cost;
         grandRemainder  += remainder;
 
         tr.innerHTML = `
           <td class="td-ticker">${ticker}</td>
           <td class="td-price">$${price.toFixed(2)}</td>
-          <td class="td-alloc">$${allocPerSecurity.toFixed(2)}</td>
+          <td class="td-alloc">
+            $${allocation.toFixed(2)}
+            <span style="color:#666;font-size:11px;margin-left:4px;">(${weight})</span>
+          </td>
           <td class="td-shares">${shares.toLocaleString()}</td>
           <td class="td-cost">$${cost.toFixed(2)}</td>
           <td class="td-remainder">$${remainder.toFixed(2)}</td>
@@ -569,7 +620,9 @@
         </td>
         <td class="td-shares" style="font-size:15px;">—</td>
         <td class="td-alloc">$${grandTotal.toFixed(2)}</td>
-        <td class="td-remainder" style="color:#888;">$${grandRemainder.toFixed(2)} remaining</td>
+        <td class="td-remainder" style="color:#888;">
+          $${grandRemainder.toFixed(2)} remaining
+        </td>
       `;
       tbody.appendChild(totalRow);
 
@@ -578,7 +631,9 @@
       document.getElementById("resultsSummary").innerHTML = `
         <div class="summary-stat">
           <div class="summary-stat-label">Total Allocated</div>
-          <div class="summary-stat-value">$${totalAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+          <div class="summary-stat-value">
+            $${totalAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}
+          </div>
         </div>
         <div class="summary-stat">
           <div class="summary-stat-label">Total Invested</div>
@@ -586,7 +641,9 @@
         </div>
         <div class="summary-stat">
           <div class="summary-stat-label">Cash Remaining</div>
-          <div class="summary-stat-value" style="color:#00b4d8;">$${(totalAmount - grandTotal).toFixed(2)}</div>
+          <div class="summary-stat-value" style="color:#00b4d8;">
+            $${(totalAmount - grandTotal).toFixed(2)}
+          </div>
         </div>
         <div class="summary-stat">
           <div class="summary-stat-label">Capital Utilization</div>
@@ -595,10 +652,6 @@
         <div class="summary-stat">
           <div class="summary-stat-label">Securities</div>
           <div class="summary-stat-value">${tickers.length - unavailableCount}</div>
-        </div>
-        <div class="summary-stat">
-          <div class="summary-stat-label">Per Position</div>
-          <div class="summary-stat-value">$${allocPerSecurity.toFixed(2)}</div>
         </div>
       `;
 
