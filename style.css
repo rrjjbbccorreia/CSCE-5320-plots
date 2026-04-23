@@ -1150,3 +1150,34 @@ button:active {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ===== Ticker Yahoo Finance Links ===== */
+.ticker-yahoo-link {
+  color: #f0a500;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  display: inline-block;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.ticker-yahoo-link:hover {
+  color: #fff;
+  background: rgba(240, 165, 0, 0.2);
+  text-decoration: none;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(240, 165, 0, 0.4);
+}
+
+.tactical-ticker-link {
+  color: #00c896;
+}
+
+.tactical-ticker-link:hover {
+  color: #fff;
+  background: rgba(0, 200, 150, 0.2);
+  box-shadow: 0 0 8px rgba(0, 200, 150, 0.4);
+}

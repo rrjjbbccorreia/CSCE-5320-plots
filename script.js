@@ -879,7 +879,14 @@ async function loadQ2Picks() {
   // Build initial cards with loading state
   grid.innerHTML = Q2_PICKS.map(ticker => `
     <div class="pick-card" id="pick-${ticker}">
-      <div class="pick-ticker">${ticker}</div>
+      <div class="pick-ticker">
+        <a href="https://finance.yahoo.com/quote/${ticker}" 
+           target="_blank" 
+           class="ticker-yahoo-link"
+           title="View ${ticker} on Yahoo Finance">
+          ${ticker}
+        </a>
+      </div>
       <div class="pick-price" id="price-${ticker}">
         <span style="color:#aaa;font-size:13px;">Loading...</span>
       </div>
@@ -1063,15 +1070,20 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     const closes      = result.indicators.quote[0].close;
     const validCloses = closes.filter((v) => v !== null && !isNaN(v));
 
-    // Use real-time market price if available, otherwise fall back to last close
-    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+    // Current live price
+    const latestPrice = meta.regularMarketPrice
+      || validCloses[validCloses.length - 1];
 
-    // Previous close for change calculation
-    const prevPrice   = meta.chartPreviousClose || validCloses[validCloses.length - 2];
+    // Get yesterday's close — second to last valid close in the array
+    // This is more accurate than chartPreviousClose which is start of range
+    const yesterdayClose = validCloses[validCloses.length - 2];
 
-    const change      = latestPrice - prevPrice;
-    const changePct   = (change / prevPrice) * 100;
-    const isPositive  = change >= 0;
+    // Use yesterday's close as prev price for accurate day change
+    const prevPrice = yesterdayClose || meta.chartPreviousClose;
+
+    const change    = latestPrice - prevPrice;
+    const changePct = (change / prevPrice) * 100;
+    const isPositive = change >= 0;
 
     // ===== SAVE TO CACHE =====
     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
@@ -1110,7 +1122,14 @@ async function loadTacticalPicks() {
   // Build initial cards with loading state
   grid.innerHTML = TACTICAL_PICKS.map(ticker => `
     <div class="pick-card tactical-card" id="tactical-pick-${ticker}">
-      <div class="pick-ticker" style="color:#00c896">${ticker}</div>
+      <div class="pick-ticker">
+        <a href="https://finance.yahoo.com/quote/${ticker}"
+           target="_blank"
+           class="ticker-yahoo-link tactical-ticker-link"
+           title="View ${ticker} on Yahoo Finance">
+          ${ticker}
+        </a>
+      </div>
       <div class="pick-price" id="tactical-price-${ticker}">
         <span style="color:#aaa;font-size:13px;">Loading...</span>
       </div>
@@ -1316,15 +1335,20 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const closes      = result.indicators.quote[0].close;
     const validCloses = closes.filter((v) => v !== null && !isNaN(v));
 
-    // Use real-time market price if available, otherwise fall back to last close
-    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+    // Current live price
+    const latestPrice = meta.regularMarketPrice
+      || validCloses[validCloses.length - 1];
 
-    // Previous close for change calculation
-    const prevPrice   = meta.chartPreviousClose || validCloses[validCloses.length - 2];
+    // Get yesterday's close — second to last valid close in the array
+    // This is more accurate than chartPreviousClose which is start of range
+    const yesterdayClose = validCloses[validCloses.length - 2];
 
-    const change      = latestPrice - prevPrice;
-    const changePct   = (change / prevPrice) * 100;
-    const isPositive  = change >= 0;
+    // Use yesterday's close as prev price for accurate day change
+    const prevPrice = yesterdayClose || meta.chartPreviousClose;
+
+    const change    = latestPrice - prevPrice;
+    const changePct = (change / prevPrice) * 100;
+    const isPositive = change >= 0;
 
     // ===== SAVE TO CACHE =====
     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
