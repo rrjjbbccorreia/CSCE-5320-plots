@@ -184,16 +184,26 @@ async function fetchStockTable(ticker, retryCount = 0) {
     } else {
       console.error(`All ${maxRetries} attempts failed for ${ticker}:`, err);
       tableContainer.innerHTML = `
-        <div style="text-align:center; padding: 12px;">
-          <p style="color:#ff6b6b; margin-bottom: 10px;">
+        <div style="text-align:center; padding: 16px;">
+          <p style="color:#ff6b6b; margin-bottom: 12px; font-size:14px;">
             Unable to load market data for ${ticker}
           </p>
-          <button
-            onclick="fetchStockTable('${ticker}')"
-            style="padding: 8px 16px; cursor: pointer; background: #00b4d8;
-                   color: white; border: none; border-radius: 6px; font-size: 14px;">
-            🔄 Retry
-          </button>
+          <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <button
+              onclick="fetchStockTable('${ticker}')"
+              style="padding: 9px 18px; cursor: pointer; background: #00b4d8;
+                     color: white; border: none; border-radius: 6px; font-size: 14px;
+                     font-weight:600;">
+              🔄 Retry
+            </button>
+            <a href="https://finance.yahoo.com/quote/${ticker}"
+               target="_blank"
+               style="padding: 9px 18px; background: #6a0dad; color: white;
+                      border-radius: 6px; font-size: 14px; font-weight:600;
+                      text-decoration: none; display:inline-block;">
+              📈 View ${ticker} on Yahoo Finance
+            </a>
+          </div>
         </div>
       `;
 
