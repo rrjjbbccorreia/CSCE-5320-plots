@@ -91,10 +91,15 @@ async function fetchStockTable(ticker, retryCount = 0) {
       const cached = sessionStorage.getItem(`table_cache_${ticker}`);
       if (cached) {
         const { html, savedAt } = JSON.parse(cached);
-        if (Date.now() - savedAt < 15 * 60 * 1000) {
+        const cachedDate = new Date(savedAt).toDateString();
+        const todayDate  = new Date().toDateString();
+        // Expire if older than 15 min OR from a different day
+        if (Date.now() - savedAt < 15 * 60 * 1000 && cachedDate === todayDate) {
           console.log(`${ticker} table — loaded from cache`);
           tableContainer.innerHTML = html;
           return;
+        } else {
+          sessionStorage.removeItem(`table_cache_${ticker}`);
         }
       }
     }
@@ -852,6 +857,15 @@ function loadPrice(key) {
       sessionStorage.removeItem(`price_cache_${key}`);
       return null;
     }
+
+    // Also expire if cached on a different calendar day
+    const cachedDate  = new Date(data.savedAt).toDateString();
+    const todayDate   = new Date().toDateString();
+    if (cachedDate !== todayDate) {
+      sessionStorage.removeItem(`price_cache_${key}`);
+      return null;
+    }
+
     return data;
   } catch (e) {
     return null;
@@ -1005,7 +1019,9 @@ async function fetchPickPrice(ticker, retryCount = 0) {
       }
     }
 
-    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+    //const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+    // TO:
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
 
     // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
@@ -1067,6 +1083,16 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
     const result      = data.chart.result[0];
     const meta        = result.meta || {};
+
+    // DEBUG — remove after fixing
+    //console.log(`${ticker} meta:`, {
+      //regularMarketPrice:         meta.regularMarketPrice,
+      //regularMarketPreviousClose: meta.regularMarketPreviousClose,
+      //chartPreviousClose:         meta.chartPreviousClose,
+      //regularMarketChange:        meta.regularMarketChange,
+      //regularMarketChangePercent: meta.regularMarketChangePercent
+    //});
+
     const closes      = result.indicators.quote[0].close;
     const validCloses = closes.filter((v) => v !== null && !isNaN(v));
 
@@ -1076,10 +1102,14 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
     // Get yesterday's close — second to last valid close in the array
     // This is more accurate than chartPreviousClose which is start of range
-    const yesterdayClose = validCloses[validCloses.length - 2];
+    //const yesterdayClose = validCloses[validCloses.length - 2];
 
     // Use yesterday's close as prev price for accurate day change
-    const prevPrice = yesterdayClose || meta.chartPreviousClose;
+    //const prevPrice = yesterdayClose || meta.chartPreviousClose;
+
+    // TO:
+    // With 2d range — validCloses[0] is always yesterday's official close
+    const prevPrice = validCloses[0] || meta.chartPreviousClose;
 
     const change    = latestPrice - prevPrice;
     const changePct = (change / prevPrice) * 100;
@@ -1270,7 +1300,9 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
       }
     }
 
-    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+    //const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+
 
     // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
@@ -1341,10 +1373,14 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
 
     // Get yesterday's close — second to last valid close in the array
     // This is more accurate than chartPreviousClose which is start of range
-    const yesterdayClose = validCloses[validCloses.length - 2];
+    //const yesterdayClose = validCloses[validCloses.length - 2];
 
     // Use yesterday's close as prev price for accurate day change
-    const prevPrice = yesterdayClose || meta.chartPreviousClose;
+    //const prevPrice = yesterdayClose || meta.chartPreviousClose;
+
+    // TO:
+    // With 2d range — validCloses[0] is always yesterday's official close
+    const prevPrice = validCloses[0] || meta.chartPreviousClose;
 
     const change    = latestPrice - prevPrice;
     const changePct = (change / prevPrice) * 100;
