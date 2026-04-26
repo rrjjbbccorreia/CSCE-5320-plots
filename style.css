@@ -1181,3 +1181,36 @@ button:active {
   background: rgba(0, 200, 150, 0.2);
   box-shadow: 0 0 8px rgba(0, 200, 150, 0.4);
 }
+
+/* ===== Purpose Section ===== */
+.purpose-section {
+  width: 95%;
+  max-width: 1100px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-left: 4px solid #00b4d8;
+  border-radius: 12px;
+  padding: 26px 32px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+}
+
+.purpose-title {
+  color: #00b4d8;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.purpose-text {
+  color: #bbb;
+  font-size: 15px;
+  line-height: 1.85;
+  margin: 0 0 14px 0;
+  text-align: justify;
+}
+
+.purpose-text:last-child {
+  margin-bottom: 0;
+}
