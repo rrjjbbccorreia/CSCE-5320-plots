@@ -885,8 +885,8 @@ function loadPrice(key) {
 // ============ Q2 FUNDAMENTAL PICKS ============
 const Q2_PICKS = [
   "ALB", "SPG", "ETR", "COST", "MU",
-  "SYF", "EXPD", "CEG", "NRG", "ARE",
-  "CTAS", "DECK", "DD", "AMCR","ACN",
+  "EXPD", "CEG", "NRG", "ARE",
+  "CTAS", "DECK", "AMCR","ACN",
   "FDS", "PLTR", "PSX"
 ];
 
