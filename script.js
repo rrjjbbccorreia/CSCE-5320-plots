@@ -1056,7 +1056,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
       },
       // Proxy 3 — try v6 endpoint via allorigins as alternative
       async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r = await fetch(
           `https://api.allorigins.win/get?url=${encodeURIComponent(v6Url)}`,
           { signal: AbortSignal.timeout(20000) }
@@ -1067,7 +1067,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
       },
       // Proxy 4 — query2 via corsproxy
       async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r = await fetch(
           `https://corsproxy.io/?${encodeURIComponent(v6Url)}`,
           { signal: AbortSignal.timeout(20000) }
@@ -1337,7 +1337,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
       },
       // Proxy 3 — try v6 endpoint via allorigins as alternative
       async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r = await fetch(
           `https://api.allorigins.win/get?url=${encodeURIComponent(v6Url)}`,
           { signal: AbortSignal.timeout(20000) }
@@ -1348,7 +1348,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
       },
       // Proxy 4 — query2 via corsproxy
       async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r = await fetch(
           `https://corsproxy.io/?${encodeURIComponent(v6Url)}`,
           { signal: AbortSignal.timeout(20000) }
