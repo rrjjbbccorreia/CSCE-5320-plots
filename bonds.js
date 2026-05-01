@@ -32,9 +32,9 @@ const TARGET_ETFS = [
 const ALL_ETFS = [...PERPETUAL_ETFS, ...TARGET_ETFS];
 
 // ==================== TIMING ====================
-const GAP_MS         = 2600;
+const GAP_MS         = 3500;
 const BATCH_SIZE     = 3;
-const BATCH_PAUSE_MS = 10000;
+const BATCH_PAUSE_MS = 12000;
 const maxNoProgress  = 5;
 const INITIAL_DELAY  = 1000;   // wait 5 seconds before starting
 
@@ -89,36 +89,58 @@ async function proxyFetch(yahooUrl) {
 
 async function fetchETFData(ticker) {
   try {
-    const yahooUrl =
-      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1mo&events=dividends`;
+    // Fetch price data with 2d for accurate day change
+    const priceUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
 
-    const data   = await proxyFetch(yahooUrl);
-    const result = data?.chart?.result?.[0];
+    // Fetch yield data with 3mo to capture recent dividends
+    const yieldUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=3mo&events=dividends`;
+
+    // Fetch both — yield fetch is optional, don't fail if it errors
+    const [priceData, yieldData] = await Promise.all([
+      proxyFetch(priceUrl),
+      proxyFetch(yieldUrl).catch(() => null)
+    ]);
+
+    const result      = priceData?.chart?.result?.[0];
     if (!result) throw new Error("No result in response");
 
     const meta        = result.meta || {};
     const closes      = result.indicators?.quote?.[0]?.close || [];
     const validCloses = closes.filter(v => v !== null && !isNaN(v));
 
-    // --- Price ---
-    const latestPrice = meta.regularMarketPrice || validCloses.slice(-1)[0];
-    const prevClose   = meta.chartPreviousClose  || validCloses.slice(-2)[0];
-    const change      = latestPrice && prevClose ? latestPrice - prevClose : null;
-    const changePct   = change && prevClose ? (change / prevClose) * 100 : null;
+    // --- Price using 2d range ---
+    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+    const prevPrice   = validCloses[0] || meta.chartPreviousClose;
+    const change      = latestPrice && prevPrice ? latestPrice - prevPrice : null;
+    const changePct   = change && prevPrice ? (change / prevPrice) * 100 : null;
     const isPos       = change !== null ? change >= 0 : null;
 
-    // --- Yield from dividends ---
+    // --- Yield from 3mo dividend data ---
     let yieldStr = "N/A";
     try {
-      const divEvents = result.events?.dividends || {};
-      const divValues = Object.values(divEvents);
-      if (divValues.length > 0 && latestPrice > 0) {
-        const totalDiv   = divValues.reduce((s, d) => s + d.amount, 0);
-        const annualized = totalDiv * 12;
-        yieldStr         = `${((annualized / latestPrice) * 100).toFixed(2)}%`;
+      if (yieldData) {
+        const yResult    = yieldData?.chart?.result?.[0];
+        const yMeta      = yResult?.meta || {};
+
+        // Try meta yield fields first
+        if (yMeta.trailingAnnualDividendYield && yMeta.trailingAnnualDividendYield > 0) {
+          yieldStr = `${(yMeta.trailingAnnualDividendYield * 100).toFixed(2)}%`;
+        } else if (yMeta.trailingAnnualDividendRate && latestPrice > 0) {
+          yieldStr = `${((yMeta.trailingAnnualDividendRate / latestPrice) * 100).toFixed(2)}%`;
+        } else {
+          // Calculate from dividend events in 3mo window
+          const divEvents  = yResult?.events?.dividends || {};
+          const divValues  = Object.values(divEvents);
+          if (divValues.length > 0 && latestPrice > 0) {
+            const totalDiv   = divValues.reduce((s, d) => s + d.amount, 0);
+            // Annualize based on how many months of data we have
+            const annualized = totalDiv * (12 / 3);
+            yieldStr         = `${((annualized / latestPrice) * 100).toFixed(2)}%`;
+          }
+        }
       }
     } catch (e) {
-      console.warn(`Yield calc failed for ${ticker}`);
+      console.warn(`Yield calc failed for ${ticker}:`, e.message);
     }
 
     return {
@@ -145,7 +167,10 @@ function updateRow(ticker, data) {
   if (priceEl) {
     priceEl.innerHTML = data.price !== "N/A"
       ? `<span class="etf-price">${data.price}</span>`
-      : `<span style="color:#ff6b6b;font-size:12px;">N/A</span>`;
+      : `<a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
+             style="color:#00b4d8;font-size:12px;text-decoration:none;">
+           View on Yahoo →
+         </a>`;
   }
 
   if (changeEl) {
@@ -259,7 +284,12 @@ function buildPerpetualTableHTML() {
   if (!tbody) return;
   tbody.innerHTML = PERPETUAL_ETFS.map(etf => `
     <tr id="row-${etf.ticker}">
-      <td><span class="etf-ticker">${etf.ticker}</span></td>
+      <td>
+        <a href="https://finance.yahoo.com/quote/${etf.ticker}"
+          target="_blank" class="etf-ticker-link">
+          ${etf.ticker}
+        </a>
+      </td>
       <td>
         <span class="etf-name">${etf.name}</span>
         <span class="etf-subdesc">${etf.duration} duration focus</span>
@@ -279,7 +309,12 @@ function buildTargetTableHTML() {
   if (!tbody) return;
   tbody.innerHTML = TARGET_ETFS.map(etf => `
     <tr id="row-${etf.ticker}">
-      <td><span class="etf-ticker">${etf.ticker}</span></td>
+      <td>
+        <a href="https://finance.yahoo.com/quote/${etf.ticker}"
+          target="_blank" class="etf-ticker-link">
+          ${etf.ticker}
+        </a>
+      </td>
       <td>
         <span class="etf-name">${etf.name}</span>
         <span class="etf-subdesc">Returns capital at maturity - ${etf.duration} remaining</span>

@@ -221,3 +221,20 @@
   font-weight: 600;
   font-size: 13px;
 }
+
+.etf-ticker-link {
+  color: #00b4d8;
+  text-decoration: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.etf-ticker-link:hover {
+  color: #fff;
+  background: rgba(0, 180, 216, 0.2);
+  box-shadow: 0 0 8px rgba(0, 180, 216, 0.4);
+}
