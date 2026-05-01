@@ -1,0 +1,38 @@
+name: Update ETF Prices
+
+on:
+  schedule:
+    # Run every hour during US market hours (Mon-Fri 13:00-21:00 UTC = 9am-5pm ET)
+    - cron: '0 13-21 * * 1-5'
+    # Also run once after market close to get final prices
+    - cron: '30 21 * * 1-5'
+    # Run once on weekend mornings to keep prices current
+    - cron: '0 12 * * 0,6'
+  workflow_dispatch:  # allows manual trigger from GitHub Actions tab
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch ETF prices
+        run: python scripts/fetch_etf_prices.py
+
+      - name: Commit and push prices file
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/etf_prices.json
+          git diff --staged --quiet || git commit -m "Auto-update ETF prices $(date +'%Y-%m-%d %H:%M UTC')"
+          git push

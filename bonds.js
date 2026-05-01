@@ -33,61 +33,61 @@ const TARGET_ETFS = [
 
 const ALL_ETFS = [...PERPETUAL_ETFS, ...TARGET_ETFS];
 
-// ==================== TIMING ====================
-const GAP_MS         = 4000;   // gap between each fetch
-const BATCH_SIZE     = 2;      // fetch 2 then pause — gentler on proxy
-const BATCH_PAUSE_MS = 15000;  // pause between batches
-const maxNoProgress  = 5;      // stop retrying after 5 rounds with no progress
+// ==================== LOAD PRICES FROM JSON FILE ====================
+// Prices are fetched server-side every hour via GitHub Action
+// and saved to data/etf_prices.json — loaded here with no proxy needed
 
-// ==================== PROXY LIST ====================
-const PROXY_BUILDERS = [
-  // Proxy 1 — allorigins with JSON wrapper
-  (url) => ({
-    fetchUrl: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    parseResponse: async (r) => { const j = await r.json(); return JSON.parse(j.contents); }
-  }),
-  // Proxy 2 — allorigins raw (sometimes works when wrapper fails)
-  (url) => ({
-    fetchUrl: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    parseResponse: async (r) => r.json()
-  }),
-  // Proxy 3 — corsproxy.io
-  (url) => ({
-    fetchUrl: `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    parseResponse: async (r) => r.json()
-  }),
-];
+async function loadPricesFromFile() {
+  try {
+    const url      = `data/etf_prices.json?v=${Date.now()}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-// ==================== PROXY FETCH WITH LONGER TIMEOUT ====================
+    const data    = await response.json();
+    const prices  = data.prices  || {};
+    const updated = data.updated || null;
 
-async function proxyFetch(yahooUrl) {
-  for (let p = 0; p < PROXY_BUILDERS.length; p++) {
-    try {
-      const { fetchUrl, parseResponse } = PROXY_BUILDERS[p](yahooUrl);
-      const controller = new AbortController();
-      // Longer timeout for bonds — less time pressure than picks
-      const timeout    = setTimeout(() => controller.abort(), 20000);
-      const response   = await fetch(fetchUrl, { signal: controller.signal });
-      clearTimeout(timeout);
+    console.log(`ETF prices loaded from file — last updated: ${updated}`);
 
-      if (!response.ok) {
-        console.warn(`Bonds proxy ${p + 1} HTTP ${response.status}`);
-        await new Promise(r => setTimeout(r, 1000));
-        continue;
+    // Update price cells in both tables
+    ALL_ETFS.forEach(etf => {
+      const price = prices[etf.ticker];
+      const el    = document.getElementById(`price-${etf.ticker}`);
+      if (!el) return;
+
+      if (price && price !== "N/A") {
+        el.innerHTML = `<span class="etf-price">$${Number(price).toFixed(2)}</span>`;
+      } else {
+        el.innerHTML = `
+          <a href="https://finance.yahoo.com/quote/${etf.ticker}"
+             target="_blank"
+             style="color:#00b4d8;font-size:12px;text-decoration:none;">
+            View on Yahoo →
+          </a>`;
       }
+    });
 
-      const data = await parseResponse(response);
-      console.log(`Bonds proxy ${p + 1} succeeded for ${yahooUrl.split('/').pop().split('?')[0]}`);
-      return data;
-
-    } catch (err) {
-      console.warn(`Bonds proxy ${p + 1} failed: ${err.message}`);
-      if (p < PROXY_BUILDERS.length - 1) {
-        await new Promise(r => setTimeout(r, 2000));
-      }
+    // Show last updated timestamp
+    const tsEl = document.getElementById("pricesUpdatedAt");
+    if (tsEl && updated) {
+      tsEl.textContent = `Prices last updated: ${updated}`;
     }
+
+  } catch (e) {
+    console.warn("Could not load etf_prices.json:", e.message);
+    // Show Yahoo Finance links for all tickers as fallback
+    ALL_ETFS.forEach(etf => {
+      const el = document.getElementById(`price-${etf.ticker}`);
+      if (el) {
+        el.innerHTML = `
+          <a href="https://finance.yahoo.com/quote/${etf.ticker}"
+             target="_blank"
+             style="color:#00b4d8;font-size:12px;text-decoration:none;">
+            View on Yahoo →
+          </a>`;
+      }
+    });
   }
-  throw new Error("All proxies failed");
 }
 
 // ==================== LOAD YIELDS FROM JSON FILE ====================
@@ -133,154 +133,8 @@ async function loadYieldsFromFile() {
   }
 }
 
-// proxyFetch defined above with PROXY_BUILDERS
 
-// ==================== FETCH SINGLE ETF PRICE ====================
-// Only fetches price — yield comes from etf_yields.json
 
-async function fetchETFData(ticker) {
-  try {
-    // 2d range gives us today's live price and yesterday's close
-    const yahooUrl =
-      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
-
-    const data   = await proxyFetch(yahooUrl);
-    const result = data?.chart?.result?.[0];
-    if (!result) throw new Error("No result in response");
-
-    const meta        = result.meta || {};
-    const closes      = result.indicators?.quote?.[0]?.close || [];
-    const validCloses = closes.filter(v => v !== null && !isNaN(v));
-
-    // Live market price — falls back to last close if unavailable
-    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
-
-    return {
-      price:   latestPrice ? `$${latestPrice.toFixed(2)}` : "N/A",
-      success: true
-    };
-
-  } catch (err) {
-    console.warn(`fetchETFData failed for ${ticker}:`, err.message);
-    return { price: "N/A", success: false };
-  }
-}
-
-// ==================== UPDATE ROW ====================
-
-function updateRow(ticker, data) {
-  const priceEl = document.getElementById(`price-${ticker}`);
-
-  if (priceEl) {
-    priceEl.innerHTML = data.price !== "N/A"
-      ? `<span class="etf-price">${data.price}</span>`
-      : `<a href="https://finance.yahoo.com/quote/${ticker}"
-             target="_blank"
-             title="View ${ticker} on Yahoo Finance"
-             style="color:#00b4d8;font-size:12px;text-decoration:none;">
-           View on Yahoo →
-         </a>`;
-  }
-}
-
-// ==================== CHECK ROW NEEDS UPDATE ====================
-
-function rowNeedsUpdate(ticker) {
-  const priceEl = document.getElementById(`price-${ticker}`);
-  const pText   = priceEl ? priceEl.innerText.trim() : "";
-  return (
-    pText.includes("Loading") ||
-    pText.includes("Retrying") ||
-    pText === "N/A" ||
-    pText === ""
-  );
-}
-
-// ==================== BATCH FETCH ====================
-
-async function fetchBatch(tickers, retryRound) {
-  for (let i = 0; i < tickers.length; i++) {
-    const ticker = tickers[i];
-
-    if (retryRound > 0) {
-      const priceEl = document.getElementById(`price-${ticker}`);
-      if (priceEl) {
-        priceEl.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
-      }
-    }
-
-    console.log(`${retryRound === 0 ? "Fetching" : "Retrying"} ${i + 1}/${tickers.length}: ${ticker}`);
-    const data = await fetchETFData(ticker);
-    updateRow(ticker, data);
-
-    await new Promise(r => setTimeout(r, GAP_MS));
-
-    // Batch pause every BATCH_SIZE tickers to avoid rate limiting
-    if ((i + 1) % BATCH_SIZE === 0 && i < tickers.length - 1) {
-      console.log(`Batch pause after ${i + 1} — waiting ${BATCH_PAUSE_MS}ms...`);
-      await new Promise(r => setTimeout(r, BATCH_PAUSE_MS));
-    }
-  }
-}
-
-// ==================== MAIN PRICE LOADER ====================
-
-async function loadAllETFs() {
-  console.log(`ETF price fetch — ${ALL_ETFS.length} tickers`);
-
-  // Initial fetch pass
-  await fetchBatch(ALL_ETFS.map(e => e.ticker), 0);
-  console.log("Pass 1 complete — checking for failures...");
-
-  // Retry loop
-  let retryRound       = 1;
-  let noProgressRounds = 0;
-  let lastFailedCount  = ALL_ETFS.length;
-
-  while (true) {
-    const failedTickers = ALL_ETFS
-      .map(e => e.ticker)
-      .filter(t => rowNeedsUpdate(t));
-
-    if (failedTickers.length === 0) {
-      console.log("All ETF prices loaded successfully!");
-      break;
-    }
-
-    if (failedTickers.length >= lastFailedCount) {
-      noProgressRounds++;
-      console.warn(`No progress ${noProgressRounds}/${maxNoProgress} — ${failedTickers.length} pending:`, failedTickers);
-    } else {
-      noProgressRounds = 0;
-      console.log(`Progress — ${failedTickers.length} remaining`);
-    }
-
-    if (noProgressRounds >= maxNoProgress) {
-      console.warn("Stopping retries — no progress after", maxNoProgress, "rounds");
-      // Show Yahoo Finance links for any that never loaded
-      failedTickers.forEach(ticker => {
-        const priceEl = document.getElementById(`price-${ticker}`);
-        if (priceEl) {
-          priceEl.innerHTML = `<a href="https://finance.yahoo.com/quote/${ticker}"
-            target="_blank"
-            style="color:#00b4d8;font-size:12px;text-decoration:none;">
-            View on Yahoo →
-          </a>`;
-        }
-      });
-      break;
-    }
-
-    lastFailedCount = failedTickers.length;
-
-    const backoff = Math.min(5000 + retryRound * 2000, 20000);
-    console.log(`Retry round ${retryRound} — waiting ${backoff}ms...`);
-    await new Promise(r => setTimeout(r, backoff));
-
-    await fetchBatch(failedTickers, retryRound);
-    retryRound++;
-  }
-}
 
 // ==================== BUILD TABLE HTML ====================
 
@@ -348,8 +202,11 @@ function buildTargetTableHTML() {
 buildPerpetualTableHTML();
 buildTargetTableHTML();
 
-// Step 1 — load yields from JSON file first (instant, same domain, no proxy)
-// Step 2 — then fetch live prices in background
-loadYieldsFromFile().then(() => {
-  loadAllETFs();
+// Load yields and prices from JSON files — both served from same domain
+// No proxy needed — GitHub Action updates them automatically
+Promise.all([
+  loadYieldsFromFile(),
+  loadPricesFromFile()
+]).then(() => {
+  console.log("All ETF data loaded from pre-fetched files!");
 });
