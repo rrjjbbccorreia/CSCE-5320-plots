@@ -2,9 +2,9 @@ name: Update ETF Yields
 
 on:
   schedule:
-    # Runs at 6am UTC on even days (2nd, 4th, 6th... of each month)
-    - cron: '0 6 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30 * *'
-  workflow_dispatch: # allows manual trigger from GitHub Actions tab
+    # Runs at 9:00am ET (13:30 UTC) Monday-Friday — start of each market day
+    - cron: '30 13 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   update-yields:
