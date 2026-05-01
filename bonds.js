@@ -34,24 +34,61 @@ const TARGET_ETFS = [
 const ALL_ETFS = [...PERPETUAL_ETFS, ...TARGET_ETFS];
 
 // ==================== TIMING ====================
-const GAP_MS         = 3000;   // gap between each fetch
-const BATCH_SIZE     = 3;      // fetch 3 then pause
-const BATCH_PAUSE_MS = 12000;  // pause between batches
+const GAP_MS         = 4000;   // gap between each fetch
+const BATCH_SIZE     = 2;      // fetch 2 then pause — gentler on proxy
+const BATCH_PAUSE_MS = 15000;  // pause between batches
 const maxNoProgress  = 5;      // stop retrying after 5 rounds with no progress
 
 // ==================== PROXY LIST ====================
 const PROXY_BUILDERS = [
-  // Proxy 1 — allorigins (most reliable from your domain)
+  // Proxy 1 — allorigins with JSON wrapper
   (url) => ({
     fetchUrl: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
     parseResponse: async (r) => { const j = await r.json(); return JSON.parse(j.contents); }
   }),
-  // Proxy 2 — corsproxy.io (fallback)
+  // Proxy 2 — allorigins raw (sometimes works when wrapper fails)
+  (url) => ({
+    fetchUrl: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    parseResponse: async (r) => r.json()
+  }),
+  // Proxy 3 — corsproxy.io
   (url) => ({
     fetchUrl: `https://corsproxy.io/?${encodeURIComponent(url)}`,
     parseResponse: async (r) => r.json()
   }),
 ];
+
+// ==================== PROXY FETCH WITH LONGER TIMEOUT ====================
+
+async function proxyFetch(yahooUrl) {
+  for (let p = 0; p < PROXY_BUILDERS.length; p++) {
+    try {
+      const { fetchUrl, parseResponse } = PROXY_BUILDERS[p](yahooUrl);
+      const controller = new AbortController();
+      // Longer timeout for bonds — less time pressure than picks
+      const timeout    = setTimeout(() => controller.abort(), 20000);
+      const response   = await fetch(fetchUrl, { signal: controller.signal });
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        console.warn(`Bonds proxy ${p + 1} HTTP ${response.status}`);
+        await new Promise(r => setTimeout(r, 1000));
+        continue;
+      }
+
+      const data = await parseResponse(response);
+      console.log(`Bonds proxy ${p + 1} succeeded for ${yahooUrl.split('/').pop().split('?')[0]}`);
+      return data;
+
+    } catch (err) {
+      console.warn(`Bonds proxy ${p + 1} failed: ${err.message}`);
+      if (p < PROXY_BUILDERS.length - 1) {
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+  }
+  throw new Error("All proxies failed");
+}
 
 // ==================== LOAD YIELDS FROM JSON FILE ====================
 // Yields are fetched server-side every 2 days via GitHub Action
@@ -96,36 +133,7 @@ async function loadYieldsFromFile() {
   }
 }
 
-// ==================== MULTI PROXY FETCH ====================
-
-async function proxyFetch(yahooUrl) {
-  for (let p = 0; p < PROXY_BUILDERS.length; p++) {
-    try {
-      const { fetchUrl, parseResponse } = PROXY_BUILDERS[p](yahooUrl);
-      const controller = new AbortController();
-      const timeout    = setTimeout(() => controller.abort(), 15000);
-      const response   = await fetch(fetchUrl, { signal: controller.signal });
-      clearTimeout(timeout);
-
-      if (!response.ok) {
-        console.warn(`Proxy ${p + 1} HTTP ${response.status}`);
-        await new Promise(r => setTimeout(r, 500));
-        continue;
-      }
-
-      const data = await parseResponse(response);
-      console.log(`${p === 0 ? "allorigins" : "corsproxy"} succeeded`);
-      return data;
-
-    } catch (err) {
-      console.warn(`Proxy ${p + 1} failed: ${err.message}`);
-      if (p < PROXY_BUILDERS.length - 1) {
-        await new Promise(r => setTimeout(r, 1000));
-      }
-    }
-  }
-  throw new Error("All proxies failed");
-}
+// proxyFetch defined above with PROXY_BUILDERS
 
 // ==================== FETCH SINGLE ETF PRICE ====================
 // Only fetches price — yield comes from etf_yields.json
