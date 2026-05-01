@@ -87,13 +87,26 @@ async function proxyFetch(yahooUrl) {
 
 
 
+// ==================== FETCH ETF YIELD (SCRAPE) ====================
+
 async function fetchETFYield(ticker) {
-  // Source 1 — try ETF.com scrape
+
+  // Skip yield scrape on localhost — CORS blocks it anyway
+  // Will only run on the live GitHub Pages domain
+  const isLive = window.location.hostname !== "127.0.0.1" 
+              && window.location.hostname !== "localhost";
+
+  if (!isLive) {
+    console.log(`${ticker} — skipping yield scrape on localhost`);
+    return "N/A";
+  }
+
+  // Source 1 — ETF.com scrape
   try {
     const url      = `https://www.etf.com/${ticker}`;
     const proxy    = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
     const ctrl     = new AbortController();
-    const timeout  = setTimeout(() => ctrl.abort(), 12000);
+    const timeout  = setTimeout(() => ctrl.abort(), 20000);
     const response = await fetch(proxy, { signal: ctrl.signal });
     clearTimeout(timeout);
 
@@ -115,16 +128,15 @@ async function fetchETFYield(ticker) {
     console.warn(`${ticker} ETF.com yield failed:`, e.message);
   }
 
-  // Source 2 — try Vanguard API for Vanguard ETFs
-  const VANGUARD_TICKERS = ["VGSH", "VGIT", "VGLT"];
-  if (VANGUARD_TICKERS.includes(ticker)) {
+  // Source 2 — Vanguard ETFs only
+  const VANGUARD_IDS = { VGSH: "0928", VGIT: "0646", VGLT: "0644" };
+  if (VANGUARD_IDS[ticker]) {
     try {
-      const VANGUARD_IDS = { VGSH: "0928", VGIT: "0646", VGLT: "0644" };
       const id      = VANGUARD_IDS[ticker];
       const url     = `https://advisors.vanguard.com/web/c1/fas-investmentproducts/${id}/overview`;
       const proxy   = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
       const ctrl    = new AbortController();
-      const timeout = setTimeout(() => ctrl.abort(), 12000);
+      const timeout = setTimeout(() => ctrl.abort(), 20000);
       const resp    = await fetch(proxy, { signal: ctrl.signal });
       clearTimeout(timeout);
 
