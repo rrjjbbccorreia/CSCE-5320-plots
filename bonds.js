@@ -85,62 +85,101 @@ async function proxyFetch(yahooUrl) {
   throw new Error("All proxies failed");
 }
 
+
+
+async function fetchETFYield(ticker) {
+  // Source 1 — try ETF.com scrape
+  try {
+    const url      = `https://www.etf.com/${ticker}`;
+    const proxy    = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const ctrl     = new AbortController();
+    const timeout  = setTimeout(() => ctrl.abort(), 12000);
+    const response = await fetch(proxy, { signal: ctrl.signal });
+    clearTimeout(timeout);
+
+    if (response.ok) {
+      const json  = await response.json();
+      const html  = json.contents || "";
+
+      const match = html.match(/30-Day SEC Yield[\s\S]{0,200}?(\d+\.\d+)%/i)
+        || html.match(/SEC Yield[\s\S]{0,100}?(\d+\.\d+)%/i)
+        || html.match(/Distribution Yield[\s\S]{0,100}?(\d+\.\d+)%/i)
+        || html.match(/Yield[\s\S]{0,50}?(\d+\.\d+)%/i);
+
+      if (match && parseFloat(match[1]) > 0 && parseFloat(match[1]) < 20) {
+        console.log(`${ticker} yield from ETF.com: ${match[1]}%`);
+        return `${parseFloat(match[1]).toFixed(2)}%`;
+      }
+    }
+  } catch (e) {
+    console.warn(`${ticker} ETF.com yield failed:`, e.message);
+  }
+
+  // Source 2 — try Vanguard API for Vanguard ETFs
+  const VANGUARD_TICKERS = ["VGSH", "VGIT", "VGLT"];
+  if (VANGUARD_TICKERS.includes(ticker)) {
+    try {
+      const VANGUARD_IDS = { VGSH: "0928", VGIT: "0646", VGLT: "0644" };
+      const id      = VANGUARD_IDS[ticker];
+      const url     = `https://advisors.vanguard.com/web/c1/fas-investmentproducts/${id}/overview`;
+      const proxy   = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const ctrl    = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 12000);
+      const resp    = await fetch(proxy, { signal: ctrl.signal });
+      clearTimeout(timeout);
+
+      if (resp.ok) {
+        const json  = await resp.json();
+        const html  = json.contents || "";
+        const match = html.match(/SEC yield[\s\S]{0,100}?(\d+\.\d+)%/i)
+          || html.match(/30-day SEC[\s\S]{0,100}?(\d+\.\d+)%/i);
+        if (match) {
+          console.log(`${ticker} yield from Vanguard: ${match[1]}%`);
+          return `${parseFloat(match[1]).toFixed(2)}%`;
+        }
+      }
+    } catch (e) {
+      console.warn(`${ticker} Vanguard yield failed:`, e.message);
+    }
+  }
+
+  return "N/A";
+}
+
+
+
 // ==================== FETCH SINGLE ETF ====================
 
 async function fetchETFData(ticker) {
   try {
-    // Fetch price data with 2d for accurate day change
-    const priceUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+    const yahooUrl =
+      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
 
-    // Fetch yield data with 3mo to capture recent dividends
-    const yieldUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=3mo&events=dividends`;
-
-    // Fetch both — yield fetch is optional, don't fail if it errors
-    const [priceData, yieldData] = await Promise.all([
-      proxyFetch(priceUrl),
-      proxyFetch(yieldUrl).catch(() => null)
-    ]);
-
-    const result      = priceData?.chart?.result?.[0];
+    const data   = await proxyFetch(yahooUrl);
+    const result = data?.chart?.result?.[0];
     if (!result) throw new Error("No result in response");
 
     const meta        = result.meta || {};
     const closes      = result.indicators?.quote?.[0]?.close || [];
     const validCloses = closes.filter(v => v !== null && !isNaN(v));
 
-    // --- Price using 2d range ---
     const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
     const prevPrice   = validCloses[0] || meta.chartPreviousClose;
     const change      = latestPrice && prevPrice ? latestPrice - prevPrice : null;
     const changePct   = change && prevPrice ? (change / prevPrice) * 100 : null;
     const isPos       = change !== null ? change >= 0 : null;
 
-    // --- Yield from 3mo dividend data ---
+    // Try meta yield first — fast, no extra call
     let yieldStr = "N/A";
-    try {
-      if (yieldData) {
-        const yResult    = yieldData?.chart?.result?.[0];
-        const yMeta      = yResult?.meta || {};
-
-        // Try meta yield fields first
-        if (yMeta.trailingAnnualDividendYield && yMeta.trailingAnnualDividendYield > 0) {
-          yieldStr = `${(yMeta.trailingAnnualDividendYield * 100).toFixed(2)}%`;
-        } else if (yMeta.trailingAnnualDividendRate && latestPrice > 0) {
-          yieldStr = `${((yMeta.trailingAnnualDividendRate / latestPrice) * 100).toFixed(2)}%`;
-        } else {
-          // Calculate from dividend events in 3mo window
-          const divEvents  = yResult?.events?.dividends || {};
-          const divValues  = Object.values(divEvents);
-          if (divValues.length > 0 && latestPrice > 0) {
-            const totalDiv   = divValues.reduce((s, d) => s + d.amount, 0);
-            // Annualize based on how many months of data we have
-            const annualized = totalDiv * (12 / 3);
-            yieldStr         = `${((annualized / latestPrice) * 100).toFixed(2)}%`;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn(`Yield calc failed for ${ticker}:`, e.message);
+    const ty = meta.trailingAnnualDividendYield;
+    const tr = meta.trailingAnnualDividendRate;
+    if (ty && ty > 0) {
+      yieldStr = `${(ty * 100).toFixed(2)}%`;
+    } else if (tr && latestPrice > 0) {
+      yieldStr = `${((tr / latestPrice) * 100).toFixed(2)}%`;
+    } else {
+      // Fallback — scrape from ETF.com
+      yieldStr = await fetchETFYield(ticker);
     }
 
     return {
