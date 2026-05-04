@@ -1168,6 +1168,16 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
+      // Proxy 4 — query2 via corsproxy
+      async () => {
+        const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+        const r     = await fetch(
+          `https://corsproxy.io/?${encodeURIComponent(v2Url)}`,
+          { signal: AbortSignal.timeout(20000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      },
     ];
 
     let data = null;
@@ -1430,6 +1440,16 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
         return JSON.parse(j.contents);
+      },
+      // Proxy 4 — query2 via corsproxy
+      async () => {
+        const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+        const r     = await fetch(
+          `https://corsproxy.io/?${encodeURIComponent(v2Url)}`,
+          { signal: AbortSignal.timeout(20000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
       },
     ];
 
