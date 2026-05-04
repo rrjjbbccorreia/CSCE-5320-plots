@@ -882,11 +882,99 @@ function loadPrice(key) {
   }
 }
 
+// ============ PICK PRICES FROM JSON FILE ====================
+// Loaded from data/pick_prices.json which is updated every 15min
+// by GitHub Action during market hours — no proxy needed
+
+let pickPricesCache = {};       // prices from JSON file
+let pickPricesUpdated = null;   // timestamp from JSON file
+
+async function loadPickPricesFromFile() {
+  try {
+    const url      = `data/pick_prices.json?v=${Date.now()}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data        = await response.json();
+    pickPricesCache   = data.prices  || {};
+    pickPricesUpdated = data.updated || null;
+
+    console.log(`Pick prices loaded from file — last updated: ${pickPricesUpdated}`);
+    return true;
+
+  } catch (e) {
+    console.warn("Could not load pick_prices.json:", e.message);
+    return false;
+  }
+}
+
+// Apply a price from the JSON file to a Q2 card
+function applyFilePriceToQ2Card(ticker) {
+  const data = pickPricesCache[ticker];
+  if (!data || data.price === null) return false;
+
+  const priceEl  = document.getElementById(`price-${ticker}`);
+  const changeEl = document.getElementById(`change-${ticker}`);
+  const card     = document.getElementById(`pick-${ticker}`);
+  if (!priceEl) return false;
+
+  priceEl.innerHTML = `<span class="pick-price-value">$${data.price.toFixed(2)}</span>`;
+
+  if (changeEl && data.change !== null) {
+    changeEl.innerHTML = `
+      <span class="pick-change-value ${data.isPositive ? "positive" : "negative"}">
+        ${data.isPositive ? "▲" : "▼"} $${Math.abs(data.change).toFixed(2)}
+        (${data.isPositive ? "+" : ""}${data.changePct.toFixed(2)}%)
+      </span>
+    `;
+  }
+
+  if (card) {
+    card.classList.remove("pick-positive", "pick-negative");
+    card.classList.add(data.isPositive ? "pick-positive" : "pick-negative");
+  }
+
+  // Also save to session cache so it persists during navigation
+  savePrice(`q2_${ticker}`, data.price, data.change, data.changePct, data.isPositive);
+  return true;
+}
+
+// Apply a price from the JSON file to a Tactical card
+function applyFilePriceToTacticalCard(ticker) {
+  const data = pickPricesCache[ticker];
+  if (!data || data.price === null) return false;
+
+  const priceEl  = document.getElementById(`tactical-price-${ticker}`);
+  const changeEl = document.getElementById(`tactical-change-${ticker}`);
+  const card     = document.getElementById(`tactical-pick-${ticker}`);
+  if (!priceEl) return false;
+
+  priceEl.innerHTML = `<span class="pick-price-value">$${data.price.toFixed(2)}</span>`;
+
+  if (changeEl && data.change !== null) {
+    changeEl.innerHTML = `
+      <span class="pick-change-value ${data.isPositive ? "positive" : "negative"}">
+        ${data.isPositive ? "▲" : "▼"} $${Math.abs(data.change).toFixed(2)}
+        (${data.isPositive ? "+" : ""}${data.changePct.toFixed(2)}%)
+      </span>
+    `;
+  }
+
+  if (card) {
+    card.classList.remove("pick-positive", "pick-negative");
+    card.classList.add(data.isPositive ? "pick-positive" : "pick-negative");
+  }
+
+  // Also save to session cache
+  savePrice(`tac_${ticker}`, data.price, data.change, data.changePct, data.isPositive);
+  return true;
+}
+
 // ============ Q2 FUNDAMENTAL PICKS ============
 const Q2_PICKS = [
   "ALB", "SPG", "ETR", "COST", "MU",
   "EXPD", "CEG", "NRG", "ARE",
-  "CTAS", "DECK", "AMCR","ACN",
+  "CTAS", "DECK", "AMCR", "ACN",
   "FDS", "PLTR", "PSX"
 ];
 
@@ -904,8 +992,8 @@ async function loadQ2Picks() {
   grid.innerHTML = Q2_PICKS.map(ticker => `
     <div class="pick-card" id="pick-${ticker}">
       <div class="pick-ticker">
-        <a href="https://finance.yahoo.com/quote/${ticker}" 
-           target="_blank" 
+        <a href="https://finance.yahoo.com/quote/${ticker}"
+           target="_blank"
            class="ticker-yahoo-link"
            title="View ${ticker} on Yahoo Finance">
           ${ticker}
@@ -924,118 +1012,135 @@ async function loadQ2Picks() {
   // Wait 3 seconds for stock table and profile to finish first
   await new Promise(resolve => setTimeout(resolve, 3000));
 
-  // Initial staggered fetch for all picks
-  for (let i = 0; i < Q2_PICKS.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, i * 400));
-    fetchPickPrice(Q2_PICKS[i]);
+  // ===== STEP 1: Apply prices from session cache (instant) =====
+  Q2_PICKS.forEach(ticker => {
+    const cached = loadPrice(`q2_${ticker}`);
+    if (cached) {
+      console.log(`${ticker} Q2 — loaded from session cache`);
+      document.getElementById(`price-${ticker}`).innerHTML =
+        `<span class="pick-price-value">$${cached.price.toFixed(2)}</span>`;
+      document.getElementById(`change-${ticker}`).innerHTML = `
+        <span class="pick-change-value ${cached.isPositive ? "positive" : "negative"}">
+          ${cached.isPositive ? "▲" : "▼"} $${Math.abs(cached.change).toFixed(2)}
+          (${cached.isPositive ? "+" : ""}${cached.changePct.toFixed(2)}%)
+        </span>`;
+      const card = document.getElementById(`pick-${ticker}`);
+      if (card) card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
+    }
+  });
+
+  // ===== STEP 2: Apply any prices from JSON file =====
+  Q2_PICKS.forEach(ticker => {
+    const priceEl = document.getElementById(`price-${ticker}`);
+    const alreadyLoaded = priceEl && priceEl.innerHTML.includes("pick-price-value");
+    if (!alreadyLoaded) {
+      applyFilePriceToQ2Card(ticker);
+    }
+  });
+
+  // ===== STEP 3: Find who still needs fetching =====
+  const stillNeeded = Q2_PICKS.filter(ticker => {
+    const el = document.getElementById(`price-${ticker}`);
+    return el && !el.innerHTML.includes("pick-price-value");
+  });
+
+  console.log(`Q2 — ${Q2_PICKS.length - stillNeeded.length} loaded from cache/file, ${stillNeeded.length} need proxy fetch`);
+
+  // If everything loaded from cache/file — skip retry loop entirely
+  if (stillNeeded.length === 0) {
+    console.log("✅ All Q2 picks loaded from cache/file — no proxy needed!");
+    return;
   }
 
-  // Wait for all initial fetches to complete
-  const totalInitialTime = Q2_PICKS.length * 400 + 5000;
-  await new Promise(resolve => setTimeout(resolve, totalInitialTime));
+  // ===== STEP 4: Proxy fetch for missing =====
+  for (let i = 0; i < stillNeeded.length; i++) {
+    await new Promise(resolve => setTimeout(resolve, i * 400));
+    fetchPickPrice(stillNeeded[i]);       // for Q2
+    // fetchTacticalPrice(stillNeeded[i]); // for Tactical
+  }
 
-  // ===== INFINITE RETRY LOOP =====
-  // Keeps running until ALL tickers are loaded — no round limit
-  let retryRound = 1;
-  const maxRoundsWithNoProgress = 10; // safety stop if nothing is improving
-  let roundsWithNoProgress = 0;
-  let lastFailedCount = Q2_PICKS.length;
+  // Wait for initial proxy round to settle
+  await new Promise(resolve => setTimeout(resolve, stillNeeded.length * 400 + 3000));
+
+  // ===== STEP 5: 30 second timeout clock starts HERE =====
+  // Clock begins AFTER the first proxy attempt has had time to respond
+  const PROXY_TIMEOUT_MS = 30000;
+  const proxyStart       = Date.now();  // ← moved to here
+
+  let retryRound           = 1;
+  const maxRoundsNoProgress = 10;
+  let roundsWithNoProgress  = 0;
+  let lastFailedCount       = stillNeeded.length;
 
   while (true) {
-    // Find any picks still showing Unavailable or Loading
     const failedTickers = Q2_PICKS.filter(ticker => {
-      const priceEl = document.getElementById(`price-${ticker}`);
-      return priceEl && (
-        priceEl.innerHTML.includes("Unavailable") ||
-        priceEl.innerHTML.includes("Loading")
+      const el = document.getElementById(`price-${ticker}`);
+      return el && (
+        el.innerHTML.includes("Unavailable") ||
+        el.innerHTML.includes("Loading")
       );
     });
 
-    // All done — exit loop
     if (failedTickers.length === 0) {
-      console.log("✅ All picks loaded successfully!");
+      console.log("✅ All Q2 picks loaded successfully!");
       break;
     }
 
-    // Check if we are making progress
-    if (failedTickers.length >= lastFailedCount) {
-      roundsWithNoProgress++;
-      console.warn(`No progress round ${roundsWithNoProgress}/${maxRoundsWithNoProgress} — still ${failedTickers.length} unavailable`);
-    } else {
-      // Progress was made — reset counter
-      roundsWithNoProgress = 0;
-      console.log(`Progress made — ${failedTickers.length} still remaining`);
+    // After 30 seconds of proxy attempts — fall back to file for remainders
+    if (Date.now() - proxyStart > PROXY_TIMEOUT_MS) {
+      console.log(`Q2 — 30s timeout reached, applying file prices for ${failedTickers.length} remaining...`);
+      failedTickers.forEach(ticker => {
+        const applied = applyFilePriceToQ2Card(ticker);
+        if (!applied) {
+          const el = document.getElementById(`price-${ticker}`);
+          if (el) el.innerHTML = `
+            <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
+               style="color:#00b4d8;font-size:11px;text-decoration:none;">
+               View on Yahoo →
+            </a>`;
+        }
+      });
+      break;
     }
 
-    // Safety stop — if nothing is improving after several rounds give up
-    if (roundsWithNoProgress >= maxRoundsWithNoProgress) {
-      console.warn("⚠️ Stopping retries — no progress after", maxRoundsWithNoProgress, "rounds");
-      console.warn("Still unavailable:", failedTickers);
+    if (failedTickers.length >= lastFailedCount) {
+      roundsWithNoProgress++;
+    } else {
+      roundsWithNoProgress = 0;
+    }
+
+    if (roundsWithNoProgress >= maxRoundsNoProgress) {
+      console.warn("⚠️ Q2 — stopping proxy retries, using file prices for remainder");
+      failedTickers.forEach(ticker => applyFilePriceToQ2Card(ticker));
       break;
     }
 
     lastFailedCount = failedTickers.length;
 
-    console.log(`Retry round ${retryRound} — retrying ${failedTickers.length} tickers:`, failedTickers);
-
-    // Update failed cards to show retrying status
     failedTickers.forEach(ticker => {
-      const priceEl = document.getElementById(`price-${ticker}`);
-      if (priceEl) {
-        priceEl.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
-      }
+      const el = document.getElementById(`price-${ticker}`);
+      if (el) el.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
     });
 
-    // Wait between rounds — gets slightly longer each round to back off
-    const waitTime = Math.min(3000 + retryRound * 500, 10000);
-    await new Promise(resolve => setTimeout(resolve, waitTime));
+    const backoff = Math.min(3000 + retryRound * 500, 10000);
+    await new Promise(resolve => setTimeout(resolve, backoff));
 
-    // Retry each failed ticker with a stagger
     for (let i = 0; i < failedTickers.length; i++) {
       await new Promise(resolve => setTimeout(resolve, i * 500));
       fetchPickPrice(failedTickers[i]);
     }
 
-    // Wait for this round to complete
     await new Promise(resolve => setTimeout(resolve, failedTickers.length * 500 + 3000));
-
     retryRound++;
   }
 }
 
-
-
 async function fetchPickPrice(ticker, retryCount = 0) {
   const maxRetries = 3;
   try {
-
-    // ===== CHECK CACHE FIRST =====
-    if (retryCount === 0) {
-      const cached = loadPrice(`q2_${ticker}`);
-      if (cached) {
-        console.log(`${ticker} — loaded from cache`);
-        document.getElementById(`price-${ticker}`).innerHTML = `
-          <span class="pick-price-value">$${cached.price.toFixed(2)}</span>
-        `;
-        document.getElementById(`change-${ticker}`).innerHTML = `
-          <span class="pick-change-value ${cached.isPositive ? "positive" : "negative"}">
-            ${cached.isPositive ? "▲" : "▼"} $${Math.abs(cached.change).toFixed(2)}
-            (${cached.isPositive ? "+" : ""}${cached.changePct.toFixed(2)}%)
-          </span>
-        `;
-        const card = document.getElementById(`pick-${ticker}`);
-        card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
-        return;
-      }
-    }
-
-    //const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
-    // TO:
     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
 
-    // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
-      // Proxy 1 — allorigins
       async () => {
         const r = await fetch(
           `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
@@ -1045,7 +1150,6 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
-      // Proxy 2 — corsproxy.io
       async () => {
         const r = await fetch(
           `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
@@ -1054,26 +1158,15 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       },
-      // Proxy 3 — try v6 endpoint via allorigins as alternative
       async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
-        const r = await fetch(
-          `https://api.allorigins.win/get?url=${encodeURIComponent(v6Url)}`,
+        const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+        const r     = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(v2Url)}`,
           { signal: AbortSignal.timeout(20000) }
         );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
         return JSON.parse(j.contents);
-      },
-      // Proxy 4 — query2 via corsproxy
-      async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
-        const r = await fetch(
-          `https://corsproxy.io/?${encodeURIComponent(v6Url)}`,
-          { signal: AbortSignal.timeout(20000) }
-        );
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
       },
     ];
 
@@ -1081,10 +1174,10 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     for (let p = 0; p < proxies.length; p++) {
       try {
         data = await proxies[p]();
-        console.log(`${ticker} — Proxy ${p + 1} succeeded`);
+        console.log(`${ticker} Q2 — Proxy ${p + 1} succeeded`);
         break;
       } catch (e) {
-        console.warn(`${ticker} — Proxy ${p + 1} failed: ${e.message}`);
+        console.warn(`${ticker} Q2 — Proxy ${p + 1} failed: ${e.message}`);
         if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 1000));
       }
     }
@@ -1093,73 +1186,52 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
     const result      = data.chart.result[0];
     const meta        = result.meta || {};
-
-    // DEBUG — remove after fixing
-    //console.log(`${ticker} meta:`, {
-      //regularMarketPrice:         meta.regularMarketPrice,
-      //regularMarketPreviousClose: meta.regularMarketPreviousClose,
-      //chartPreviousClose:         meta.chartPreviousClose,
-      //regularMarketChange:        meta.regularMarketChange,
-      //regularMarketChangePercent: meta.regularMarketChangePercent
-    //});
-
     const closes      = result.indicators.quote[0].close;
-    const validCloses = closes.filter((v) => v !== null && !isNaN(v));
+    const validCloses = closes.filter(v => v !== null && !isNaN(v));
 
-    // Current live price
-    const latestPrice = meta.regularMarketPrice
-      || validCloses[validCloses.length - 1];
+    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+    const prevPrice   = validCloses[0] || meta.chartPreviousClose;
+    const change      = latestPrice - prevPrice;
+    const changePct   = (change / prevPrice) * 100;
+    const isPositive  = change >= 0;
 
-    // Get yesterday's close — second to last valid close in the array
-    // This is more accurate than chartPreviousClose which is start of range
-    //const yesterdayClose = validCloses[validCloses.length - 2];
-
-    // Use yesterday's close as prev price for accurate day change
-    //const prevPrice = yesterdayClose || meta.chartPreviousClose;
-
-    // TO:
-    // With 2d range — validCloses[0] is always yesterday's official close
-    const prevPrice = validCloses[0] || meta.chartPreviousClose;
-
-    const change    = latestPrice - prevPrice;
-    const changePct = (change / prevPrice) * 100;
-    const isPositive = change >= 0;
-
-    // ===== SAVE TO CACHE =====
     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
 
-    document.getElementById(`price-${ticker}`).innerHTML = `
-      <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
-    `;
+    document.getElementById(`price-${ticker}`).innerHTML =
+      `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
     document.getElementById(`change-${ticker}`).innerHTML = `
       <span class="pick-change-value ${isPositive ? "positive" : "negative"}">
         ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)}
         (${isPositive ? "+" : ""}${changePct.toFixed(2)}%)
-      </span>
-    `;
+      </span>`;
 
     const card = document.getElementById(`pick-${ticker}`);
-    card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+    if (card) {
+      card.classList.remove("pick-positive", "pick-negative");
+      card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+    }
 
   } catch (err) {
     if (retryCount < maxRetries - 1) {
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
-      // Don't give up — keep retrying with longer backoff
-      console.warn(`${ticker} — all standard retries failed, entering extended retry mode...`);
-      const extendedWait = 15000; // wait 15s then try again from scratch
-      setTimeout(() => fetchPickPrice(ticker, 0), extendedWait);
+      // Fall back to file price before showing unavailable
+      const applied = applyFilePriceToQ2Card(ticker);
+      if (!applied) {
+        document.getElementById(`price-${ticker}`).innerHTML =
+          "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+      }
     }
   }
 }
 
 // ============ TACTICAL ROTATION PICKS ============
+
 async function loadTacticalPicks() {
   const grid = document.getElementById("tacticalPicksGrid");
   if (!grid) return;
 
-  // Build initial cards with loading state
   grid.innerHTML = TACTICAL_PICKS.map(ticker => `
     <div class="pick-card tactical-card" id="tactical-pick-${ticker}">
       <div class="pick-ticker">
@@ -1180,34 +1252,72 @@ async function loadTacticalPicks() {
     </div>
   `).join("");
 
-  // Wait for fundamental picks AND all their retries to fully complete
-  // before starting tactical picks fetches
   await waitForFundamentalPicksComplete();
-
   console.log("Starting tactical picks fetch...");
 
-  // Initial staggered fetch for all tactical picks
-  for (let i = 0; i < TACTICAL_PICKS.length; i++) {
-    await new Promise(resolve => setTimeout(resolve, i * 400));
-    fetchTacticalPrice(TACTICAL_PICKS[i]);
+  // ===== STEP 1: Apply session cache =====
+  TACTICAL_PICKS.forEach(ticker => {
+    const cached = loadPrice(`tac_${ticker}`);
+    if (cached) {
+      document.getElementById(`tactical-price-${ticker}`).innerHTML =
+        `<span class="pick-price-value">$${cached.price.toFixed(2)}</span>`;
+      document.getElementById(`tactical-change-${ticker}`).innerHTML = `
+        <span class="pick-change-value ${cached.isPositive ? "positive" : "negative"}">
+          ${cached.isPositive ? "▲" : "▼"} $${Math.abs(cached.change).toFixed(2)}
+          (${cached.isPositive ? "+" : ""}${cached.changePct.toFixed(2)}%)
+        </span>`;
+      const card = document.getElementById(`tactical-pick-${ticker}`);
+      if (card) card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
+    }
+  });
+
+  // ===== STEP 2: Apply file prices =====
+  TACTICAL_PICKS.forEach(ticker => {
+    const priceEl = document.getElementById(`tactical-price-${ticker}`);
+    const alreadyLoaded = priceEl && priceEl.innerHTML.includes("pick-price-value");
+    if (!alreadyLoaded) applyFilePriceToTacticalCard(ticker);
+  });
+
+  // ===== STEP 3: Find remaining =====
+  const stillNeeded = TACTICAL_PICKS.filter(ticker => {
+    const el = document.getElementById(`tactical-price-${ticker}`);
+    return el && !el.innerHTML.includes("pick-price-value");
+  });
+
+  console.log(`Tactical — ${TACTICAL_PICKS.length - stillNeeded.length} from cache/file, ${stillNeeded.length} need proxy`);
+
+  // If everything loaded from cache/file — skip retry loop entirely
+  if (stillNeeded.length === 0) {
+    console.log("✅ All Q2 picks loaded from cache/file — no proxy needed!");
+    return;
   }
 
-  // Wait for initial fetches to complete
-  const totalInitialTime = TACTICAL_PICKS.length * 400 + 3000;
-  await new Promise(resolve => setTimeout(resolve, totalInitialTime));
+  // ===== STEP 4: Proxy fetch for missing =====
+  for (let i = 0; i < stillNeeded.length; i++) {
+    await new Promise(resolve => setTimeout(resolve, i * 400));
+    // fetchPickPrice(stillNeeded[i]);       // for Q2
+    fetchTacticalPrice(stillNeeded[i]); // for Tactical
+  }
 
-  // Infinite retry loop — same pattern as fundamental picks
-  let retryRound = 1;
-  const maxRoundsWithNoProgress = 5;
-  let roundsWithNoProgress = 0;
-  let lastFailedCount = TACTICAL_PICKS.length;
+  // Wait for initial proxy round to settle
+  await new Promise(resolve => setTimeout(resolve, stillNeeded.length * 400 + 3000));
+
+  // ===== STEP 5: 30 second timeout clock starts HERE =====
+  // Clock begins AFTER the first proxy attempt has had time to respond
+  const PROXY_TIMEOUT_MS = 30000;
+  const proxyStart       = Date.now();  // ← moved to here
+
+  let retryRound            = 1;
+  const maxRoundsNoProgress = 5;
+  let roundsWithNoProgress  = 0;
+  let lastFailedCount       = stillNeeded.length;
 
   while (true) {
     const failedTickers = TACTICAL_PICKS.filter(ticker => {
-      const priceEl = document.getElementById(`tactical-price-${ticker}`);
-      return priceEl && (
-        priceEl.innerHTML.includes("Unavailable") ||
-        priceEl.innerHTML.includes("Loading")
+      const el = document.getElementById(`tactical-price-${ticker}`);
+      return el && (
+        el.innerHTML.includes("Unavailable") ||
+        el.innerHTML.includes("Loading")
       );
     });
 
@@ -1216,31 +1326,43 @@ async function loadTacticalPicks() {
       break;
     }
 
-    if (failedTickers.length >= lastFailedCount) {
-      roundsWithNoProgress++;
-      console.warn(`Tactical — no progress round ${roundsWithNoProgress}/${maxRoundsWithNoProgress}`);
-    } else {
-      roundsWithNoProgress = 0;
-      console.log(`Tactical — progress made, ${failedTickers.length} still remaining`);
+    if (Date.now() - proxyStart > PROXY_TIMEOUT_MS) {
+      console.log(`Tactical — 30s timeout, applying file prices for ${failedTickers.length} remaining...`);
+      failedTickers.forEach(ticker => {
+        const applied = applyFilePriceToTacticalCard(ticker);
+        if (!applied) {
+          const el = document.getElementById(`tactical-price-${ticker}`);
+          if (el) el.innerHTML = `
+            <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
+               style="color:#00b4d8;font-size:11px;text-decoration:none;">
+               View on Yahoo →
+            </a>`;
+        }
+      });
+      break;
     }
 
-    if (roundsWithNoProgress >= maxRoundsWithNoProgress) {
-      console.warn("⚠️ Tactical picks — stopping retries, no progress after", maxRoundsWithNoProgress, "rounds");
+    if (failedTickers.length >= lastFailedCount) {
+      roundsWithNoProgress++;
+    } else {
+      roundsWithNoProgress = 0;
+    }
+
+    if (roundsWithNoProgress >= maxRoundsNoProgress) {
+      console.warn("⚠️ Tactical — stopping proxy retries, using file prices");
+      failedTickers.forEach(ticker => applyFilePriceToTacticalCard(ticker));
       break;
     }
 
     lastFailedCount = failedTickers.length;
-    console.log(`Tactical retry round ${retryRound} — retrying:`, failedTickers);
 
     failedTickers.forEach(ticker => {
-      const priceEl = document.getElementById(`tactical-price-${ticker}`);
-      if (priceEl) {
-        priceEl.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
-      }
+      const el = document.getElementById(`tactical-price-${ticker}`);
+      if (el) el.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
     });
 
-    const waitTime = Math.min(3000 + retryRound * 500, 10000);
-    await new Promise(resolve => setTimeout(resolve, waitTime));
+    const backoff = Math.min(3000 + retryRound * 500, 10000);
+    await new Promise(resolve => setTimeout(resolve, backoff));
 
     for (let i = 0; i < failedTickers.length; i++) {
       await new Promise(resolve => setTimeout(resolve, i * 500));
@@ -1253,70 +1375,35 @@ async function loadTacticalPicks() {
 }
 
 // ============ WAIT FOR FUNDAMENTAL PICKS TO COMPLETE ============
-// ============ WAIT FOR FUNDAMENTAL PICKS TO COMPLETE ============
 async function waitForFundamentalPicksComplete() {
   console.log("Waiting for fundamental picks to complete...");
-
   while (true) {
     const stillPending = Q2_PICKS.filter(ticker => {
-      const priceEl = document.getElementById(`price-${ticker}`);
-      if (!priceEl) return true;
-      const html = priceEl.innerHTML;
-      // Still pending if showing any loading or retrying state
-      // Unavailable and $ prices are both considered done
-      return (
-        html.includes("Loading") ||
-        html.includes("Retrying") ||
-        html.trim() === ""
-      );
+      const el = document.getElementById(`price-${ticker}`);
+      if (!el) return true;
+      const html = el.innerHTML;
+      return html.includes("Loading") || html.includes("Retrying") || html.trim() === "";
     });
 
     if (stillPending.length === 0) {
-      // Add an extra buffer to let the retry loop fully settle
-      // before we start hammering the proxy with tactical picks
-      console.log("Q2 picks all settled — waiting 5s buffer before starting tactical...");
+      console.log("Q2 picks settled — waiting 5s before starting tactical...");
       await new Promise(resolve => setTimeout(resolve, 5000));
       console.log("✅ Starting tactical picks now");
       break;
     }
 
-    console.log(`Waiting... ${stillPending.length} fundamental picks still loading`);
+    console.log(`Waiting... ${stillPending.length} Q2 picks still loading`);
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
 }
 
 // ============ FETCH TACTICAL PICK PRICE ============
 async function fetchTacticalPrice(ticker, retryCount = 0) {
-  const maxRetries = 10;
+  const maxRetries = 3;
   try {
-
-    // ===== CHECK CACHE FIRST =====
-    if (retryCount === 0) {
-      const cached = loadPrice(`tac_${ticker}`);
-      if (cached) {
-        console.log(`${ticker} tactical — loaded from cache`);
-        document.getElementById(`tactical-price-${ticker}`).innerHTML = `
-          <span class="pick-price-value">$${cached.price.toFixed(2)}</span>
-        `;
-        document.getElementById(`tactical-change-${ticker}`).innerHTML = `
-          <span class="pick-change-value ${cached.isPositive ? "positive" : "negative"}">
-            ${cached.isPositive ? "▲" : "▼"} $${Math.abs(cached.change).toFixed(2)}
-            (${cached.isPositive ? "+" : ""}${cached.changePct.toFixed(2)}%)
-          </span>
-        `;
-        const card = document.getElementById(`tactical-pick-${ticker}`);
-        card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
-        return;
-      }
-    }
-
-    //const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
 
-
-    // Try proxies in order — corsproxy.io first as it is most reliable
     const proxies = [
-      // Proxy 1 — allorigins
       async () => {
         const r = await fetch(
           `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
@@ -1326,7 +1413,6 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
-      // Proxy 2 — corsproxy.io
       async () => {
         const r = await fetch(
           `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
@@ -1335,26 +1421,15 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       },
-      // Proxy 3 — try v6 endpoint via allorigins as alternative
       async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
-        const r = await fetch(
-          `https://api.allorigins.win/get?url=${encodeURIComponent(v6Url)}`,
+        const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+        const r     = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(v2Url)}`,
           { signal: AbortSignal.timeout(20000) }
         );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
         return JSON.parse(j.contents);
-      },
-      // Proxy 4 — query2 via corsproxy
-      async () => {
-        const v6Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
-        const r = await fetch(
-          `https://corsproxy.io/?${encodeURIComponent(v6Url)}`,
-          { signal: AbortSignal.timeout(20000) }
-        );
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
       },
     ];
 
@@ -1375,52 +1450,41 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const result      = data.chart.result[0];
     const meta        = result.meta || {};
     const closes      = result.indicators.quote[0].close;
-    const validCloses = closes.filter((v) => v !== null && !isNaN(v));
+    const validCloses = closes.filter(v => v !== null && !isNaN(v));
 
-    // Current live price
-    const latestPrice = meta.regularMarketPrice
-      || validCloses[validCloses.length - 1];
+    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+    const prevPrice   = validCloses[0] || meta.chartPreviousClose;
+    const change      = latestPrice - prevPrice;
+    const changePct   = (change / prevPrice) * 100;
+    const isPositive  = change >= 0;
 
-    // Get yesterday's close — second to last valid close in the array
-    // This is more accurate than chartPreviousClose which is start of range
-    //const yesterdayClose = validCloses[validCloses.length - 2];
-
-    // Use yesterday's close as prev price for accurate day change
-    //const prevPrice = yesterdayClose || meta.chartPreviousClose;
-
-    // TO:
-    // With 2d range — validCloses[0] is always yesterday's official close
-    const prevPrice = validCloses[0] || meta.chartPreviousClose;
-
-    const change    = latestPrice - prevPrice;
-    const changePct = (change / prevPrice) * 100;
-    const isPositive = change >= 0;
-
-    // ===== SAVE TO CACHE =====
     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
 
-    document.getElementById(`tactical-price-${ticker}`).innerHTML = `
-      <span class="pick-price-value">$${latestPrice.toFixed(2)}</span>
-    `;
+    document.getElementById(`tactical-price-${ticker}`).innerHTML =
+      `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
     document.getElementById(`tactical-change-${ticker}`).innerHTML = `
       <span class="pick-change-value ${isPositive ? "positive" : "negative"}">
         ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)}
         (${isPositive ? "+" : ""}${changePct.toFixed(2)}%)
-      </span>
-    `;
+      </span>`;
 
     const card = document.getElementById(`tactical-pick-${ticker}`);
-    card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+    if (card) {
+      card.classList.remove("pick-positive", "pick-negative");
+      card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+    }
 
   } catch (err) {
     if (retryCount < maxRetries - 1) {
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
     } else {
-      // Don't give up — keep retrying with longer backoff
-      console.warn(`${ticker} — all standard retries failed, entering extended retry mode...`);
-      const extendedWait = 15000; // wait 15s then try again from scratch
-      setTimeout(() => fetchTacticalPrice(ticker, 0), extendedWait);
+      // Fall back to file price
+      const applied = applyFilePriceToTacticalCard(ticker);
+      if (!applied) {
+        document.getElementById(`tactical-price-${ticker}`).innerHTML =
+          "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+      }
     }
   }
 }
@@ -1550,10 +1614,14 @@ function openTacticalCalculator() {
   window.open(`tactical_calculator.html?picks=${encodeURIComponent(params)}&type=Tactical%20Rotation%20Picks`, "_blank");
 }
 
-
+// Load file prices first, then start the pick sections
+loadPickPricesFromFile().then(() => {
+  loadQ2Picks();
+  loadTacticalPicks();
+});
 // Load picks on page start
-loadQ2Picks();
-loadTacticalPicks();
+//loadQ2Picks();
+//loadTacticalPicks();
 setTimeout(() => loadSpreadsheetPreview(), 3000);
 
 updateQ2CalcButton();
