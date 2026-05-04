@@ -1,0 +1,16 @@
+{
+  "updated": "2026-05-01 18:00 UTC",
+  "marketOpen": false,
+  "q2Picks": [
+    "ALB", "SPG", "ETR", "COST", "MU",
+    "EXPD", "CEG", "NRG", "ARE",
+    "CTAS", "DECK", "AMCR", "ACN",
+    "FDS", "PLTR", "PSX"
+  ],
+  "tacticalPicks": [
+    "NVR", "CARR", "PODD", "PTC", "MU",
+    "HSY", "ZBRA", "STE", "APP", "VRTX",
+    "XME", "XLE", "IGE", "COPX", "BN", "UCO"
+  ],
+  "prices": {}
+}

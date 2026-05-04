@@ -1,0 +1,44 @@
+name: Update Pick Prices
+
+on:
+  schedule:
+    # Every 15 minutes during market hours Mon-Fri (13:30-21:00 UTC = 9:30am-5pm ET)
+    - cron: '0,15,30,45 13 * * 1-5'   # 9am-10am ET (first hour includes open)
+    - cron: '0,15,30,45 14 * * 1-5'   # 10am-11am ET
+    - cron: '0,15,30,45 15 * * 1-5'   # 11am-12pm ET
+    - cron: '0,15,30,45 16 * * 1-5'   # 12pm-1pm ET
+    - cron: '0,15,30,45 17 * * 1-5'   # 1pm-2pm ET
+    - cron: '0,15,30,45 18 * * 1-5'   # 2pm-3pm ET
+    - cron: '0,15,30,45 19 * * 1-5'   # 3pm-4pm ET (market close)
+    - cron: '0,15,30,45 20 * * 1-5'   # 4pm-5pm ET (1hr after close)
+    - cron: '0 21 * * 1-5'            # Final update at 5pm ET
+  workflow_dispatch:  # allows manual trigger from GitHub Actions tab
+
+jobs:
+  update-pick-prices:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch pick prices
+        run: python scripts/fetch_pick_prices.py
+
+      - name: Commit and push prices file
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/pick_prices.json
+          git diff --staged --quiet || git commit -m "Auto-update pick prices $(date +'%Y-%m-%d %H:%M UTC')"
+          git push
