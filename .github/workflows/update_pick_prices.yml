@@ -2,17 +2,11 @@ name: Update Pick Prices
 
 on:
   schedule:
-    # Every 15 minutes during market hours Mon-Fri (13:30-21:00 UTC = 9:30am-5pm ET)
-    - cron: '0,15,30,45 13 * * 1-5'   # 9am-10am ET (first hour includes open)
-    - cron: '0,15,30,45 14 * * 1-5'   # 10am-11am ET
-    - cron: '0,15,30,45 15 * * 1-5'   # 11am-12pm ET
-    - cron: '0,15,30,45 16 * * 1-5'   # 12pm-1pm ET
-    - cron: '0,15,30,45 17 * * 1-5'   # 1pm-2pm ET
-    - cron: '0,15,30,45 18 * * 1-5'   # 2pm-3pm ET
-    - cron: '0,15,30,45 19 * * 1-5'   # 3pm-4pm ET (market close)
-    - cron: '0,15,30,45 20 * * 1-5'   # 4pm-5pm ET (1hr after close)
-    - cron: '0 21 * * 1-5'            # Final update at 5pm ET
-  workflow_dispatch:  # allows manual trigger from GitHub Actions tab
+    # Every 15 minutes Mon-Fri during market hours (13:30-21:00 UTC = 9:30am-5pm ET)
+    - cron: '*/15 13-21 * * 1-5'
+    # Final update at 5:15pm ET (after market + 1hr buffer)
+    - cron: '15 21 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   update-pick-prices:

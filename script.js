@@ -908,6 +908,28 @@ async function loadPickPricesFromFile() {
   }
 }
 
+// ============ CHECK IF FILE PRICES ARE STALE ====================
+
+function isPickPricesStale() {
+  if (!pickPricesUpdated) return true; // no file loaded at all
+
+  try {
+    // Parse the timestamp from the file e.g. "2026-05-01 18:00 UTC"
+    const fileTime = new Date(pickPricesUpdated.replace(" UTC", "Z"));
+    const ageMs    = Date.now() - fileTime.getTime();
+    const ageMin   = Math.round(ageMs / 60000);
+
+    console.log(`pick_prices.json age: ${ageMin} minutes`);
+
+    // Consider stale if older than 30 minutes
+    return ageMs > 30 * 60 * 1000;
+
+  } catch (e) {
+    console.warn("Could not parse file timestamp:", e.message);
+    return true; // assume stale if can't parse
+  }
+}
+
 // ============ PRICE FRESHNESS CHECK ====================
 // Checks if prices need refreshing and does so automatically
 // Triggers on: 15min interval, page visibility change, manual click
@@ -918,7 +940,7 @@ let lastPriceRefresh   = Date.now();
 async function refreshPickPrices() {
   console.log("🔄 Refreshing pick prices...");
 
-  // Clear session cache for all picks
+  // Clear session cache
   Q2_PICKS.forEach(ticker => {
     sessionStorage.removeItem(`price_cache_q2_${ticker}`);
   });
@@ -929,7 +951,15 @@ async function refreshPickPrices() {
   // Reload file
   await loadPickPricesFromFile();
 
-  // Apply to all cards
+  // Check if file is fresh or stale
+  if (isPickPricesStale()) {
+    console.warn("⚠️ File is still stale after refresh — GitHub Action may be delayed");
+    // Don't apply stale file prices — let existing prices stay on screen
+    // Proxy fetches will handle updates when user next interacts
+    return;
+  }
+
+  // File is fresh — apply to all cards
   Q2_PICKS.forEach(ticker => applyFilePriceToQ2Card(ticker));
   TACTICAL_PICKS.forEach(ticker => applyFilePriceToTacticalCard(ticker));
 
@@ -937,10 +967,11 @@ async function refreshPickPrices() {
   console.log(`✅ Prices refreshed at ${new Date().toLocaleTimeString()}`);
 }
 
+
 function startPickPriceAutoRefresh() {
   // 1 — Interval every 15 minutes
   setInterval(() => {
-    console.log("⏰ 15 min interval — auto-refreshing prices...");
+    console.log("15 min interval — auto-refreshing prices...");
     refreshPickPrices();
   }, PRICE_MAX_AGE_MS);
 
@@ -1100,29 +1131,38 @@ async function loadQ2Picks() {
     }
   });
 
-  // ===== STEP 3: Find who still needs fetching =====
+  // ===== STEP 3: Find remaining =====
   const stillNeeded = Q2_PICKS.filter(ticker => {
     const el = document.getElementById(`price-${ticker}`);
     return el && !el.innerHTML.includes("pick-price-value");
   });
 
-  console.log(`Q2 — ${Q2_PICKS.length - stillNeeded.length} loaded from cache/file, ${stillNeeded.length} need proxy fetch`);
+  // If file is stale (>30 min old) force proxy fetch for ALL tickers
+  // even ones that loaded from file — to get fresh prices
+  const fileIsStale  = isPickPricesStale();
+  const needsProxy   = fileIsStale
+    ? Q2_PICKS  // fetch everything fresh via proxy
+    : stillNeeded; // only fetch what file didn't cover
 
-  // If everything loaded from cache/file — skip retry loop entirely
-  if (stillNeeded.length === 0) {
-    console.log("✅ All Q2 picks loaded from cache/file — no proxy needed!");
+  if (fileIsStale) {
+    console.warn("pick_prices.json is stale (>30min) — falling back to proxy for all Q2 picks");
+  }
+
+  console.log(`Q2 — ${Q2_PICKS.length - stillNeeded.length} loaded from cache/file, ${needsProxy.length} need proxy fetch`);
+
+  // If everything loaded from fresh file — skip proxy entirely
+  if (needsProxy.length === 0) {
+    console.log("✅ All Q2 picks loaded from fresh file — no proxy needed!");
     return;
   }
 
-  // ===== STEP 4: Proxy fetch for missing =====
-  for (let i = 0; i < stillNeeded.length; i++) {
+  // ===== STEP 4: Proxy fetch =====
+  for (let i = 0; i < needsProxy.length; i++) {
     await new Promise(resolve => setTimeout(resolve, i * 400));
-    fetchPickPrice(stillNeeded[i]);       // for Q2
-    // fetchTacticalPrice(stillNeeded[i]); // for Tactical
+    fetchPickPrice(needsProxy[i]);
   }
 
-  // Wait for initial proxy round to settle
-  await new Promise(resolve => setTimeout(resolve, stillNeeded.length * 400 + 3000));
+  await new Promise(resolve => setTimeout(resolve, needsProxy.length * 400 + 3000));
 
   // ===== STEP 5: 30 second timeout clock starts HERE =====
   // Clock begins AFTER the first proxy attempt has had time to respond
@@ -1356,23 +1396,27 @@ async function loadTacticalPicks() {
     return el && !el.innerHTML.includes("pick-price-value");
   });
 
-  console.log(`Tactical — ${TACTICAL_PICKS.length - stillNeeded.length} from cache/file, ${stillNeeded.length} need proxy`);
+  const fileIsStale = isPickPricesStale();
+  const needsProxy  = fileIsStale ? TACTICAL_PICKS : stillNeeded;
 
-  // If everything loaded from cache/file — skip retry loop entirely
-  if (stillNeeded.length === 0) {
-    console.log("✅ All Q2 picks loaded from cache/file — no proxy needed!");
+  if (fileIsStale) {
+    console.warn("pick_prices.json is stale (>30min) — falling back to proxy for all Tactical picks");
+  }
+
+  console.log(`Tactical — ${TACTICAL_PICKS.length - stillNeeded.length} from cache/file, ${needsProxy.length} need proxy`);
+
+  if (needsProxy.length === 0) {
+    console.log("✅ All tactical picks loaded from fresh file — no proxy needed!");
     return;
   }
 
   // ===== STEP 4: Proxy fetch for missing =====
-  for (let i = 0; i < stillNeeded.length; i++) {
+  for (let i = 0; i < needsProxy.length; i++) {
     await new Promise(resolve => setTimeout(resolve, i * 400));
-    // fetchPickPrice(stillNeeded[i]);       // for Q2
-    fetchTacticalPrice(stillNeeded[i]); // for Tactical
+    fetchTacticalPrice(needsProxy[i]);
   }
 
-  // Wait for initial proxy round to settle
-  await new Promise(resolve => setTimeout(resolve, stillNeeded.length * 400 + 3000));
+  await new Promise(resolve => setTimeout(resolve, needsProxy.length * 400 + 3000));
 
   // ===== STEP 5: 30 second timeout clock starts HERE =====
   // Clock begins AFTER the first proxy attempt has had time to respond
