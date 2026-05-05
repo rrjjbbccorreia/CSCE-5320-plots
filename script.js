@@ -908,6 +908,68 @@ async function loadPickPricesFromFile() {
   }
 }
 
+// ============ PRICE FRESHNESS CHECK ====================
+// Checks if prices need refreshing and does so automatically
+// Triggers on: 15min interval, page visibility change, manual click
+
+const PRICE_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
+let lastPriceRefresh   = Date.now();
+
+async function refreshPickPrices() {
+  console.log("🔄 Refreshing pick prices...");
+
+  // Clear session cache for all picks
+  Q2_PICKS.forEach(ticker => {
+    sessionStorage.removeItem(`price_cache_q2_${ticker}`);
+  });
+  TACTICAL_PICKS.forEach(ticker => {
+    sessionStorage.removeItem(`price_cache_tac_${ticker}`);
+  });
+
+  // Reload file
+  await loadPickPricesFromFile();
+
+  // Apply to all cards
+  Q2_PICKS.forEach(ticker => applyFilePriceToQ2Card(ticker));
+  TACTICAL_PICKS.forEach(ticker => applyFilePriceToTacticalCard(ticker));
+
+  lastPriceRefresh = Date.now();
+  console.log(`✅ Prices refreshed at ${new Date().toLocaleTimeString()}`);
+}
+
+function startPickPriceAutoRefresh() {
+  // 1 — Interval every 15 minutes
+  setInterval(() => {
+    console.log("⏰ 15 min interval — auto-refreshing prices...");
+    refreshPickPrices();
+  }, PRICE_MAX_AGE_MS);
+
+  // 2 — Refresh when tab becomes visible again
+  // (catches case where user switches tabs and comes back)
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      const ageMs = Date.now() - lastPriceRefresh;
+      if (ageMs > PRICE_MAX_AGE_MS) {
+        console.log(`Tab visible — prices are ${Math.round(ageMs/60000)}min old, refreshing...`);
+        refreshPickPrices();
+      } else {
+        console.log(`Tab visible — prices are ${Math.round(ageMs/60000)}min old, still fresh`);
+      }
+    }
+  });
+
+  // 3 — Refresh on browser back/forward navigation
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) {
+      // Page was loaded from cache (back button)
+      console.log("Page restored from cache — refreshing prices...");
+      refreshPickPrices();
+    }
+  });
+
+  console.log("⏰ Auto-refresh active — every 15min, on tab focus, and on navigation");
+}
+
 // Apply a price from the JSON file to a Q2 card
 function applyFilePriceToQ2Card(ticker) {
   const data = pickPricesCache[ticker];
@@ -1638,6 +1700,8 @@ function openTacticalCalculator() {
 loadPickPricesFromFile().then(() => {
   loadQ2Picks();
   loadTacticalPicks();
+  // Start auto-refresh to match GitHub Action schedule
+  startPickPriceAutoRefresh();
 });
 // Load picks on page start
 //loadQ2Picks();

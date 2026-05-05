@@ -3,7 +3,7 @@ name: Update ETF Prices
 on:
   schedule:
     # Run every hour during US market hours (Mon-Fri 13:00-21:00 UTC = 9am-5pm ET)
-    - cron: '0 13-21 * * 1-5'
+    - cron: '5 13-21 * * 1-5'
     # Also run once after market close to get final prices
     - cron: '30 21 * * 1-5'
     # Run once on weekend mornings to keep prices current
@@ -11,10 +11,14 @@ on:
   workflow_dispatch:  # allows manual trigger from GitHub Actions tab
 
 jobs:
-  update-prices:
+  update-pick-prices:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    # Retry up to 3 times if runner unavailable
+    strategy:
+      fail-fast: false
+      max-parallel: 1
 
     steps:
       - name: Checkout repo

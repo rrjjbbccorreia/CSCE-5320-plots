@@ -7,10 +7,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-yields:
+  update-pick-prices:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    # Retry up to 3 times if runner unavailable
+    strategy:
+      fail-fast: false
+      max-parallel: 1
 
     steps:
       - name: Checkout repo
