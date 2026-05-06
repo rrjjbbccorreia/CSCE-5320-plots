@@ -1072,9 +1072,9 @@ const Q2_PICKS = [
 ];
 
 const TACTICAL_PICKS = [
-  "NVR", "CARR", "PODD", "PTC", "MU",
-  "HSY", "ZBRA", "STE", "APP", "VRTX",
-  "XME", "XLE", "IGE", "COPX", "BN", "UCO"
+  "CSGP", "NOW", "TER", "TSLA", "CRM",
+  "WM", "CHTR", "GS", "ADSK", "CFG",
+  "COPX", "FEZ", "XME", "VGK", "BRK-B", "GDX"
 ];
 
 async function loadQ2Picks() {
