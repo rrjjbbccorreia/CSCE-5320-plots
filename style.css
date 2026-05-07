@@ -1586,3 +1586,47 @@ html {
   border-top: 1px solid #1a2a3a;
   width: 100%;
 }
+
+/* ===== Purpose Cards ===== */
+.purpose-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  margin: 24px 0 8px 0;
+}
+
+.purpose-card {
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-top: 3px solid #00b4d8;
+  border-radius: 12px;
+  padding: 22px 24px;
+  flex: 1;
+  min-width: 240px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.purpose-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 180, 216, 0.15);
+}
+
+.purpose-card-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.purpose-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #00b4d8;
+  margin: 0 0 10px 0;
+}
+
+.purpose-card-text {
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.75;
+  margin: 0;
+}
