@@ -1630,3 +1630,19 @@ html {
   line-height: 1.75;
   margin: 0;
 }
+
+.about-nav-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #00b4d8;
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+.about-nav-link:hover {
+  color: #00d4ff;
+  text-decoration: underline;
+}

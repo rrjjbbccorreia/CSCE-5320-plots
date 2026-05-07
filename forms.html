@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forms — Correia Investment Solutions</title>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JVTLY699PB"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JVTLY699PB');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f0f12;
+      --surface: #16161a;
+      --surface2:#1e1e24;
+      --border:  #2a2a35;
+      --cyan:    #00b4d8;
+      --gold:    #c9a84c;
+      --green:   #00c896;
+      --red:     #ff4d6d;
+      --text:    #e4e4ee;
+      --muted:   #888899;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    .forms-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .header-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--cyan);
+    }
+
+    .header-email {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      text-decoration: none;
+    }
+
+    .header-email:hover { color: var(--cyan); }
+
+    .back-home-btn {
+      padding: 10px 22px;
+      background: transparent;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .back-home-btn:hover {
+      background: var(--cyan);
+      color: #000;
+    }
+
+    /* ===== HERO ===== */
+    .forms-hero {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 56px 40px 44px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .forms-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,180,216,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,180,216,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      border: 1px solid rgba(0,180,216,0.3);
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(28px, 4vw, 42px);
+      color: var(--text);
+      position: relative;
+      z-index: 1;
+      margin-bottom: 10px;
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ===== MAIN ===== */
+    .forms-main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+
+    /* ===== FORM CARD ===== */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 32px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.5s ease 0.1s forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-card-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .form-card-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(0,180,216,0.12);
+      border: 1px solid rgba(0,180,216,0.25);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .form-card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--text);
+    }
+
+    .form-card-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .form-card-body {
+      padding: 28px;
+    }
+
+    .form-desc {
+      font-size: 14px;
+      color: #9090aa;
+      line-height: 1.75;
+      margin-bottom: 24px;
+      padding: 14px 18px;
+      background: rgba(0,180,216,0.05);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* ===== FORM FIELDS ===== */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #b0b0c8;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-label span {
+      color: var(--red);
+      margin-left: 2px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0,180,216,0.12);
+    }
+
+    .form-input.error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(255,77,109,0.12);
+    }
+
+    .form-input.success {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(0,200,150,0.12);
+    }
+
+    .form-error {
+      display: none;
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 6px;
+    }
+
+    .form-error.visible { display: block; }
+
+    /* ===== SUBMIT BUTTON ===== */
+    .form-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--cyan), #0077b6);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+      margin-top: 8px;
+    }
+
+    .form-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0,180,216,0.35);
+    }
+
+    .form-submit:active { transform: scale(0.98); }
+
+    .form-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ===== SUCCESS / ERROR MESSAGES ===== */
+    .form-result {
+      display: none;
+      padding: 16px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    .form-result.success {
+      display: block;
+      background: rgba(0,200,150,0.1);
+      border: 1px solid rgba(0,200,150,0.3);
+      color: var(--green);
+    }
+
+    .form-result.error-msg {
+      display: block;
+      background: rgba(255,77,109,0.1);
+      border: 1px solid rgba(255,77,109,0.3);
+      color: var(--red);
+    }
+
+    /* ===== PRIVACY NOTE ===== */
+    .privacy-note {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.6;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ===== FUTURE FORMS PLACEHOLDER ===== */
+    .coming-soon-card {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      text-align: center;
+      color: #555;
+      margin-bottom: 32px;
+    }
+
+    .coming-soon-card p {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ===== BACK TO HOME ===== */
+    .page-back-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 40px;
+    }
+
+    .page-back-btn {
+      padding: 10px 22px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .page-back-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* ===== FOOTER ===== */
+    .forms-footer {
+      background: #0a0a0d;
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      text-align: center;
+    }
+
+    .forms-footer p {
+      font-size: 12px;
+      color: #444;
+    }
+
+    .forms-footer a { color: var(--cyan); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .forms-header { padding: 16px 20px; }
+      .forms-hero   { padding: 40px 20px 32px; }
+      .forms-main   { padding: 32px 16px 60px; }
+      .form-card-body { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="forms-header">
+    <div class="header-brand">
+      <img src="data/CIS brand 2.webp" alt="CIS Logo" class="header-logo"
+           onerror="this.style.display='none'" />
+      <div>
+        <div class="header-name">Correia Investment Solutions</div>
+        <a href="mailto:richcorreia.cfa@correiainvestmentsolutions.com"
+           class="header-email">
+          richcorreia.cfa@correiainvestmentsolutions.com
+        </a>
+      </div>
+    </div>
+    <a href="index.html" class="back-home-btn">← Back to Home</a>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <div class="forms-hero">
+    <div class="hero-tag">Forms</div>
+    <h1 class="hero-title">Stay Informed</h1>
+    <p class="hero-sub">
+      Sign up to receive updates and notifications from Correia Investment Solutions
+      directly in your inbox.
+    </p>
+  </div>
+
+  <!-- ===== Main ===== -->
+  <main class="forms-main">
+
+    <!-- ===== FORM 1 — Tactical Portfolio Notifications ===== -->
+    <div class="form-card" id="form-tactical-notifications">
+
+      <div class="form-card-header">
+        <div class="form-card-icon"></div>
+        <div>
+          <div class="form-card-title">Tactical Portfolio Change Alerts</div>
+          <div class="form-card-subtitle">Get notified when the tactical rotation portfolio updates</div>
+        </div>
+      </div>
+
+      <div class="form-card-body">
+        <p class="form-desc">
+          The tactical rotation portfolio refreshes every two to four weeks based on macroeconomic
+          signals, technical indicators, and AI-driven optimization. Enter your email below to
+          receive an automatic notification the moment the portfolio changes — including the
+          updated securities and allocation percentages.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="emailInput">
+            Email Address <span>*</span>
+          </label>
+          <input
+            type="email"
+            id="emailInput"
+            class="form-input"
+            placeholder="your@email.com"
+            autocomplete="email"
+            spellcheck="false"
+          />
+          <div class="form-error" id="emailError">
+            Please enter a valid email address.
+          </div>
+        </div>
+
+        <button class="form-submit" id="submitBtn" onclick="handleSubscribe()">
+          Subscribe to Tactical Portfolio Alerts →
+        </button>
+
+        <div class="form-result" id="formResult"></div>
+
+        <p class="privacy-note">
+          Your email is stored securely and used only to send tactical portfolio change
+          notifications. We do not share your information with third parties. You can
+          unsubscribe at any time by replying to any notification email with
+          "unsubscribe" in the subject line.
+        </p>
+      </div>
+    </div>
+
+    <!-- ===== FUTURE FORMS (add new form cards above this section) ===== -->
+    <div class="coming-soon-card">
+      <p style="font-size:22px;margin-bottom:12px;"></p>
+      <p>
+        Additional forms will be added here as new features and services become available —
+        such as Q2 fundamental pick alerts, monthly market commentary, and retirement
+        planning newsletter sign-up.
+      </p>
+    </div>
+
+    <div class="page-back-row">
+      <a href="index.html" class="page-back-btn">← Back to Home</a>
+    </div>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="forms-footer">
+    <p>
+      &copy; 2026 Correia Investment Solutions &nbsp;|&nbsp;
+      <a href="index.html">Home</a> &nbsp;|&nbsp;
+      <a href="about.html">About</a>
+    </p>
+  </footer>
+
+  <script>
+    // ===== EMAIL VALIDATION =====
+    function isValidEmail(email) {
+      const pattern = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      return pattern.test(email.trim());
+    }
+
+    // ===== LIVE VALIDATION =====
+    const emailInput = document.getElementById("emailInput");
+    const emailError = document.getElementById("emailError");
+
+    emailInput.addEventListener("input", () => {
+      const val = emailInput.value.trim();
+      if (val === "") {
+        emailInput.className = "form-input";
+        emailError.classList.remove("visible");
+      } else if (isValidEmail(val)) {
+        emailInput.className = "form-input success";
+        emailError.classList.remove("visible");
+      } else {
+        emailInput.className = "form-input error";
+        emailError.classList.add("visible");
+      }
+    });
+
+    // ===== WEB3FORMS ACCESS KEY =====
+    const WEB3FORMS_KEY = "43e996d4-b0b8-4efb-854a-26db97c8f74e";
+
+    // ===== SUBMIT HANDLER =====
+    async function handleSubscribe() {
+      const email     = emailInput.value.trim().toLowerCase();
+      const submitBtn = document.getElementById("submitBtn");
+      const result    = document.getElementById("formResult");
+
+      // Reset result
+      result.className   = "form-result";
+      result.textContent = "";
+
+      // Validate — empty check
+      if (!email) {
+        emailInput.className = "form-input error";
+        emailError.classList.add("visible");
+        emailInput.focus();
+        return;
+      }
+
+      // Validate — format check
+      if (!isValidEmail(email)) {
+        emailInput.className = "form-input error";
+        emailError.classList.add("visible");
+        emailInput.focus();
+        return;
+      }
+
+      // Disable button during submission
+      submitBtn.disabled    = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept":       "application/json"
+          },
+          body: JSON.stringify({
+            access_key:   WEB3FORMS_KEY,
+            email:        email,
+            subject:      "New Tactical Portfolio Alert Subscriber — CIS",
+            from_name:    "Correia Investment Solutions Website",
+            message:      `New subscriber: ${email}\nSource: Tactical Portfolio Alerts Form\nDate: ${new Date().toISOString()}`,
+            // Honeypot spam protection
+            botcheck:     ""
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          emailInput.className  = "form-input success";
+          emailInput.value      = "";
+          result.className      = "form-result success";
+          result.innerHTML      = `
+            ✅ <strong>Thank you!</strong> You are now subscribed to tactical portfolio alerts.
+            You will receive an email notification the next time the portfolio changes.
+            A confirmation has been sent to your inbox.
+          `;
+          submitBtn.textContent = "Subscribed ✓";
+          submitBtn.style.background = "linear-gradient(135deg, #00c896, #009e75)";
+
+        } else {
+          throw new Error(data.message || "Submission failed");
+        }
+
+      } catch (err) {
+        console.error("Submission error:", err);
+        result.className   = "form-result error-msg";
+        result.innerHTML   = `
+          ❌ Something went wrong. Please try again or email us directly at
+          <a href="mailto:richcorreia.cfa@correiainvestmentsolutions.com"
+             style="color:#ff6b6b;">
+            richcorreia.cfa@correiainvestmentsolutions.com
+          </a>
+        `;
+        submitBtn.disabled    = false;
+        submitBtn.textContent = "Subscribe to Tactical Portfolio Alerts →";
+      }
+    }
+  </script>
+
+</body>
+</html>

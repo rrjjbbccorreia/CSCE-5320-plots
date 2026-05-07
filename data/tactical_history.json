@@ -1,0 +1,29 @@
+{
+  "description": "Historical log of tactical portfolio changes. Each entry records the date of change, the securities, and their allocation percentages.",
+  "history": [
+    {
+      "date": "2026-05-07",
+      "addedAt": "2026-05-07T00:00:00Z",
+      "picks": ["NVR", "CARR", "PODD", "PTC", "MU", "HSY", "ZBRA", "STE", "APP", "VRTX", "XME", "XLE", "IGE", "COPX", "BN", "UCO"],
+      "weights": {
+        "NVR":  7.0,
+        "CARR": 6.0,
+        "PODD": 6.0,
+        "PTC":  6.0,
+        "MU":   7.0,
+        "HSY":  5.0,
+        "ZBRA": 6.0,
+        "STE":  6.0,
+        "APP":  7.0,
+        "VRTX": 7.0,
+        "XME":  5.0,
+        "XLE":  6.0,
+        "IGE":  5.0,
+        "COPX": 5.0,
+        "BN":   6.0,
+        "UCO":  6.0
+      },
+      "note": "Initial entry"
+    }
+  ]
+}
