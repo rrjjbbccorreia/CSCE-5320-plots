@@ -900,12 +900,47 @@ async function loadPickPricesFromFile() {
     pickPricesUpdated = data.updated || null;
 
     console.log(`Pick prices loaded from file — last updated: ${pickPricesUpdated}`);
+
+    // ===== CHECK STALENESS DURING MARKET HOURS =====
+    if (pickPricesUpdated && isMarketHours()) {
+      const fileTime = new Date(pickPricesUpdated.replace(" UTC", "Z"));
+      const ageMs    = Date.now() - fileTime.getTime();
+      const ageMin   = Math.round(ageMs / 60000);
+
+      if (ageMs > 30 * 60 * 1000) {
+        // File is stale during market hours — signal to use proxies
+        console.warn(`⚠️ pick_prices.json is ${ageMin} min old during market hours — proxies will be used`);
+        pickPricesCache = {}; // clear cache so proxies fetch fresh prices
+        return true;          // return true so picks still load, just via proxy
+      } else {
+        console.log(`✅ File is ${ageMin} min old — fresh enough, using file prices`);
+      }
+    } else if (pickPricesUpdated && !isMarketHours()) {
+      console.log("Market closed — using file prices regardless of age");
+    }
+
     return true;
 
   } catch (e) {
     console.warn("Could not load pick_prices.json:", e.message);
     return false;
   }
+}
+
+// ===== MARKET HOURS CHECK =====
+function isMarketHours() {
+  const now     = new Date();
+  const utcHour = now.getUTCHours();
+  const utcMin  = now.getUTCMinutes();
+  const weekday = now.getUTCDay(); // 0=Sun 6=Sat
+
+  // Closed on weekends
+  if (weekday === 0 || weekday === 6) return false;
+
+  // Market open: 9:30am ET = 13:30 UTC (EDT)
+  // Market close + 1hr buffer: 5:00pm ET = 21:00 UTC
+  const utcMinutes = utcHour * 60 + utcMin;
+  return utcMinutes >= 810 && utcMinutes <= 1260; // 13:30 to 21:00
 }
 
 // ============ CHECK IF FILE PRICES ARE STALE ====================
