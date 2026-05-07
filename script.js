@@ -1754,3 +1754,156 @@ setTimeout(() => loadSpreadsheetPreview(), 3000);
 
 updateQ2CalcButton();
 updateTacCalcButton();
+
+
+
+
+
+
+
+// ============================================================
+// NAV ENHANCEMENTS — Add this at the bottom of script.js
+// 1. Scroll progress bar
+// 2. Active nav section highlighting
+// 3. Mobile hamburger menu
+// ============================================================
+
+// ===== 1. SCROLL PROGRESS BAR =====
+function initScrollProgressBar() {
+  // Create the bar element
+  const bar = document.createElement("div");
+  bar.className = "scroll-progress-bar";
+  bar.id = "scrollProgressBar";
+  document.body.prepend(bar);
+
+  // Update width on scroll
+  window.addEventListener("scroll", () => {
+    const scrollTop    = window.scrollY;
+    const docHeight    = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPct    = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width    = `${Math.min(scrollPct, 100)}%`;
+  }, { passive: true });
+}
+
+// ===== 2. ACTIVE NAV HIGHLIGHTING =====
+function initActiveNav() {
+  const sections = [
+    { id: "section-purpose",     navHref: "#section-purpose"     },
+    { id: "section-videos",      navHref: "#section-videos"      },
+    { id: "section-ai-chat",     navHref: "#section-ai-chat"     },
+    { id: "section-sp500",       navHref: "#section-sp500"       },
+    { id: "section-fundamental", navHref: "#section-fundamental" },
+    { id: "section-tactical",    navHref: "#section-tactical"    },
+    { id: "section-charts",      navHref: "#section-charts"      },
+    { id: "section-planning",    navHref: "#section-planning"    },
+  ];
+
+  const navLinks = document.querySelectorAll(".nav-btn");
+
+  // Use IntersectionObserver to detect which section is visible
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const activeId = entry.target.id;
+
+        // Remove active from all nav buttons
+        navLinks.forEach(link => link.classList.remove("active"));
+
+        // Add active to matching nav button
+        const activeLink = document.querySelector(`.nav-btn[href="#${activeId}"]`);
+        if (activeLink) {
+          activeLink.classList.add("active");
+
+          // Scroll the nav button into view on mobile
+          activeLink.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center"
+          });
+        }
+      }
+    });
+  }, {
+    // Trigger when section is 20% visible
+    threshold: 0.2,
+    rootMargin: "-60px 0px -60px 0px"
+  });
+
+  // Observe all sections
+  sections.forEach(({ id }) => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+}
+
+// ===== 3. MOBILE HAMBURGER MENU =====
+function initMobileHamburger() {
+  const navInner = document.querySelector(".page-nav-inner");
+  if (!navInner) return;
+
+  // Add mobile label
+  const mobileLabel = document.createElement("span");
+  mobileLabel.className = "nav-mobile-label";
+  mobileLabel.textContent = "Navigate to section";
+  navInner.prepend(mobileLabel);
+
+  // Create hamburger button
+  const hamburger = document.createElement("button");
+  hamburger.className = "nav-hamburger";
+  hamburger.setAttribute("aria-label", "Toggle navigation menu");
+  hamburger.innerHTML = `
+    <span></span>
+    <span></span>
+    <span></span>
+  `;
+  navInner.appendChild(hamburger);
+
+  // Toggle menu open/close
+  hamburger.addEventListener("click", () => {
+    hamburger.classList.toggle("open");
+    navInner.classList.toggle("mobile-open");
+  });
+
+  // Close menu when a nav link is clicked
+  document.querySelectorAll(".nav-btn").forEach(link => {
+    link.addEventListener("click", () => {
+      hamburger.classList.remove("open");
+      navInner.classList.remove("mobile-open");
+    });
+  });
+
+  // Close menu when clicking outside the nav
+  document.addEventListener("click", (e) => {
+    const nav = document.querySelector(".page-nav");
+    if (nav && !nav.contains(e.target)) {
+      hamburger.classList.remove("open");
+      navInner.classList.remove("mobile-open");
+    }
+  });
+}
+
+// ===== INIT ALL NAV FEATURES =====
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    initScrollProgressBar();
+    initActiveNav();
+    initMobileHamburger();
+    // Fix back to top buttons
+    document.querySelectorAll(".back-to-top-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+  });
+} else {
+  initScrollProgressBar();
+  initActiveNav();
+  initMobileHamburger();
+  document.querySelectorAll(".back-to-top-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+}

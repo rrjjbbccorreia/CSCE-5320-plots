@@ -8,7 +8,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-JVTLY699PB');
     </script>
 
@@ -16,29 +15,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Correia Investment Solutions</title>
 
-    <!-- External Styles -->
     <link rel="stylesheet" href="style.css" />
-
-    <!-- Plotly & CSV Parser -->
     <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   </head>
 
   <body>
-
-
-
+    <div id="top"></div>  <!-- ← add this -->
     <!-- ===== Company Header ===== -->
     <div class="company-header">
       <div class="company-header-top">
-        <img src="data/CIS brand 2.webp" 
-            alt="Correia Investment Solutions Logo" 
-            class="company-logo"
-            onerror="this.style.display='none'" />
+        <img src="data/CIS brand 2.webp"
+             alt="Correia Investment Solutions Logo"
+             class="company-logo"
+             onerror="this.style.display='none'" />
         <div class="company-header-text">
           <h1 class="company-title">Correia Investment Solutions</h1>
-          <p class="company-tagline">AI-Powered Investment Intelligence for the Modern Investor — 
-            equipping you with the tools, knowledge, and confidence to take control of 
+          <p class="company-tagline">AI-Powered Investment Intelligence for the Modern Investor —
+            equipping you with the tools, knowledge, and confidence to take control of
             your financial future
           </p>
           <a href="mailto:richcorreia.cfa@correiainvestmentsolutions.com" class="company-email">
@@ -48,440 +42,546 @@
       </div>
     </div>
 
+    <!-- ===== Sticky Navigation Bar ===== -->
+    <nav class="page-nav" id="pageNav">
+      <div class="page-nav-inner">
+        <a href="#section-purpose"     class="nav-btn">Our Purpose</a>
+        <a href="#section-videos"      class="nav-btn">Educational Videos</a>
+        <a href="#section-ai-chat"     class="nav-btn">AI Chat</a>
+        <a href="#section-sp500"       class="nav-btn">S&amp;P500 Analysis</a>
+        <a href="#section-fundamental" class="nav-btn">Fundamental Portfolio</a>
+        <a href="#section-tactical"    class="nav-btn">Tactical Portfolio</a>
+        <a href="#section-charts"      class="nav-btn">Charts &amp; Bonds</a>
+        <a href="#section-planning"    class="nav-btn">Financial Planning</a>
+      </div>
+    </nav>
 
-    <!-- ===== Purpose Section ===== -->
-    <div class="purpose-section">
-      <h2 class="purpose-title">Our Purpose</h2>
-      <p class="purpose-text">
-        This site is built for individuals who want to learn and understand what they need 
-        to do to meet their financial goals — whether that is retirement, financial 
-        independence, or any other meaningful milestone. We aim to provide clarity on what 
-        to invest in and how to think about building wealth systematically over time.
-      </p>
-      <p class="purpose-text">
-        The choice of brokerage platform is entirely up to you — there are many excellent 
-        options available including Schwab, Fidelity, Morgan Stanley, Interactive Brokers, 
-        and others, each with their own strengths depending on your needs. What matters more 
-        than the platform is understanding the two fundamental types of investment accounts 
-        available to you. Taxable accounts are standard brokerage accounts where you can 
-        invest freely in securities, but gains are subject to taxation in the year they are 
-        realized. Deferred tax accounts — such as traditional IRAs, 401(k)s, and other 
-        qualified retirement accounts — allow you to contribute pre-tax dollars, grow your 
-        investments without annual taxation on gains, and only pay taxes when you withdraw 
-        funds in retirement. Understanding how to use both account types strategically is 
-        one of the most powerful tools available to any investor.
-      </p>
-      <p class="purpose-text">
-        This site provides two core resources to help you on that journey. First, the 
-        financial planning tool available at the bottom of this page allows you to evaluate 
-        where you stand today relative to your future financial goals, model different 
-        scenarios, and understand what changes you can make to improve your trajectory. 
-        Second, the site provides two distinct investment strategies built around 
-        carefully selected securities — a tactical rotation strategy that refreshes every 
-        two to four weeks to adapt to short-term market dynamics, and a longer-term 
-        fundamental strategy that rotates every three to five months based on deep 
-        quantitative analysis of company fundamentals. Together, these tools and strategies 
-        are designed to help you invest more efficiently, with better performance, and with 
-        greater confidence in reaching your financial goals.
-      </p>
-    </div>
+    <!-- Thick dark blue divider -->
+    <div class="section-divider"></div>
 
-
-    <!-- ===== YouTube Section ===== -->
-    <div class="youtube-section">
-      <div class="youtube-icon">▶</div>
-      <div class="youtube-content">
-        <h2 class="youtube-title">Free Finance & Investing Education</h2>
-        <p class="youtube-desc">
-          Expand your financial knowledge with our YouTube channel — featuring in-depth videos 
-          on investing strategies, financial analysis, and market insights to help you make 
-          more informed investment decisions.
+    <!-- ================================================================ -->
+    <!-- SECTION 1 — OUR PURPOSE (dark background)                        -->
+    <!-- ================================================================ -->
+    <section id="section-purpose" class="page-section section-dark">
+      <h2 class="section-heading">Our Purpose</h2>
+      <div class="purpose-section">
+        <p class="purpose-text">
+          This site is built for individuals who want to learn and understand what they need
+          to do to meet their financial goals — whether that is retirement, financial
+          independence, or any other meaningful milestone. We aim to provide clarity on what
+          to invest in and how to think about building wealth systematically over time.
         </p>
-        <a 
-          href="https://www.youtube.com/channel/UC14YDZ4QVl5CKm8Y_TYwxKA" 
-          target="_blank" 
-          class="youtube-btn">
-          Visit Our YouTube Channel →
+        <p class="purpose-text">
+          The choice of brokerage platform is entirely up to you — there are many excellent
+          options available including Schwab, Fidelity, Morgan Stanley, Interactive Brokers,
+          and others, each with their own strengths depending on your needs. What matters more
+          than the platform is understanding the two fundamental types of investment accounts
+          available to you. Taxable accounts are standard brokerage accounts where you can
+          invest freely in securities, but gains are subject to taxation in the year they are
+          realized. Deferred tax accounts — such as traditional IRAs, 401(k)s, and other
+          qualified retirement accounts — allow you to contribute pre-tax dollars, grow your
+          investments without annual taxation on gains, and only pay taxes when you withdraw
+          funds in retirement. Understanding how to use both account types strategically is
+          one of the most powerful tools available to any investor.
+        </p>
+        <p class="purpose-text">
+          This site provides two core resources to help you on that journey. First, the
+          financial planning tool available at the bottom of this page allows you to evaluate
+          where you stand today relative to your future financial goals, model different
+          scenarios, and understand what changes you can make to improve your trajectory.
+          Second, the site provides two distinct investment strategies built around
+          carefully selected securities — a tactical rotation strategy that refreshes every
+          two to four weeks to adapt to short-term market dynamics, and a longer-term
+          fundamental strategy that rotates every three to five months based on deep
+          quantitative analysis of company fundamentals. Together, these tools and strategies
+          are designed to help you invest more efficiently, with better performance, and with
+          greater confidence in reaching your financial goals.
+        </p>
+      </div>
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SECTION 2 — EDUCATIONAL VIDEOS (gray background)                 -->
+    <!-- ================================================================ -->
+    <section id="section-videos" class="page-section section-gray">
+      <h2 class="section-heading">Educational Videos</h2>
+      <div class="youtube-section" style="width:95%;max-width:1100px;">
+        <div class="youtube-icon">▶</div>
+        <div class="youtube-content">
+          <h2 class="youtube-title">Free Finance &amp; Investing Education</h2>
+          <p class="youtube-desc">
+            Expand your financial knowledge with our YouTube channel — featuring in-depth videos
+            on investing strategies, financial analysis, and market insights to help you make
+            more informed investment decisions.
+          </p>
+          <a href="https://www.youtube.com/channel/UC14YDZ4QVl5CKm8Y_TYwxKA"
+             target="_blank"
+             class="youtube-btn">
+            Visit Our YouTube Channel →
+          </a>
+        </div>
+      </div>
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SECTION 3 — AI CHAT (dark background)                            -->
+    <!-- ================================================================ -->
+    <section id="section-ai-chat" class="page-section section-dark">
+      <h2 class="section-heading">AI Financial Question Builder</h2>
+      <div class="chatgpt-section" style="width:95%;max-width:1100px;">
+        <p class="chatgpt-desc">
+          Ask detailed financial questions using structured prompts powered by AI.
+          Enter your question below and generate a professional-grade prompt you can use in ChatGPT.
+        </p>
+        <textarea id="userQuestion" placeholder="Example: Analyze Apple stock based on fundamentals and valuation..." rows="4"></textarea>
+        <button onclick="generatePrompt()" class="chatgpt-btn">
+          Generate AI Prompt →
+        </button>
+        <textarea id="generatedPrompt" rows="6" readonly placeholder="Your structured prompt will appear here..."></textarea>
+        <button onclick="openChatGPT()" class="chatgpt-btn secondary">
+          Open in ChatGPT →
+        </button>
+      </div>
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SECTION 4 — S&P500 ANALYSIS (gray background)                    -->
+    <!-- ================================================================ -->
+    <section id="section-sp500" class="page-section section-gray">
+      <h2 class="section-heading">S&amp;P 500 AI Predictive Analysis</h2>
+
+      <div class="model-description" style="width:95%;max-width:1100px;">
+        <h2 class="model-description-title">Fundamental AI Predictive Model</h2>
+        <p class="model-description-text">
+          The results displayed below are generated by a proprietary AI model built on the principles
+          of fundamental analysis, trained and evaluated on quarterly financial data from S&P 500 companies.
+          The model incorporates a comprehensive set of financial variables including net income, sales and
+          revenue, gross and net margins, return on assets (ROA), return on equity (ROE), capital expenditures,
+          and research and development investments — along with the three-year rate of change for each of these
+          metrics to capture meaningful trends over time. Valuation multiples such as price-to-earnings (PE)
+          and price-to-sales (PS) ratios are also factored in, alongside industry-level rankings and
+          cross-industry comparisons to contextualize each company's relative financial standing.
+          In addition to these fundamental inputs, the model employs a Cash Flow to Equity (FCFE)
+          valuation framework combined with Monte Carlo simulations to generate probabilistic estimates
+          of future price levels, accounting for uncertainty across a range of possible outcomes.
+          Two forward-looking price targets are produced for each security: Horizon 1 (H1), which looks
+          approximately 3 months ahead, and Horizon 2 (H2), which extends to roughly 6 months — both
+          measured from an entry point that falls approximately 2 months after the official close of each
+          quarterly reporting period. The charts below visualize how closely the model's predictions aligned
+          with actual realized prices in historical periods, and include a confidence band representing
+          one standard deviation around the predicted values to illustrate the range of expected outcomes.
+          For the most recent quarters, the charts also project what the model anticipates for future price
+          levels, offering a forward-looking perspective grounded in rigorous quantitative analysis.
+        </p>
+      </div>
+
+      <h2 class="chart-heading" style="margin-top:32px;">Predicted vs Real Future Prices</h2>
+
+      <div class="controls">
+        <label for="tickerSelect">Select Security:</label>
+        <select id="tickerSelect"></select>
+        <button id="toggleBtn">Switch Target (T1 / T2)</button>
+      </div>
+
+      <div id="stock-table-container" class="stock-table-wrapper"></div>
+      <div id="company-profile-container" class="company-profile-wrapper"></div>
+      <div id="chart"></div>
+
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SECTION 5 — FUNDAMENTAL PORTFOLIO (dark background)              -->
+    <!-- ================================================================ -->
+    <section id="section-fundamental" class="page-section section-dark">
+      <h2 class="section-heading">Fundamental Portfolio</h2>
+
+      <div class="picks-section" style="width:95%;max-width:1100px;background:transparent;box-shadow:none;">
+        <h2 class="picks-title">Q2 Fundamental Analysis Picks — Entry date of 3-16-2026</h2>
+        <p class="picks-desc">
+          The securities listed below represent our current selections derived from the AI-driven
+          fundamental analysis model. These picks have been evaluated across all key financial
+          metrics and are intended to be held throughout the second quarter. Each selection
+          reflects a high-conviction opportunity identified through the model's rigorous
+          quantitative screening process.
+        </p>
+        <div class="picks-grid" id="picksGrid"></div>
+        <!-- Q2 Calculator Button -->
+        <div class="calc-launcher-section" style="margin-top:20px;">
+          <h3 class="calc-launcher-title" style="font-size:16px;">Q2 Portfolio Share Calculator</h3>
+          <p class="calc-launcher-desc">
+            Calculate the number of shares to purchase for each Q2 fundamental pick
+            based on an optimized distribution of your equity allocation.
+          </p>
+          <div id="q2CalcBtnStatus" class="calc-btn-status">
+            ⏳ Waiting for Q2 prices to load...
+          </div>
+          <button id="q2CalcBtn"
+                  onclick="openQ2Calculator()"
+                  class="calc-launch-btn"
+                  disabled>
+            Open Q2 Calculator
+          </button>
+        </div>
+      </div>
+
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SECTION 6 — TACTICAL PORTFOLIO (gray background)                 -->
+    <!-- ================================================================ -->
+    <section id="section-tactical" class="page-section section-gray">
+      <h2 class="section-heading">Tactical Rotation Portfolio</h2>
+
+      <!-- Portfolio Strategy Description -->
+      <div class="portfolio-description" style="width:95%;max-width:1100px;background:transparent;border-left:4px solid #4e9af1;">
+        <h2 class="portfolio-description-title">Tactical/Monthly Portfolio Strategy — 2 to 4 Week Changes</h2>
+        <p class="portfolio-description-text">
+          The portfolios displayed below are constructed using a sophisticated combination of technical
+          indicators and macroeconomic variables, layered on top of a purpose-built AI model designed
+          to optimize portfolio performance over a rolling two-to-four week forward horizon. The strategy
+          draws from a broad set of macroeconomic signals — including interest rates, inflation trends,
+          economic growth indicators, and sector rotation dynamics — alongside technical signals such as
+          momentum, moving averages, and volatility measures, to identify the most favorable asset
+          allocations at any given point in time. While the core universe of securities analyzed consists
+          of S&P 500 companies, making the S&P 500 index the natural performance benchmark, the portfolio
+          also extends its reach into other asset classes including commodities and international equity
+          regions, with the objective of reducing overall portfolio volatility while simultaneously
+          enhancing returns through broader diversification. The strategy seeks to improve risk-adjusted 
+          outcomes relative to a SP500 benchmark by combining technical, macroeconomic, and quantitative 
+          signals, and capitalizing on short-to-medium term mispricings and momentum opportunities that traditional
+          passive strategies are unable to exploit. To achieve this, portfolio allocations are actively
+          reviewed and rebalanced on a monthly basis, ensuring that the weightings remain aligned with
+          the latest signals produced by the AI model and reflect any meaningful shifts in the underlying
+          macroeconomic or technical landscape. This disciplined, data-driven approach to portfolio
+          construction seeks to deliver consistent outperformance while maintaining a clear and
+          transparent framework that investors can follow and understand.
+        </p>
+      </div>
+
+      <!-- Portfolio Images -->
+      <div class="images-section" style="width:95%;max-width:1100px;margin-top:32px;">
+        <h3 class="images-title">Portfolio Performance Snapshots</h3>
+        <div class="images-grid">
+          <div class="image-card">
+            <p class="image-label">Returns - YTD — May 4, 2026</p>
+            <img src="data/return_2026-05-04.png" alt="Return - YTD and over 12 months" class="portfolio-img" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Performance Disclaimer ===== -->
+      <div class="performance-disclaimer">
+        <p class="disclaimer-text">
+          <strong>Performance Disclosure:</strong> The benchmark used for comparison is the S&P 500 index. 
+          Returns shown reflect price performance only and do not include dividends. Transaction costs 
+          are not included in the performance figures — while they would apply in practice, they are 
+          expected to be negligible relative to overall returns. Tax implications are not reflected in 
+          the results shown — taxes would not apply within qualified retirement accounts such as IRAs 
+          and 401(k)s, and would vary based on individual tax situations in taxable accounts. Market 
+          slippage is not included. All performance figures are calculated using closing prices for 
+          each security. Returns are measured for the specific interval periods shown between the 
+          dates indicated in the performance sheet. <strong>Past performance does not guarantee future 
+          results.</strong> These figures are provided for informational and educational purposes only 
+          and should not be interpreted as a promise or guarantee of future investment returns.
+        </p>
+      </div>
+
+      <!-- Tactical Picks -->
+      <div class="picks-section tactical-picks-section" style="width:95%;max-width:1100px;background:transparent;box-shadow:none;margin-top:32px;">
+        <h2 class="picks-title" style="color:#00c896;">
+          Tactical Rotation Portfolio Picks for 5/05/26
+        </h2>
+        <p class="picks-desc">
+          The securities listed below represent our current tactical rotation portfolio — a
+          higher-frequency strategy that refreshes every two to four weeks to adapt to shifting
+          market dynamics, sector momentum, and macroeconomic signals. Unlike the fundamental
+          picks which are held through the quarter, these selections are actively managed to
+          capture short-to-medium term opportunities across equities, commodities, and
+          sector ETFs. Greater portfolio turnover is an intentional feature of this strategy,
+          allowing it to respond more rapidly to changing conditions and reduce exposure to
+          deteriorating trends while rotating into emerging ones.
+        </p>
+        <div class="picks-grid" id="tacticalPicksGrid"></div>
+        <!-- Tactical Calculator Button -->
+        <div class="calc-launcher-section" style="margin-top:20px;border-left-color:#00c896;">
+          <h3 class="calc-launcher-title" style="font-size:16px;color:#00c896;">
+            Tactical Portfolio Share Calculator
+          </h3>
+          <p class="calc-launcher-desc">
+            Calculate the number of shares to purchase for each tactical rotation pick
+            based on an optimized distribution of your equity allocation.
+            This portfolio refreshes every 2 to 4 weeks.
+          </p>
+          <div id="tacCalcBtnStatus" class="calc-btn-status">
+            ⏳ Waiting for Tactical prices to load...
+          </div>
+          <button id="tacCalcBtn"
+                  onclick="openTacticalCalculator()"
+                  class="calc-launch-btn"
+                  style="background:linear-gradient(145deg,#00c896,#009e75);
+                         box-shadow:0 2px 8px rgba(0,200,150,0.3);"
+                  disabled>
+            Open Tactical Calculator
+          </button>
+        </div>
+      </div>
+
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SECTION 7 — CHARTS & BONDS (dark background)                     -->
+    <!-- ================================================================ -->
+    <section id="section-charts" class="page-section section-dark">
+      <h2 class="section-heading">Additional Charts &amp; Bond Education</h2>
+
+      <div class="chart-buttons" style="width:95%;max-width:700px;">
+        <h3>Select one of the chart options below or the bonds selection, for further information and analysis on separate pages:</h3>
+        <button onclick="window.location='roa_chart.html'">Entry Price vs ROA</button>
+        <button onclick="window.location='ni_rev_roe.html'">NI + Revenue vs ROE</button>
+        <button onclick="window.location='fcf_asset.html'">FCF/Revenue &amp; Asset Turnover</button>
+        <button onclick="window.location='ni_rev_change.html'">NI &amp; Revenue Changes</button>
+        <button onclick="window.location='bonds.html'"
+                style="background:linear-gradient(145deg,#00b4d8,#0077b6);margin-top:8px;">
+          Bond ETF Guide &amp; Education
+        </button>
+      </div>
+
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SECTION 8 — FINANCIAL PLANNING (gray background)                 -->
+    <!-- ================================================================ -->
+    <section id="section-planning" class="page-section section-gray">
+      <h2 class="section-heading">Financial Planning Tool</h2>
+
+      <div class="retirement-section" style="width:95%;max-width:1100px;background:transparent;box-shadow:none;border:none;padding:0;">
+
+        <p class="retirement-desc">
+          The spreadsheet available for download below is a comprehensive financial planning tool
+          designed to take you from simple to complex financial analysis — giving you a clear picture
+          of where you stand today and what the future may hold based on the specific actions and
+          decisions you make along the way. Built with flexibility at its core, the tool allows you
+          to construct multiple financial scenarios and evaluate how different choices — such as
+          changes in savings rate, continuing to work in a semi or quasi-retired capacity, investment
+          returns, retirement age, or spending habits — can dramatically alter your long-term financial
+          outcomes. Whether you are just starting to plan for retirement or are already in the later
+          stages of your career, the model adapts to your situation and projects forward with precision.
+          It places particular emphasis on the outer years of retirement, where the compounding effects
+          of early decisions become most apparent and where financial security matters most. Beyond the
+          built-in simulations described below, the spreadsheet is fully adjustable and can be tailored
+          to model virtually any financial scenario you can imagine — the inputs, assumptions, and
+          structure are designed to be flexible enough to accommodate unique situations, unconventional
+          retirement paths, and any combination of financial variables that reflect your personal
+          circumstances. Simply input your current financial details, define your assumptions, and let
+          the model do the rest — giving you the clarity and confidence to make better financial
+          decisions today for a more secure tomorrow.
+        </p>
+
+        <!-- Monte Carlo Section -->
+        <div class="retirement-monte-carlo">
+          <h3 class="retirement-subtitle">Monte Carlo Retirement Simulations</h3>
+          <p class="retirement-desc">
+            The Analysis sheet includes three built-in simulations that run thousands of Monte Carlo
+            iterations against your inputs to stress-test your retirement plan. Each simulation uses
+            a 15% failure threshold — meaning the plan is considered viable when the probability of
+            running out of money falls below that level.
+          </p>
+
+          <div class="simulation-card">
+            <div class="simulation-header">
+              <span class="simulation-number">1</span>
+              <h4 class="simulation-title">When can I retire?</h4>
+            </div>
+            <p class="simulation-desc">
+              Uses your current savings rate and portfolio to find the earliest age at which your
+              plan is viable. Starting from your target retirement age, the model runs full Monte
+              Carlo iterations and advances the retirement age one year at a time until the failure
+              probability drops below 15%. The result tells you the earliest realistic retirement
+              age and estimates the legacy you are likely to leave behind — both under average
+              conditions and through strategic investment.
+            </p>
+          </div>
+
+          <div class="simulation-card">
+            <div class="simulation-header">
+              <span class="simulation-number">2</span>
+              <h4 class="simulation-title">How much do I need to save?</h4>
+            </div>
+            <p class="simulation-desc">
+              Locks in your target retirement age and finds the minimum annual contributions needed
+              to make it work. If your current savings rate already passes the threshold, the
+              simulation confirms your plan is on track. Otherwise it increases both your deferred
+              tax and taxable contributions by 10% per step — up to the IRS annual limit of $26,000
+              for deferred accounts — and reruns the model until the failure rate falls below 15%.
+              The result shows exactly how much you need to set aside each year to retire on schedule.
+            </p>
+          </div>
+
+          <div class="simulation-card">
+            <div class="simulation-header">
+              <span class="simulation-number">3</span>
+              <h4 class="simulation-title">Can I retire earlier?</h4>
+            </div>
+            <p class="simulation-desc">
+              Lets you enter a younger target retirement age and immediately tests whether your
+              current savings can support it. If not, it applies the same 10% step-up logic as
+              Simulation 2 to find the savings level that makes the earlier age achievable. The
+              result gives you a clear, actionable savings target paired with projected legacy
+              values — so you can decide whether retiring earlier is worth the increased
+              contribution required.
+            </p>
+          </div>
+
+          <div class="simulation-card">
+            <div class="simulation-header">
+              <span class="simulation-number">4</span>
+              <h4 class="simulation-title">How do major withdrawals impact my retirement age?</h4>
+            </div>
+            <p class="simulation-desc">
+              Builds directly on Simulation 1 by taking your established retirement age and stress-testing
+              it against up to four significant pre-retirement withdrawals — such as purchasing a second
+              home, funding college tuition, or financing any other major life expense. For each withdrawal
+              event, you will be prompted to provide four pieces of information: how many years from today
+              the withdrawal will occur, the duration of the withdrawal in years if it spans more than one
+              year, the dollar amount, and whether the funds will come from your taxable or deferred tax
+              account. The simulation validates that sufficient funds exist in the selected account before
+              proceeding — flagging any case where the balance falls short as a problem that needs to be
+              addressed before the plan can be stress-tested. Each withdrawal is then applied directly to
+              the appropriate rows in the model — row 19 for taxable account withdrawals and row 21 for
+              deferred tax account withdrawals — across the correct time columns based on your current age
+              and the number of years forward each event occurs. Once all withdrawals have been entered and
+              applied, the model runs the same Monte Carlo iterations used in Simulation 1 to determine
+              whether your retirement age remains achievable under the new cash flow constraints, or whether
+              the withdrawals push your viable retirement age later. All original cell values are preserved
+              and restored after the simulation completes, ensuring your base plan remains intact. The
+              output mirrors Simulation 1 — showing your projected retirement age, expected legacy values
+              under average and strategic investment conditions — with the addition of a clear statement
+              indicating whether your retirement age remains unchanged or has been pushed out as a result
+              of the planned withdrawals.
+            </p>
+          </div>
+        </div>
+
+        <!-- Macros Section -->
+        <div class="retirement-macros">
+          <h3 class="retirement-subtitle">Enabling Macros in Microsoft Excel</h3>
+          <p class="retirement-desc">
+            The <code class="inline-code">.xlsm</code> file requires macros to be enabled before
+            the simulations can run. Follow the steps for your version of Excel:
+          </p>
+          <div class="macro-platforms">
+            <div class="macro-platform-card">
+              <h4 class="macro-platform-title">On Windows</h4>
+              <ol class="macro-steps">
+                <li>Open the file. Excel will show a yellow security bar at the top reading
+                  <em>"Macros have been disabled."</em></li>
+                <li>Click <strong>Enable Content</strong> in that bar. The simulations are now active.</li>
+                <li>If you do not see the bar, go to <strong>File → Options → Trust Center →
+                  Trust Center Settings → Macro Settings</strong> and select
+                  <strong>Enable all macros</strong>, then reopen the file.</li>
+              </ol>
+            </div>
+            <div class="macro-platform-card">
+              <h4 class="macro-platform-title">On Mac</h4>
+              <ol class="macro-steps">
+                <li>Open the file. A dialog may appear warning that macros are disabled.</li>
+                <li>Click <strong>Enable Macros</strong>. If the dialog does not appear, go to
+                  <strong>Excel → Preferences → Security</strong> and enable macros from there.</li>
+                <li>Save the file after enabling to retain the setting for future sessions.</li>
+              </ol>
+            </div>
+          </div>
+          <p class="macro-note">
+            ⚠️ If you are on a managed corporate device, your IT policy may restrict macros.
+            In that case, contact your IT department to whitelist the file or adjust macro
+            security settings.
+          </p>
+        </div>
+
+        <!-- Download Button -->
+        <a href="data/Retirement analysis_PROT14v4_p.xlsm"
+           download
+           class="retirement-download-btn">
+          ⬇️ Download Retirement Analysis Spreadsheet
         </a>
-      </div>
-    </div>
 
-    <!-- ===== ChatGPT Financial Prompt Tool ===== -->
-    <div class="chatgpt-section">
-      <h2 class="chatgpt-title">AI Financial Question Builder</h2>
-
-      <p class="chatgpt-desc">
-        Ask detailed financial questions using structured prompts powered by AI. 
-        Enter your question below and generate a professional-grade prompt you can use in ChatGPT.
-      </p>
-
-      <textarea id="userQuestion" placeholder="Example: Analyze Apple stock based on fundamentals and valuation..." rows="4"></textarea>
-
-      <button onclick="generatePrompt()" class="chatgpt-btn">
-        Generate AI Prompt →
-      </button>
-
-      <textarea id="generatedPrompt" rows="6" readonly placeholder="Your structured prompt will appear here..."></textarea>
-
-      <button onclick="openChatGPT()" class="chatgpt-btn secondary">
-        Open in ChatGPT →
-      </button>
-    </div>
-
-
-    <!-- ===== AI Model Description Section ===== -->
-    <div class="model-description">
-      <h2 class="model-description-title">About the AI Predictive Model</h2>
-      <p class="model-description-text">
-        The results displayed below are generated by a proprietary AI model built on the principles 
-        of fundamental analysis, trained and evaluated on quarterly financial data from S&P 500 companies. 
-        The model incorporates a comprehensive set of financial variables including net income, sales and 
-        revenue, gross and net margins, return on assets (ROA), return on equity (ROE), capital expenditures, 
-        and research and development investments — along with the three-year rate of change for each of these 
-        metrics to capture meaningful trends over time. Valuation multiples such as price-to-earnings (PE) 
-        and price-to-sales (PS) ratios are also factored in, alongside industry-level rankings and 
-        cross-industry comparisons to contextualize each company's relative financial standing. 
-        In addition to these fundamental inputs, the model employs a Cash Flow to Equity (FCFE) 
-        valuation framework combined with Monte Carlo simulations to generate probabilistic estimates 
-        of future price levels, accounting for uncertainty across a range of possible outcomes. 
-        Two forward-looking price targets are produced for each security: Horizon 1 (H1), which looks 
-        approximately 3 months ahead, and Horizon 2 (H2), which extends to roughly 6 months — both 
-        measured from an entry point that falls approximately 2 months after the official close of each 
-        quarterly reporting period. The charts below visualize how closely the model's predictions aligned 
-        with actual realized prices in historical periods, and include a confidence band representing 
-        one standard deviation around the predicted values to illustrate the range of expected outcomes. 
-        For the most recent quarters, the charts also project what the model anticipates for future price 
-        levels, offering a forward-looking perspective grounded in rigorous quantitative analysis.
-      </p>
-    </div>
-
-    <!-- ===== Chart Title ===== -->
-    <h2 class="chart-heading">Predicted vs Real Future Prices</h2>
-
-    <!-- Dropdown and Toggle -->
-    <div class="controls">
-      <label for="tickerSelect">Select Security:</label>
-      <select id="tickerSelect"></select>
-      <button id="toggleBtn">Switch Target (T1 / T2)</button>
-    </div>
-
-    <!-- Stock Data Table -->
-    <div id="stock-table-container" class="stock-table-wrapper"></div>
-
-    <!-- Company Profile -->
-    <div id="company-profile-container" class="company-profile-wrapper"></div>
-
-    <!-- Chart Container -->
-    <div id="chart"></div>
-
-    <!-- ===== Fundamental Analysis Picks Section ===== -->
-    <div class="picks-section">
-      <h2 class="picks-title">Q2 Fundamental Analysis Picks - Entry date of 3-16-2026</h2>
-      <p class="picks-desc">
-        The securities listed below represent our current selections derived from the AI-driven 
-        fundamental analysis model. These picks have been evaluated across all key financial 
-        metrics and are intended to be held throughout the second quarter. Each selection 
-        reflects a high-conviction opportunity identified through the model's rigorous 
-        quantitative screening process.
-      </p>
-      <div class="picks-grid" id="picksGrid"></div>
-      <!-- Q2 Calculator Button -->
-      <div class="calc-launcher-section" style="margin-top:20px;">
-        <h3 class="calc-launcher-title" style="font-size:16px;">
-          Q2 Portfolio Share Calculator
-        </h3>
-        <p class="calc-launcher-desc">
-          Calculate the number of shares to purchase for each Q2 fundamental pick 
-          based on an optimized distribution of your equity allocation.
-        </p>
-        <div id="q2CalcBtnStatus" class="calc-btn-status">
-          ⏳ Waiting for Q2 prices to load...
-        </div>
-        <button id="q2CalcBtn"
-                onclick="openQ2Calculator()"
-                class="calc-launch-btn"
-                disabled>
-          Open Q2 Calculator
-        </button>
-      </div>
-    </div>
-
-    <!-- ===== Portfolio Description Section ===== -->
-    <div class="portfolio-description">
-      <h2 class="portfolio-description-title">About the Portfolio Strategy Below Based on 2 to 4 Week Changes</h2>
-      <p class="portfolio-description-text">
-        The portfolios displayed below are constructed using a sophisticated combination of technical 
-        indicators and macroeconomic variables, layered on top of a purpose-built AI model designed 
-        to optimize portfolio performance over a rolling two-to-four week forward horizon. The strategy 
-        draws from a broad set of macroeconomic signals — including interest rates, inflation trends, 
-        economic growth indicators, and sector rotation dynamics — alongside technical signals such as 
-        momentum, moving averages, and volatility measures, to identify the most favorable asset 
-        allocations at any given point in time. While the core universe of securities analyzed consists 
-        of S&P 500 companies, making the S&P 500 index the natural performance benchmark, the portfolio 
-        also extends its reach into other asset classes including commodities and international equity 
-        regions, with the objective of reducing overall portfolio volatility while simultaneously 
-        enhancing returns through broader diversification. The overarching performance goal is to 
-        deliver returns that are at least 2x those of the S&P 500 on a risk-adjusted basis, by 
-        capitalizing on short-to-medium term mispricings and momentum opportunities that traditional 
-        passive strategies are unable to exploit. To achieve this, portfolio allocations are actively 
-        reviewed and rebalanced on a monthly basis, ensuring that the weightings remain aligned with 
-        the latest signals produced by the AI model and reflect any meaningful shifts in the underlying 
-        macroeconomic or technical landscape. This disciplined, data-driven approach to portfolio 
-        construction seeks to deliver consistent outperformance while maintaining a clear and 
-        transparent framework that investors can follow and understand.
-      </p>
-    </div>
-
-    <!-- ===== Portfolio Images Section ===== -->
-    <div class="images-section">
-      <h3 class="images-title">Portfolio Performance Snapshots</h3>
-      <div class="images-grid">
-        <div class="image-card">
-          <p class="image-label">Returns - YTD — May 4, 2026</p>
-          <img src="data/return_2026-05-04.png" alt="Return - YTD and over 12 months" class="portfolio-img" />
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== Tactical Portfolio Picks Section ===== -->
-    <div class="picks-section tactical-picks-section">
-      <h2 class="picks-title" style="color: #00c896;">
-        Tactical Rotation Portfolio Picks for 5/05/26
-      </h2>
-      <p class="picks-desc">
-        The securities listed below represent our current tactical rotation portfolio — a 
-        higher-frequency strategy that refreshes every two to four weeks to adapt to shifting 
-        market dynamics, sector momentum, and macroeconomic signals. Unlike the fundamental 
-        picks which are held through the quarter, these selections are actively managed to 
-        capture short-to-medium term opportunities across equities, commodities, and 
-        sector ETFs. Greater portfolio turnover is an intentional feature of this strategy, 
-        allowing it to respond more rapidly to changing conditions and reduce exposure to 
-        deteriorating trends while rotating into emerging ones.
-      </p>
-      <div class="picks-grid" id="tacticalPicksGrid"></div>
-      <!-- Tactical Calculator Button -->
-      <div class="calc-launcher-section" style="margin-top:20px;border-left-color:#00c896;">
-        <h3 class="calc-launcher-title" style="font-size:16px;color:#00c896;">
-          Tactical Portfolio Share Calculator
-        </h3>
-        <p class="calc-launcher-desc">
-          Calculate the number of shares to purchase for each tactical rotation pick
-          based on an optimized distribution of your equity allocation.
-          This portfolio refreshes every 2 to 4 weeks.
-        </p>
-        <div id="tacCalcBtnStatus" class="calc-btn-status">
-          ⏳ Waiting for Tactical prices to load...
-        </div>
-        <button id="tacCalcBtn"
-                onclick="openTacticalCalculator()"
-                class="calc-launch-btn"
-                style="background:linear-gradient(145deg,#00c896,#009e75);
-                      box-shadow:0 2px 8px rgba(0,200,150,0.3);"
-                disabled>
-          Open Tactical Calculator
-        </button>
-      </div>
-    </div>
-
-
-
-    <!-- Navigation Buttons -->
-    <div class="chart-buttons">
-      <h3>Select one of the chart options below or the bonds selection, for further information and analysis on separate pages:</h3>
-      <button onclick="window.location='roa_chart.html'">Entry Price vs ROA</button>
-      <button onclick="window.location='ni_rev_roe.html'">NI + Revenue vs ROE</button>
-      <button onclick="window.location='fcf_asset.html'">FCF/Revenue & Asset Turnover</button>
-      <button onclick="window.location='ni_rev_change.html'">NI & Revenue Changes</button>
-      <button onclick="window.location='bonds.html'" 
-              style="background: linear-gradient(145deg, #00b4d8, #0077b6); margin-top: 8px;">
-        Bond ETF Guide & Education
-      </button>
-    </div>
-
-    <!-- ===== Retirement Analysis Section ===== -->
-    <!-- ===== Retirement Analysis Section ===== -->
-    <!-- ===== Retirement Analysis Section ===== -->
-    <div class="retirement-section">
-      <h2 class="retirement-title">Retirement & Financial Scenario Analysis Tool</h2>
-      
-      <p class="retirement-desc">
-        The spreadsheet available for download below is a comprehensive financial planning tool 
-        designed to take you from simple to complex financial analysis — giving you a clear picture 
-        of where you stand today and what the future may hold based on the specific actions and 
-        decisions you make along the way. Built with flexibility at its core, the tool allows you 
-        to construct multiple financial scenarios and evaluate how different choices — such as 
-        changes in savings rate, continuing to work in a semi or quasi-retired capacity, investment 
-        returns, retirement age, or spending habits — can dramatically alter your long-term financial 
-        outcomes. Whether you are just starting to plan for retirement or are already in the later 
-        stages of your career, the model adapts to your situation and projects forward with precision. 
-        It places particular emphasis on the outer years of retirement, where the compounding effects 
-        of early decisions become most apparent and where financial security matters most. Beyond the 
-        built-in simulations described below, the spreadsheet is fully adjustable and can be tailored 
-        to model virtually any financial scenario you can imagine — the inputs, assumptions, and 
-        structure are designed to be flexible enough to accommodate unique situations, unconventional 
-        retirement paths, and any combination of financial variables that reflect your personal 
-        circumstances. Simply input your current financial details, define your assumptions, and let 
-        the model do the rest — giving you the clarity and confidence to make better financial 
-        decisions today for a more secure tomorrow.
-      </p>
-
-      <!-- Monte Carlo Section -->
-      <div class="retirement-monte-carlo">
-        <h3 class="retirement-subtitle">Monte Carlo Retirement Simulations</h3>
-        <p class="retirement-desc">
-          The Analysis sheet includes three built-in simulations that run thousands of Monte Carlo 
-          iterations against your inputs to stress-test your retirement plan. Each simulation uses 
-          a 15% failure threshold — meaning the plan is considered viable when the probability of 
-          running out of money falls below that level.
-        </p>
-
-        <!-- Simulation 1 -->
-        <div class="simulation-card">
-          <div class="simulation-header">
-            <span class="simulation-number">1</span>
-            <h4 class="simulation-title">When can I retire?</h4>
-          </div>
-          <p class="simulation-desc">
-            Uses your current savings rate and portfolio to find the earliest age at which your 
-            plan is viable. Starting from your target retirement age, the model runs full Monte 
-            Carlo iterations and advances the retirement age one year at a time until the failure 
-            probability drops below 15%. The result tells you the earliest realistic retirement 
-            age and estimates the legacy you are likely to leave behind — both under average 
-            conditions and through strategic investment.
+        <!-- Spreadsheet Preview -->
+        <div class="spreadsheet-preview">
+          <h3 class="preview-title">📋 Preview the Spreadsheet</h3>
+          <p class="preview-desc">
+            Select a sheet below to preview its contents directly on this page.
           </p>
-        </div>
-
-        <!-- Simulation 2 -->
-        <div class="simulation-card">
-          <div class="simulation-header">
-            <span class="simulation-number">2</span>
-            <h4 class="simulation-title">How much do I need to save?</h4>
+          <div class="preview-tabs" id="previewTabs"></div>
+          <div id="spreadsheet-container" class="spreadsheet-container">
+            <p style="color:#aaa;text-align:center;padding:20px;">
+              Click a sheet tab above to preview it here.
+            </p>
           </div>
-          <p class="simulation-desc">
-            Locks in your target retirement age and finds the minimum annual contributions needed 
-            to make it work. If your current savings rate already passes the threshold, the 
-            simulation confirms your plan is on track. Otherwise it increases both your deferred 
-            tax and taxable contributions by 10% per step — up to the IRS annual limit of $26,000 
-            for deferred accounts — and reruns the model until the failure rate falls below 15%. 
-            The result shows exactly how much you need to set aside each year to retire on schedule.
-          </p>
-        </div>
-
-        <!-- Simulation 3 -->
-        <div class="simulation-card">
-          <div class="simulation-header">
-            <span class="simulation-number">3</span>
-            <h4 class="simulation-title">Can I retire earlier?</h4>
-          </div>
-          <p class="simulation-desc">
-            Lets you enter a younger target retirement age and immediately tests whether your 
-            current savings can support it. If not, it applies the same 10% step-up logic as 
-            Simulation 2 to find the savings level that makes the earlier age achievable. The 
-            result gives you a clear, actionable savings target paired with projected legacy 
-            values — so you can decide whether retiring earlier is worth the increased 
-            contribution required.
-          </p>
-        </div>
-
-        <!-- Simulation 4 -->
-        <div class="simulation-card">
-          <div class="simulation-header">
-            <span class="simulation-number">4</span>
-            <h4 class="simulation-title">How do major withdrawals impact my retirement age?</h4>
-          </div>
-          <p class="simulation-desc">
-            Builds directly on Simulation 1 by taking your established retirement age and stress-testing 
-            it against up to four significant pre-retirement withdrawals — such as purchasing a second 
-            home, funding college tuition, or financing any other major life expense. For each withdrawal 
-            event, you will be prompted to provide four pieces of information: how many years from today 
-            the withdrawal will occur, the duration of the withdrawal in years if it spans more than one 
-            year, the dollar amount, and whether the funds will come from your taxable or deferred tax 
-            account. The simulation validates that sufficient funds exist in the selected account before 
-            proceeding — flagging any case where the balance falls short as a problem that needs to be 
-            addressed before the plan can be stress-tested. Each withdrawal is then applied directly to 
-            the appropriate rows in the model — row 19 for taxable account withdrawals and row 21 for 
-            deferred tax account withdrawals — across the correct time columns based on your current age 
-            and the number of years forward each event occurs. Once all withdrawals have been entered and 
-            applied, the model runs the same Monte Carlo iterations used in Simulation 1 to determine 
-            whether your retirement age remains achievable under the new cash flow constraints, or whether 
-            the withdrawals push your viable retirement age later. All original cell values are preserved 
-            and restored after the simulation completes, ensuring your base plan remains intact. The 
-            output mirrors Simulation 1 — showing your projected retirement age, expected legacy values 
-            under average and strategic investment conditions — with the addition of a clear statement 
-            indicating whether your retirement age remains unchanged or has been pushed out as a result 
-            of the planned withdrawals.
-          </p>
         </div>
 
       </div>
 
-      <!-- Enabling Macros Section -->
-      <div class="retirement-macros">
-        <h3 class="retirement-subtitle">Enabling Macros in Microsoft Excel</h3>
-        <p class="retirement-desc">
-          The <code class="inline-code">.xlsm</code> file requires macros to be enabled before 
-          the simulations can run. Follow the steps for your version of Excel:
-        </p>
-
-        <div class="macro-platforms">
-
-          <!-- Windows -->
-          <div class="macro-platform-card">
-            <h4 class="macro-platform-title">On Windows</h4>
-            <ol class="macro-steps">
-              <li>Open the file. Excel will show a yellow security bar at the top reading 
-                <em>"Macros have been disabled."</em></li>
-              <li>Click <strong>Enable Content</strong> in that bar. The simulations are now active.</li>
-              <li>If you do not see the bar, go to <strong>File → Options → Trust Center → 
-                Trust Center Settings → Macro Settings</strong> and select 
-                <strong>Enable all macros</strong>, then reopen the file.</li>
-            </ol>
-          </div>
-
-          <!-- Mac -->
-          <div class="macro-platform-card">
-            <h4 class="macro-platform-title">On Mac</h4>
-            <ol class="macro-steps">
-              <li>Open the file. A dialog may appear warning that macros are disabled.</li>
-              <li>Click <strong>Enable Macros</strong>. If the dialog does not appear, go to 
-                <strong>Excel → Preferences → Security</strong> and enable macros from there.</li>
-              <li>Save the file after enabling to retain the setting for future sessions.</li>
-            </ol>
-          </div>
-
-        </div>
-
-        <p class="macro-note">
-          ⚠️ If you are on a managed corporate device, your IT policy may restrict macros. 
-          In that case, contact your IT department to whitelist the file or adjust macro 
-          security settings.
-        </p>
+      <div class="back-to-top-row">
+        <a href="#top" class="back-to-top-btn">↑ Back to Top</a>
       </div>
-
-      <!-- Download Button -->
-      <a href="data/Retirement analysis_PROT14v4_p.xlsm" 
-        download 
-        class="retirement-download-btn">
-        ⬇️ Download Retirement Analysis Spreadsheet
-      </a>
-
-      <!-- Spreadsheet Preview Section -->
-      <div class="spreadsheet-preview">
-        <h3 class="preview-title">📋 Preview the Spreadsheet</h3>
-        <p class="preview-desc">
-          Select a sheet below to preview its contents directly on this page.
-        </p>
-        <div class="preview-tabs" id="previewTabs"></div>
-        <div id="spreadsheet-container" class="spreadsheet-container">
-          <p style="color:#aaa;text-align:center;padding:20px;">
-            Click a sheet tab above to preview it here.
-          </p>
-        </div>
-      </div>
-    </div>
+    </section>
 
     <script src="script.js"></script>
+
+    <!-- ===== Footer ===== -->
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="footer-logo-row">
+          <img src="data/CIS brand 2.webp"
+               alt="Correia Investment Solutions"
+               class="footer-logo"
+               onerror="this.style.display='none'" />
+          <span class="footer-brand">Correia Investment Solutions</span>
+        </div>
+        <p class="footer-disclaimer">
+          Correia Investment Solutions provides financial education, research tools, and 
+          model-driven analysis. Investing involves risk, including possible loss of principal. 
+          Past performance, backtested results, model outputs, and projections do not guarantee 
+          future results.
+        </p>
+        <div class="footer-links">
+          <a href="mailto:richcorreia.cfa@correiainvestmentsolutions.com" class="footer-link">
+            richcorreia.cfa@correiainvestmentsolutions.com
+          </a>
+          <span class="footer-divider">|</span>
+          <a href="https://www.youtube.com/channel/UC14YDZ4QVl5CKm8Y_TYwxKA"
+             target="_blank" class="footer-link">
+            YouTube Channel
+          </a>
+          <span class="footer-divider">|</span>
+          <a href="bonds.html" class="footer-link">Bond ETF Guide</a>
+        </div>
+        <p class="footer-copy">
+          &copy; 2026 Correia Investment Solutions. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
   </body>
 </html>
-
-
