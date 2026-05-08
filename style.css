@@ -42,7 +42,7 @@ body {
   min-width: 250px;
 }
 
-.company-title {
+/*.company-title {
   font-size: 38px;
   font-weight: 700;
   color: #00b4d8;
@@ -57,7 +57,7 @@ body {
   margin: 0 0 8px 0;
   letter-spacing: 0.3px;
   line-height: 1.6;
-}
+}*/
 
 .company-email {
   display: inline-block;
@@ -1646,3 +1646,33 @@ html {
   color: #00d4ff;
   text-decoration: underline;
 }
+
+/* ===== Banner Header ===== */
+.company-header-banner {
+  width: 100%;
+  background: #0a0f1e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== Banner Image ===== */
+.company-banner-img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.company-banner-contact {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 24px;
+  border-bottom: 1px solid #1a2a3a;
+}
+
