@@ -59,9 +59,13 @@ def main():
     # Add new subscriber
     now = datetime.now(timezone.utc)
     subscribers.append({
-        "email":       email,
+        "email":        email,
         "subscribedAt": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "active":      True
+        "active":       True,
+        "notifications": {
+            "tactical": True,
+            "q2":       True
+        }
     })
 
     data["subscribers"] = subscribers

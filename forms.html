@@ -447,17 +447,18 @@
       <div class="form-card-header">
         <div class="form-card-icon"></div>
         <div>
-          <div class="form-card-title">Tactical Portfolio Change Alerts</div>
-          <div class="form-card-subtitle">Get notified when the tactical rotation portfolio updates</div>
+          <div class="form-card-title">Portfolio Change Alerts</div>
+          <div class="form-card-subtitle">Get notified when the portfolios update</div>
         </div>
       </div>
 
       <div class="form-card-body">
         <p class="form-desc">
-          The tactical rotation portfolio refreshes every two to four weeks based on macroeconomic
-          signals, technical indicators, and AI-driven optimization. Enter your email below to
-          receive an automatic notification the moment the portfolio changes — including the
-          updated securities and allocation percentages.
+          Sign up once to receive notifications for both portfolios — the tactical 
+          rotation portfolio which refreshes every two to four weeks, and the 
+          fundamental portfolio which rotates every three to five months. You will 
+          receive an automatic email notification whenever either portfolio changes, 
+          including the updated securities and allocation percentages.
         </p>
 
         <div class="form-group">
@@ -478,7 +479,7 @@
         </div>
 
         <button class="form-submit" id="submitBtn" onclick="handleSubscribe()">
-          Subscribe to Tactical Portfolio Alerts →
+          Subscribe to Portfolio Alerts →
         </button>
 
         <div class="form-result" id="formResult"></div>
@@ -497,7 +498,7 @@
       <p style="font-size:22px;margin-bottom:12px;"></p>
       <p>
         Additional forms will be added here as new features and services become available —
-        such as Q2 fundamental pick alerts, monthly market commentary, and retirement
+        such as monthly market commentary, and retirement
         planning newsletter sign-up.
       </p>
     </div>
@@ -585,9 +586,9 @@
           body: JSON.stringify({
             access_key:   WEB3FORMS_KEY,
             email:        email,
-            subject:      "New Tactical Portfolio Alert Subscriber — CIS",
+            subject:      "New Portfolio Alert Subscriber — CIS",
             from_name:    "Correia Investment Solutions Website",
-            message:      `New subscriber: ${email}\nSource: Tactical Portfolio Alerts Form\nDate: ${new Date().toISOString()}`,
+            message:      `New subscriber: ${email}\nSource: Portfolio Alerts Form\nDate: ${new Date().toISOString()}`,
             // Honeypot spam protection
             botcheck:     ""
           })
@@ -599,10 +600,10 @@
           emailInput.className  = "form-input success";
           emailInput.value      = "";
           result.className      = "form-result success";
-          result.innerHTML      = `
-            ✅ <strong>Thank you!</strong> You are now subscribed to tactical portfolio alerts.
-            You will receive an email notification the next time the portfolio changes.
-            A confirmation has been sent to your inbox.
+          result.innerHTML = `
+            ✅ <strong>Thank you!</strong> You are now subscribed to both the 
+            tactical rotation and Q2 fundamental portfolio alerts. You will 
+            receive an email notification whenever either portfolio changes.
           `;
           submitBtn.textContent = "Subscribed ✓";
           submitBtn.style.background = "linear-gradient(135deg, #00c896, #009e75)";
