@@ -1,3 +1,33 @@
+// ============ DETECT HARD REFRESH ============
+// Clears proxy refresh timestamp on hard page load
+// so stale prices always trigger a fresh proxy fetch
+// Uses performance.navigation for older browsers and
+// navigation entries for modern browsers
+
+(function detectHardRefresh() {
+  let isHardRefresh = false;
+
+  // Modern browsers
+  if (window.performance && performance.getEntriesByType) {
+    const nav = performance.getEntriesByType("navigation")[0];
+    if (nav && (nav.type === "reload" || nav.type === "navigate")) {
+      isHardRefresh = true;
+    }
+  }
+
+  // Fallback for older browsers
+  if (!isHardRefresh && window.performance && performance.navigation) {
+    if (performance.navigation.type === 1) { // 1 = reload
+      isHardRefresh = true;
+    }
+  }
+
+  if (isHardRefresh) {
+    sessionStorage.removeItem("last_proxy_refresh");
+    console.log("Hard refresh detected — proxy refresh stamp cleared");
+  }
+})();
+
 // ==================== CONFIG ====================
 const DATA_PATH = "data/merged_predictions_v2_web_032526.csv";
 let globalData = [];
@@ -882,6 +912,23 @@ function loadPrice(key) {
   }
 }
 
+
+
+// ============ PROXY REFRESH TRACKER ============   ← ADD HERE
+// Tracks when proxies last ran successfully
+// Prevents duplicate proxy runs within 30 minutes
+
+function saveProxyRefreshTime() {
+  sessionStorage.setItem("last_proxy_refresh", Date.now().toString());
+}
+
+function wasProxyRefreshedRecently() {
+  const last = sessionStorage.getItem("last_proxy_refresh");
+  if (!last) return false;
+  const ageMs = Date.now() - parseInt(last);
+  return ageMs < 30 * 60 * 1000;
+}
+
 // ============ PICK PRICES FROM JSON FILE ====================
 // Loaded from data/pick_prices.json which is updated every 15min
 // by GitHub Action during market hours — no proxy needed
@@ -899,26 +946,21 @@ async function loadPickPricesFromFile() {
     pickPricesCache   = data.prices  || {};
     pickPricesUpdated = data.updated || null;
 
-    console.log(`Pick prices loaded from file — last updated: ${pickPricesUpdated}`);
+    console.log(`Pick prices loaded — last updated: ${pickPricesUpdated}`);
 
-    // ===== CHECK STALENESS DURING MARKET HOURS =====
-    if (pickPricesUpdated && isMarketHours()) {
-      const fileTime = new Date(pickPricesUpdated.replace(" UTC", "Z"));
-      const ageMs    = Date.now() - fileTime.getTime();
-      const ageMin   = Math.round(ageMs / 60000);
-
-      if (ageMs > 30 * 60 * 1000) {
-        // File is stale during market hours — signal to use proxies
-        console.warn(`⚠️ pick_prices.json is ${ageMin} min old during market hours — proxies will be used`);
-        pickPricesCache = {}; // clear cache so proxies fetch fresh prices
-        return true;          // return true so picks still load, just via proxy
-      } else {
-        console.log(`✅ File is ${ageMin} min old — fresh enough, using file prices`);
+    // ===== STALENESS CHECK =====
+    if (isPickPricesStale()) {
+      if (isMarketHours()) {
+        console.warn("Market open + stale file → proxy will fetch fresh prices");
+      } else if (isAfterMarketClose()) {
+        console.warn("After close + stale file → proxy will fetch closing prices (one-time)");
       }
-    } else if (pickPricesUpdated && !isMarketHours()) {
-      console.log("Market closed — using file prices regardless of age");
+      // Clear cache so proxy fetches run
+      pickPricesCache = {};
+      return true;
     }
 
+    console.log("✅ File prices are fresh — applying to cards");
     return true;
 
   } catch (e) {
@@ -927,41 +969,77 @@ async function loadPickPricesFromFile() {
   }
 }
 
-// ===== MARKET HOURS CHECK =====
+// ============ MARKET HOURS CHECK ============
 function isMarketHours() {
-  const now     = new Date();
-  const utcHour = now.getUTCHours();
-  const utcMin  = now.getUTCMinutes();
-  const weekday = now.getUTCDay(); // 0=Sun 6=Sat
-
-  // Closed on weekends
+  const now        = new Date();
+  const weekday    = now.getUTCDay();
   if (weekday === 0 || weekday === 6) return false;
 
-  // Market open: 9:30am ET = 13:30 UTC (EDT)
-  // Market close + 1hr buffer: 5:00pm ET = 21:00 UTC
-  const utcMinutes = utcHour * 60 + utcMin;
-  return utcMinutes >= 810 && utcMinutes <= 1260; // 13:30 to 21:00
+  const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  // 13:30 UTC = 9:30am ET open
+  // 20:00 UTC = 4:00pm ET close
+  return utcMinutes >= 810 && utcMinutes < 1200;
 }
 
-// ============ CHECK IF FILE PRICES ARE STALE ====================
+// ============ CHECK IF JUST AFTER CLOSE ============
+// Returns true if we are within 2 hours after market close
+// This is the window where we want fresh closing prices
+function isAfterMarketClose() {
+  const now        = new Date();
+  const weekday    = now.getUTCDay();
+  if (weekday === 0 || weekday === 6) return false;
 
+  const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  // 20:00 UTC = 4pm ET close
+  // 22:00 UTC = 6pm ET (2hr window after close)
+  return utcMinutes >= 1200 && utcMinutes <= 1320;
+}
+
+// ============ FILE STALENESS CHECK ============
 function isPickPricesStale() {
-  if (!pickPricesUpdated) return true; // no file loaded at all
+  if (!pickPricesUpdated) return true;
 
   try {
-    // Parse the timestamp from the file e.g. "2026-05-01 18:00 UTC"
-    const fileTime = new Date(pickPricesUpdated.replace(" UTC", "Z"));
-    const ageMs    = Date.now() - fileTime.getTime();
-    const ageMin   = Math.round(ageMs / 60000);
+    const fileTime = new Date(
+      pickPricesUpdated
+        .replace(" UTC", "")
+        .replace(" ", "T")
+        + "Z"
+    );
+    const ageMs  = Date.now() - fileTime.getTime();
+    const ageMin = Math.round(ageMs / 60000);
 
     console.log(`pick_prices.json age: ${ageMin} minutes`);
 
-    // Consider stale if older than 30 minutes
-    return ageMs > 30 * 60 * 1000;
+    if (isMarketHours()) {
+      const stale = ageMs > 30 * 60 * 1000;
+      if (stale) console.warn(`⚠️ File stale during market hours (${ageMin}min)`);
+      return stale;
+    }
+
+    if (isAfterMarketClose()) {
+      const stale = ageMs > 30 * 60 * 1000;
+      if (stale) console.warn(`⚠️ File stale after close (${ageMin}min)`);
+      return stale;
+    }
+
+    // Outside market hours — check file age
+    if (ageMs > 30 * 60 * 1000) {
+      // File is older than 30 min — but did proxies already run recently?
+      if (wasProxyRefreshedRecently()) {
+        console.log(`File is ${ageMin}min old but proxies ran recently — skipping`);
+        return false; // proxies already got fresh prices this session
+      }
+      console.warn(`⚠️ File is ${ageMin}min old outside market hours — proxy refresh needed`);
+      return true;
+    }
+
+    console.log(`Outside market hours — file fresh enough (${ageMin}min old)`);
+    return false;
 
   } catch (e) {
     console.warn("Could not parse file timestamp:", e.message);
-    return true; // assume stale if can't parse
+    return true;
   }
 }
 
@@ -983,19 +1061,37 @@ async function refreshPickPrices() {
     sessionStorage.removeItem(`price_cache_tac_${ticker}`);
   });
 
-  // Reload file
+  // Re-fetch the file
   await loadPickPricesFromFile();
 
-  // Check if file is fresh or stale
   if (isPickPricesStale()) {
-    console.warn("⚠️ File is still stale after refresh — GitHub Action may be delayed");
-    // Don't apply stale file prices — let existing prices stay on screen
-    // Proxy fetches will handle updates when user next interacts
+    // File is stale — GitHub Action missed its window
+    // Fetch fresh prices via proxy WITHOUT rebuilding the card grid
+    console.warn("⚠️ File stale — fetching fresh prices via proxy...");
+
+    // Fetch all tickers via proxy with stagger
+    const allQ2Needed = [...Q2_PICKS];
+    const allTacNeeded = [...TACTICAL_PICKS];
+
+    // Deduplicate tickers that appear in both (e.g. MU)
+    const allUnique = [...new Set([...allQ2Needed, ...allTacNeeded])];
+
+    for (let i = 0; i < allUnique.length; i++) {
+      await new Promise(r => setTimeout(r, i * 400));
+      const ticker = allUnique[i];
+
+      // Fetch and apply directly — no card rebuild
+      if (Q2_PICKS.includes(ticker))       fetchPickPrice(ticker);
+      if (TACTICAL_PICKS.includes(ticker)) fetchTacticalPrice(ticker);
+    }
+
+    console.log(`Proxy refresh started for ${allUnique.length} tickers`);
+    lastPriceRefresh = Date.now();
     return;
   }
 
   // File is fresh — apply to all cards
-  Q2_PICKS.forEach(ticker => applyFilePriceToQ2Card(ticker));
+  Q2_PICKS.forEach(ticker      => applyFilePriceToQ2Card(ticker));
   TACTICAL_PICKS.forEach(ticker => applyFilePriceToTacticalCard(ticker));
 
   lastPriceRefresh = Date.now();
@@ -1343,6 +1439,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
+    saveProxyRefreshTime();
 
     document.getElementById(`price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
@@ -1620,6 +1717,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
+    saveProxyRefreshTime();
 
     document.getElementById(`tactical-price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
