@@ -36,6 +36,7 @@ jobs:
 
       - name: Send Q2 email notifications if changed
         if: steps.check.outputs.portfolio_changed == 'true'
+        continue-on-error: true
         env:
           SENDGRID_API_KEY:    ${{ secrets.SENDGRID_API_KEY }}
           SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
