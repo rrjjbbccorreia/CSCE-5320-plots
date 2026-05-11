@@ -1676,3 +1676,16 @@ html {
   border-bottom: 1px solid #1a2a3a;
 }
 
+/* ===== Price Refreshing Indicator ===== */
+.price-refreshing {
+  font-size: 10px;
+  color: #555;
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1;   }
+}

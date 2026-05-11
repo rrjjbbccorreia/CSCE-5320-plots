@@ -1288,6 +1288,20 @@ async function loadQ2Picks() {
   }
 
   // ===== STEP 4: Proxy fetch =====
+
+  // If file is stale — show refreshing indicator on all cards
+  if (fileIsStale) {
+    needsProxy.forEach(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
+      if (priceEl) {
+        const currentHtml = priceEl.innerHTML;
+        priceEl.innerHTML = currentHtml +
+          `<div class="price-refreshing">⟳ refreshing...</div>`;
+      }
+    });
+  }
+
+
   for (let i = 0; i < needsProxy.length; i++) {
     await new Promise(resolve => setTimeout(resolve, i * 400));
     fetchPickPrice(needsProxy[i]);
@@ -1456,14 +1470,20 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     }
 
   } catch (err) {
+    // Remove refreshing indicator if showing
+    const priceEl = document.getElementById(`price-${ticker}`);
+    if (priceEl) {
+      const refreshEl = priceEl.querySelector(".price-refreshing");
+      if (refreshEl) refreshEl.remove();
+    }
+
     if (retryCount < maxRetries - 1) {
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
-      // Fall back to file price before showing unavailable
       const applied = applyFilePriceToQ2Card(ticker);
       if (!applied) {
-        document.getElementById(`price-${ticker}`).innerHTML =
+        priceEl.innerHTML =
           "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
       }
     }
@@ -1543,6 +1563,19 @@ async function loadTacticalPicks() {
   }
 
   // ===== STEP 4: Proxy fetch for missing =====
+  
+  // If file is stale — show refreshing indicator on all cards
+  if (fileIsStale) {
+    needsProxy.forEach(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
+      if (priceEl) {
+        const currentHtml = priceEl.innerHTML;
+        priceEl.innerHTML = currentHtml +
+          `<div class="price-refreshing">⟳ refreshing...</div>`;
+      }
+    });
+  }
+  
   for (let i = 0; i < needsProxy.length; i++) {
     await new Promise(resolve => setTimeout(resolve, i * 400));
     fetchTacticalPrice(needsProxy[i]);
@@ -1734,14 +1767,20 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     }
 
   } catch (err) {
+    // Remove refreshing indicator if showing
+    const priceEl = document.getElementById(`price-${ticker}`);
+    if (priceEl) {
+      const refreshEl = priceEl.querySelector(".price-refreshing");
+      if (refreshEl) refreshEl.remove();
+    }
+
     if (retryCount < maxRetries - 1) {
       const waitTime = (retryCount + 1) * 3000;
-      setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
+      setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
-      // Fall back to file price
-      const applied = applyFilePriceToTacticalCard(ticker);
+      const applied = applyFilePriceToQ2Card(ticker);
       if (!applied) {
-        document.getElementById(`tactical-price-${ticker}`).innerHTML =
+        priceEl.innerHTML =
           "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
       }
     }
