@@ -1305,11 +1305,11 @@ async function loadQ2Picks() {
   if (fileIsStale) {
     needsProxy.forEach(ticker => {
       const priceEl = document.getElementById(`price-${ticker}`);
-      if (priceEl) {
-        const currentHtml = priceEl.innerHTML;
-        priceEl.innerHTML = currentHtml +
-          `<div class="price-refreshing">⟳ refreshing...</div>`;
-      }
+      //if (priceEl) {
+      //  const currentHtml = priceEl.innerHTML;
+      //  priceEl.innerHTML = currentHtml +
+      //    `<div class="price-refreshing">⟳ refreshing...</div>`;
+      //}
     });
   }
 
@@ -1591,10 +1591,10 @@ async function loadTacticalPicks() {
   // Add refreshing indicator to any not already showing it
   if (fileIsStale) {
     needsProxy.forEach(ticker => {
-      const priceEl = document.getElementById(`tactical-price-${ticker}`); // ← fixed ID
-      if (priceEl && !priceEl.querySelector(".price-refreshing")) {
-        priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
-      }
+      const priceEl = document.getElementById(`tactical-price-${ticker}`); 
+      //if (priceEl && !priceEl.querySelector(".price-refreshing")) {
+      //  priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
+      //}
     });
   }
 
