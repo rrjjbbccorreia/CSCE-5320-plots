@@ -10,21 +10,23 @@
   // Modern browsers
   if (window.performance && performance.getEntriesByType) {
     const nav = performance.getEntriesByType("navigation")[0];
-    if (nav && (nav.type === "reload" || nav.type === "navigate")) {
+    if (nav && nav.type === "reload") {  // ← remove "navigate"
       isHardRefresh = true;
     }
   }
 
   // Fallback for older browsers
   if (!isHardRefresh && window.performance && performance.navigation) {
-    if (performance.navigation.type === 1) { // 1 = reload
+    if (performance.navigation.type === 1) { // 1 = reload only
       isHardRefresh = true;
     }
   }
 
   if (isHardRefresh) {
     sessionStorage.removeItem("last_proxy_refresh");
-    console.log("Hard refresh detected — proxy refresh stamp cleared");
+    sessionStorage.removeItem("last_price_refresh");
+    sessionStorage.removeItem("last_price_refresh_source");
+    console.log("Hard refresh detected — all refresh stamps cleared");
   }
 })();
 
@@ -929,6 +931,38 @@ function wasProxyRefreshedRecently() {
   return ageMs < 30 * 60 * 1000;
 }
 
+// ============ FILE + CACHE FRESHNESS TRACKER ============
+// During market hours — 15 min is fresh enough
+// Prevents unnecessary proxy calls when file is being updated regularly
+
+const MARKET_FRESH_MS  = 15 * 60 * 1000; // 15 minutes
+const OUTSIDE_FRESH_MS = 30 * 60 * 1000; // 30 minutes
+
+function savePriceRefreshTime(source) {
+  // source = "file" or "proxy"
+  sessionStorage.setItem("last_price_refresh",      Date.now().toString());
+  sessionStorage.setItem("last_price_refresh_source", source);
+}
+
+function getPriceRefreshAge() {
+  const last = sessionStorage.getItem("last_price_refresh");
+  if (!last) return Infinity;
+  return Date.now() - parseInt(last);
+}
+
+function wasPricesRefreshedRecently() {
+  const ageMs    = getPriceRefreshAge();
+  const source   = sessionStorage.getItem("last_price_refresh_source") || "unknown";
+  const threshold = isMarketHours() ? MARKET_FRESH_MS : OUTSIDE_FRESH_MS;
+
+  if (ageMs < threshold) {
+    console.log(`Prices fresh — last ${source} refresh was ${Math.round(ageMs/60000)}min ago`);
+    return true;
+  }
+  return false;
+}
+
+
 // ============ PICK PRICES FROM JSON FILE ====================
 // Loaded from data/pick_prices.json which is updated every 15min
 // by GitHub Action during market hours — no proxy needed
@@ -948,18 +982,21 @@ async function loadPickPricesFromFile() {
 
     console.log(`Pick prices loaded — last updated: ${pickPricesUpdated}`);
 
-    // ===== STALENESS CHECK =====
+    // Check staleness
     if (isPickPricesStale()) {
       if (isMarketHours()) {
         console.warn("Market open + stale file → proxy will fetch fresh prices");
       } else if (isAfterMarketClose()) {
-        console.warn("After close + stale file → proxy will fetch closing prices (one-time)");
+        console.warn("After close + stale file → proxy will fetch closing prices");
+      } else {
+        console.warn("Outside market hours + stale file → proxy will fetch");
       }
-      // Clear cache so proxy fetches run
       pickPricesCache = {};
       return true;
     }
 
+    // File is fresh — save the refresh time
+    savePriceRefreshTime("file");
     console.log("✅ File prices are fresh — applying to cards");
     return true;
 
@@ -999,6 +1036,12 @@ function isAfterMarketClose() {
 function isPickPricesStale() {
   if (!pickPricesUpdated) return true;
 
+  // If prices were already refreshed recently this session
+  // (from file OR proxy) — skip the staleness check entirely
+  if (wasPricesRefreshedRecently()) {
+    return false;
+  }
+
   try {
     const fileTime = new Date(
       pickPricesUpdated
@@ -1012,25 +1055,24 @@ function isPickPricesStale() {
     console.log(`pick_prices.json age: ${ageMin} minutes`);
 
     if (isMarketHours()) {
-      const stale = ageMs > 30 * 60 * 1000;
+      const stale = ageMs > MARKET_FRESH_MS;
       if (stale) console.warn(`⚠️ File stale during market hours (${ageMin}min)`);
       return stale;
     }
 
     if (isAfterMarketClose()) {
-      const stale = ageMs > 30 * 60 * 1000;
+      const stale = ageMs > OUTSIDE_FRESH_MS;
       if (stale) console.warn(`⚠️ File stale after close (${ageMin}min)`);
       return stale;
     }
 
-    // Outside market hours — check file age
-    if (ageMs > 30 * 60 * 1000) {
-      // File is older than 30 min — but did proxies already run recently?
+    // Outside market hours
+    if (ageMs > OUTSIDE_FRESH_MS) {
       if (wasProxyRefreshedRecently()) {
-        console.log(`File is ${ageMin}min old but proxies ran recently — skipping`);
-        return false; // proxies already got fresh prices this session
+        console.log(`File old but proxy ran recently — skipping`);
+        return false;
       }
-      console.warn(`⚠️ File is ${ageMin}min old outside market hours — proxy refresh needed`);
+      console.warn(`⚠️ File is ${ageMin}min old outside market hours`);
       return true;
     }
 
@@ -1465,7 +1507,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
-    saveProxyRefreshTime();
+    savePriceRefreshTime("proxy");
 
     document.getElementById(`price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
@@ -1772,7 +1814,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
-    saveProxyRefreshTime();
+    savePriceRefreshTime("proxy");
 
     document.getElementById(`tactical-price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
