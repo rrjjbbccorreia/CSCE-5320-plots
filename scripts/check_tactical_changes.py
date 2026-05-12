@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 CURRENT_PICKS = [
     "CSGP", "NOW", "TER", "TSLA", "CRM",
-    "WM", "CHTR", "GS", "ADSK", "CFG",
+    "WM", "LYB", "GS", "ADSK", "CFG",
     "COPX", "FEZ", "XME", "VGK", "BRK-B", "GDX"
 ]
 
@@ -28,7 +28,7 @@ CURRENT_WEIGHTS = {
     "TSLA":  5.22,
     "CRM":   6.2,
     "WM":  7.32,
-    "CHTR": 5.77,
+    "LYB": 5.77,
     "GS":  6.86,
     "ADSK":  6.05,
     "CFG": 8.75,

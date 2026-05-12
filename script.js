@@ -1204,7 +1204,7 @@ const Q2_PICKS = [
 
 const TACTICAL_PICKS = [
   "CSGP", "NOW", "TER", "TSLA", "CRM",
-  "WM", "CHTR", "GS", "ADSK", "CFG",
+  "WM", "LYB", "GS", "ADSK", "CFG",
   "COPX", "FEZ", "XME", "VGK", "BRK-B", "GDX"
 ];
 
