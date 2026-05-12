@@ -1237,6 +1237,7 @@ async function loadQ2Picks() {
   await new Promise(resolve => setTimeout(resolve, 3000));
 
   // ===== STEP 1: Apply prices from session cache (instant) =====
+
   Q2_PICKS.forEach(ticker => {
     const cached = loadPrice(`q2_${ticker}`);
     if (cached) {
@@ -1252,6 +1253,17 @@ async function loadQ2Picks() {
       if (card) card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
     }
   });
+
+  // ===== If file is stale — mark ALL cards as refreshing =====
+  // Do this AFTER cache is applied so user sees old price + indicator
+  if (isPickPricesStale()) {
+    Q2_PICKS.forEach(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
+      if (priceEl && !priceEl.querySelector(".price-refreshing")) {
+        priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
+      }
+    });
+  }
 
   // ===== STEP 2: Apply any prices from JSON file =====
   Q2_PICKS.forEach(ticker => {
@@ -1520,6 +1532,7 @@ async function loadTacticalPicks() {
   console.log("Starting tactical picks fetch...");
 
   // ===== STEP 1: Apply session cache =====
+
   TACTICAL_PICKS.forEach(ticker => {
     const cached = loadPrice(`tac_${ticker}`);
     if (cached) {
@@ -1534,6 +1547,17 @@ async function loadTacticalPicks() {
       if (card) card.classList.add(cached.isPositive ? "pick-positive" : "pick-negative");
     }
   });
+
+  // ===== Show refreshing indicator if file is stale =====
+  // Do this right after cache so user sees old price + indicator immediately
+  if (isPickPricesStale()) {
+    TACTICAL_PICKS.forEach(ticker => {
+      const priceEl = document.getElementById(`tactical-price-${ticker}`);
+      if (priceEl && !priceEl.querySelector(".price-refreshing")) {
+        priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
+      }
+    });
+  }
 
   // ===== STEP 2: Apply file prices =====
   TACTICAL_PICKS.forEach(ticker => {
@@ -1563,19 +1587,17 @@ async function loadTacticalPicks() {
   }
 
   // ===== STEP 4: Proxy fetch for missing =====
-  
-  // If file is stale — show refreshing indicator on all cards
+
+  // Add refreshing indicator to any not already showing it
   if (fileIsStale) {
     needsProxy.forEach(ticker => {
-      const priceEl = document.getElementById(`price-${ticker}`);
-      if (priceEl) {
-        const currentHtml = priceEl.innerHTML;
-        priceEl.innerHTML = currentHtml +
-          `<div class="price-refreshing">⟳ refreshing...</div>`;
+      const priceEl = document.getElementById(`tactical-price-${ticker}`); // ← fixed ID
+      if (priceEl && !priceEl.querySelector(".price-refreshing")) {
+        priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
       }
     });
   }
-  
+
   for (let i = 0; i < needsProxy.length; i++) {
     await new Promise(resolve => setTimeout(resolve, i * 400));
     fetchTacticalPrice(needsProxy[i]);
