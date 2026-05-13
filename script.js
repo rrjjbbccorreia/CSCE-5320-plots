@@ -1325,10 +1325,14 @@ async function loadQ2Picks() {
 
   // If file is stale (>30 min old) force proxy fetch for ALL tickers
   // even ones that loaded from file — to get fresh prices
-  const fileIsStale  = isPickPricesStale();
-  const needsProxy   = fileIsStale
-    ? Q2_PICKS  // fetch everything fresh via proxy
-    : stillNeeded; // only fetch what file didn't cover
+  const fileIsStale = isPickPricesStale();
+
+  const needsProxy = fileIsStale
+    ? Q2_PICKS.filter(ticker => {
+        const cached = loadPrice(`q2_${ticker}`);
+        return !cached; // only proxy if no valid session cache entry
+      })
+    : stillNeeded;
 
   if (fileIsStale) {
     console.warn("pick_prices.json is stale (>30min) — falling back to proxy for all Q2 picks");
@@ -1647,7 +1651,15 @@ async function loadTacticalPicks() {
   });
 
   const fileIsStale = isPickPricesStale();
-  const needsProxy  = fileIsStale ? TACTICAL_PICKS : stillNeeded;
+
+  // Even if file is stale, only proxy tickers not already showing a live price
+  // from session cache — don't re-fetch what we already have
+  const needsProxy = fileIsStale
+    ? TACTICAL_PICKS.filter(ticker => {
+        const cached = loadPrice(`tac_${ticker}`);
+        return !cached; // only proxy if no valid session cache entry
+      })
+    : stillNeeded;
 
   if (fileIsStale) {
     console.warn("pick_prices.json is stale (>30min) — falling back to proxy for all Tactical picks");
