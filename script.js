@@ -1335,14 +1335,16 @@ async function loadQ2Picks() {
     : stillNeeded;
 
   if (fileIsStale) {
-    console.warn("pick_prices.json is stale (>30min) — falling back to proxy for all Q2 picks");
+    console.warn(`pick_prices.json is stale — ${needsProxy.length} Q2 picks need proxy, ${Q2_PICKS.length - needsProxy.length} served from session cache`);
   }
 
   console.log(`Q2 — ${Q2_PICKS.length - stillNeeded.length} loaded from cache/file, ${needsProxy.length} need proxy fetch`);
-
+  
   // If everything loaded from fresh file — skip proxy entirely
   if (needsProxy.length === 0) {
-    console.log("✅ All Q2 picks loaded from fresh file — no proxy needed!");
+    console.log(fileIsStale
+      ? "✅ All Q2 picks served from session cache — no proxy needed!"
+      : "✅ All Q2 picks loaded from fresh file — no proxy needed!");
     return;
   }
 
@@ -1662,13 +1664,15 @@ async function loadTacticalPicks() {
     : stillNeeded;
 
   if (fileIsStale) {
-    console.warn("pick_prices.json is stale (>30min) — falling back to proxy for all Tactical picks");
+    console.warn(`pick_prices.json is stale — ${needsProxy.length} Tactical picks need proxy, ${TACTICAL_PICKS.length - needsProxy.length} served from session cache`);
   }
 
   console.log(`Tactical — ${TACTICAL_PICKS.length - stillNeeded.length} from cache/file, ${needsProxy.length} need proxy`);
-
+  
   if (needsProxy.length === 0) {
-    console.log("✅ All tactical picks loaded from fresh file — no proxy needed!");
+    console.log(fileIsStale
+      ? "✅ All tactical picks served from session cache — no proxy needed!"
+      : "✅ All tactical picks loaded from fresh file — no proxy needed!");
     return;
   }
 
