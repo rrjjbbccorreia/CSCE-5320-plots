@@ -1524,22 +1524,53 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     }
 
   } catch (err) {
-    // Remove refreshing indicator if showing
-    const priceEl = document.getElementById(`price-${ticker}`);
+    const priceEl  = document.getElementById(`price-${ticker}`);
+    const changeEl = document.getElementById(`change-${ticker}`);
+
+    // Remove refreshing indicator
     if (priceEl) {
       const refreshEl = priceEl.querySelector(".price-refreshing");
       if (refreshEl) refreshEl.remove();
     }
 
     if (retryCount < maxRetries - 1) {
+      // Standard retry with backoff
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
-      const applied = applyFilePriceToQ2Card(ticker);
-      if (!applied) {
-        priceEl.innerHTML =
-          "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+      // All standard retries exhausted — try file cache as last resort
+      const fileData    = pickPricesCache[ticker];
+      const today       = new Date().toDateString();
+      const fileUpdated = pickPricesUpdated
+        ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
+        : null;
+      const isSameDay   = fileUpdated === today;
+      const appliedFromFile = isSameDay && fileData?.price
+        ? applyFilePriceToQ2Card(ticker)
+        : false;
+
+      if (appliedFromFile) {
+        // Show file price with ~ indicator
+        if (priceEl) {
+          priceEl.innerHTML =
+            `<span class="pick-price-value" title="Price from last file update — refreshing">
+              ~$${fileData.price.toFixed(2)}
+             </span>
+             <div class="price-refreshing" style="color:#888;">↻ retrying...</div>`;
+        }
+      } else if (!applyFilePriceToQ2Card(ticker)) {
+        // No file price available — show Yahoo link
+        if (priceEl) {
+          priceEl.innerHTML = `
+            <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
+               style="color:#00b4d8;font-size:11px;text-decoration:none;">
+              View on Yahoo →
+            </a>`;
+        }
       }
+
+      // Keep retrying in background every 5 minutes regardless
+      setTimeout(() => fetchPickPrice(ticker, 0), 5 * 60 * 1000);
     }
   }
 }
@@ -1831,22 +1862,53 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     }
 
   } catch (err) {
-    // Remove refreshing indicator if showing
-    const priceEl = document.getElementById(`tactical-price-${ticker}`);
+    const priceEl  = document.getElementById(`tactical-price-${ticker}`);
+    const changeEl = document.getElementById(`tactical-change-${ticker}`);
+
+    // Remove refreshing indicator
     if (priceEl) {
       const refreshEl = priceEl.querySelector(".price-refreshing");
       if (refreshEl) refreshEl.remove();
     }
 
     if (retryCount < maxRetries - 1) {
+      // Standard retry with backoff
       const waitTime = (retryCount + 1) * 3000;
-      setTimeout(() => fetchTacticalPickPrice(ticker, retryCount + 1), waitTime);
+      setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
     } else {
-      const applied = applyFilePriceToTacticalCard(ticker);
-      if (!applied) {
-        priceEl.innerHTML =
-          "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
+      // All standard retries exhausted — try file cache as last resort
+      const fileData    = pickPricesCache[ticker];
+      const today       = new Date().toDateString();
+      const fileUpdated = pickPricesUpdated
+        ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
+        : null;
+      const isSameDay   = fileUpdated === today;
+      const appliedFromFile = isSameDay && fileData?.price
+        ? applyFilePriceToTacticalCard(ticker)
+        : false;
+
+      if (appliedFromFile) {
+        // Show file price with ~ indicator
+        if (priceEl) {
+          priceEl.innerHTML =
+            `<span class="pick-price-value" title="Price from last file update — refreshing">
+              ~$${fileData.price.toFixed(2)}
+             </span>
+             <div class="price-refreshing" style="color:#888;">↻ retrying...</div>`;
+        }
+      } else if (!applyFilePriceToTacticalCard(ticker)) {
+        // No file price available — show Yahoo link
+        if (priceEl) {
+          priceEl.innerHTML = `
+            <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
+               style="color:#00b4d8;font-size:11px;text-decoration:none;">
+              View on Yahoo →
+            </a>`;
+        }
       }
+
+      // Keep retrying in background every 5 minutes regardless
+      setTimeout(() => fetchTacticalPrice(ticker, 0), 5 * 60 * 1000);
     }
   }
 }
