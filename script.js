@@ -1111,23 +1111,23 @@ async function refreshPickPrices() {
     // Fetch fresh prices via proxy WITHOUT rebuilding the card grid
     console.warn("⚠️ File stale — fetching fresh prices via proxy...");
 
-    // Fetch all tickers via proxy with stagger
-    const allQ2Needed = [...Q2_PICKS];
-    const allTacNeeded = [...TACTICAL_PICKS];
-
-    // Deduplicate tickers that appear in both (e.g. MU)
-    const allUnique = [...new Set([...allQ2Needed, ...allTacNeeded])];
-
-    for (let i = 0; i < allUnique.length; i++) {
-      await new Promise(r => setTimeout(r, i * 400));
-      const ticker = allUnique[i];
-
-      // Fetch and apply directly — no card rebuild
-      if (Q2_PICKS.includes(ticker))       fetchPickPrice(ticker);
-      if (TACTICAL_PICKS.includes(ticker)) fetchTacticalPrice(ticker);
+    // Fetch Q2 first
+    for (let i = 0; i < Q2_PICKS.length; i++) {
+      await new Promise(r => setTimeout(r, i * 500));
+      fetchPickPrice(Q2_PICKS[i]);
     }
 
-    console.log(`Proxy refresh started for ${allUnique.length} tickers`);
+    // Wait for Q2 to settle before starting tactical
+    await new Promise(r => setTimeout(r, Q2_PICKS.length * 500 + 5000));
+
+    // Then fetch tactical
+    for (let i = 0; i < TACTICAL_PICKS.length; i++) {
+      await new Promise(r => setTimeout(r, i * 500));
+      fetchTacticalPrice(TACTICAL_PICKS[i]);
+    }
+
+    console.log(`Proxy refresh started — Q2: ${Q2_PICKS.length}, Tactical: ${TACTICAL_PICKS.length}`);
+    savePriceRefreshTime("proxy");
     lastPriceRefresh = Date.now();
     return;
   }
@@ -1832,7 +1832,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
 
   } catch (err) {
     // Remove refreshing indicator if showing
-    const priceEl = document.getElementById(`price-${ticker}`);
+    const priceEl = document.getElementById(`tactical-price-${ticker}`);
     if (priceEl) {
       const refreshEl = priceEl.querySelector(".price-refreshing");
       if (refreshEl) refreshEl.remove();
@@ -1840,9 +1840,9 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
 
     if (retryCount < maxRetries - 1) {
       const waitTime = (retryCount + 1) * 3000;
-      setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
+      setTimeout(() => fetchTacticalPickPrice(ticker, retryCount + 1), waitTime);
     } else {
-      const applied = applyFilePriceToQ2Card(ticker);
+      const applied = applyFilePriceToTacticalCard(ticker);
       if (!applied) {
         priceEl.innerHTML =
           "<span style='color:#ff6b6b;font-size:12px;'>Unavailable</span>";
