@@ -1126,6 +1126,7 @@ async function refreshPickPrices() {
       fetchTacticalPrice(TACTICAL_PICKS[i]);
     }
 
+
     console.log(`Proxy refresh started — Q2: ${Q2_PICKS.length}, Tactical: ${TACTICAL_PICKS.length}`);
     savePriceRefreshTime("proxy");
     lastPriceRefresh = Date.now();
@@ -1507,7 +1508,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
-    savePriceRefreshTime("proxy");
+    // savePriceRefreshTime("proxy");
 
     document.getElementById(`price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
@@ -1845,7 +1846,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
-    savePriceRefreshTime("proxy");
+    // savePriceRefreshTime("proxy");
 
     document.getElementById(`tactical-price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
