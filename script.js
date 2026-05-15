@@ -23,10 +23,22 @@
   }
 
   if (isHardRefresh) {
+    // Clear refresh stamps
     sessionStorage.removeItem("last_proxy_refresh");
     sessionStorage.removeItem("last_price_refresh");
     sessionStorage.removeItem("last_price_refresh_source");
-    console.log("Hard refresh detected — all refresh stamps cleared");
+
+    // Also clear all price cache entries so proxies run fresh
+    const keysToRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith("price_cache_")) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => sessionStorage.removeItem(key));
+
+    console.log(`Hard refresh detected — stamps and ${keysToRemove.length} price caches cleared`);
   }
 })();
 
@@ -1297,9 +1309,11 @@ async function loadQ2Picks() {
     }
   });
 
-  // ===== If file is stale — mark ALL cards as refreshing =====
-  // Do this AFTER cache is applied so user sees old price + indicator
-  if (isPickPricesStale()) {
+  // Cache staleness result once — prevents double evaluation
+  const fileIsStale = isPickPricesStale();
+
+  // ===== Show refreshing indicator if file is stale =====
+  if (fileIsStale) {
     Q2_PICKS.forEach(ticker => {
       const priceEl = document.getElementById(`price-${ticker}`);
       if (priceEl && !priceEl.querySelector(".price-refreshing")) {
@@ -1323,14 +1337,11 @@ async function loadQ2Picks() {
     return el && !el.innerHTML.includes("pick-price-value");
   });
 
-  // If file is stale (>30 min old) force proxy fetch for ALL tickers
-  // even ones that loaded from file — to get fresh prices
-  const fileIsStale = isPickPricesStale();
-
+  // Use cached fileIsStale — don't call isPickPricesStale() again
   const needsProxy = fileIsStale
     ? Q2_PICKS.filter(ticker => {
         const cached = loadPrice(`q2_${ticker}`);
-        return !cached; // only proxy if no valid session cache entry
+        return !cached;
       })
     : stillNeeded;
 
@@ -1628,11 +1639,14 @@ async function loadTacticalPicks() {
     }
   });
 
+
+  // Cache staleness result once — prevents double evaluation
+  const fileIsStale = isPickPricesStale();
+
   // ===== Show refreshing indicator if file is stale =====
-  // Do this right after cache so user sees old price + indicator immediately
-  if (isPickPricesStale()) {
-    TACTICAL_PICKS.forEach(ticker => {
-      const priceEl = document.getElementById(`tactical-price-${ticker}`);
+  if (fileIsStale) {
+    Q2_PICKS.forEach(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
       if (priceEl && !priceEl.querySelector(".price-refreshing")) {
         priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
       }
@@ -1652,14 +1666,11 @@ async function loadTacticalPicks() {
     return el && !el.innerHTML.includes("pick-price-value");
   });
 
-  const fileIsStale = isPickPricesStale();
-
-  // Even if file is stale, only proxy tickers not already showing a live price
-  // from session cache — don't re-fetch what we already have
+  // Use cached fileIsStale — don't call isPickPricesStale() again
   const needsProxy = fileIsStale
-    ? TACTICAL_PICKS.filter(ticker => {
-        const cached = loadPrice(`tac_${ticker}`);
-        return !cached; // only proxy if no valid session cache entry
+    ? Q2_PICKS.filter(ticker => {
+        const cached = loadPrice(`q2_${ticker}`);
+        return !cached;
       })
     : stillNeeded;
 
