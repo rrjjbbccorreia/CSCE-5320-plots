@@ -1301,7 +1301,6 @@ async function loadQ2Picks() {
   await new Promise(resolve => setTimeout(resolve, 3000));
 
   // ===== STEP 1: Apply prices from session cache (instant) =====
-
   Q2_PICKS.forEach(ticker => {
     const cached = loadPrice(`q2_${ticker}`);
     if (cached) {
@@ -1322,10 +1321,13 @@ async function loadQ2Picks() {
   const fileIsStale = isPickPricesStale();
 
   // ===== Show refreshing indicator if file is stale =====
+  // Only on cards that don't already have a price from session cache
   if (fileIsStale) {
     Q2_PICKS.forEach(ticker => {
       const priceEl = document.getElementById(`price-${ticker}`);
-      if (priceEl && !priceEl.querySelector(".price-refreshing")) {
+      if (priceEl
+          && !priceEl.querySelector(".price-refreshing")
+          && !priceEl.innerHTML.includes("pick-price-value")) {
         priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
       }
     });
@@ -1359,9 +1361,17 @@ async function loadQ2Picks() {
   }
 
   console.log(`Q2 — ${Q2_PICKS.length - stillNeeded.length} loaded from cache/file, ${needsProxy.length} need proxy fetch`);
-  
-  // If everything loaded from fresh file — skip proxy entirely
+
+  // If everything loaded from cache — skip proxy entirely
   if (needsProxy.length === 0) {
+    // Clean up any refreshing indicators before returning
+    Q2_PICKS.forEach(ticker => {
+      const priceEl = document.getElementById(`price-${ticker}`);
+      if (priceEl) {
+        const refreshEl = priceEl.querySelector(".price-refreshing");
+        if (refreshEl) refreshEl.remove();
+      }
+    });
     console.log(fileIsStale
       ? "✅ All Q2 picks served from session cache — no proxy needed!"
       : "✅ All Q2 picks loaded from fresh file — no proxy needed!");
@@ -1405,7 +1415,9 @@ async function loadQ2Picks() {
       const el = document.getElementById(`price-${ticker}`);
       return el && (
         el.innerHTML.includes("Unavailable") ||
-        el.innerHTML.includes("Loading")
+        el.innerHTML.includes("Loading") ||
+        el.innerHTML.includes("refreshing") || 
+        el.innerHTML.includes("Retrying")       
       );
     });
 
@@ -1631,8 +1643,7 @@ async function loadTacticalPicks() {
   await waitForFundamentalPicksComplete();
   console.log("Starting tactical picks fetch...");
 
-  // ===== STEP 1: Apply session cache =====
-
+// ===== STEP 1: Apply session cache =====
   TACTICAL_PICKS.forEach(ticker => {
     const cached = loadPrice(`tac_${ticker}`);
     if (cached) {
@@ -1648,15 +1659,17 @@ async function loadTacticalPicks() {
     }
   });
 
-
   // Cache staleness result once — prevents double evaluation
   const fileIsStale = isPickPricesStale();
 
   // ===== Show refreshing indicator if file is stale =====
+  // Only on cards that don't already have a price from session cache
   if (fileIsStale) {
-    Q2_PICKS.forEach(ticker => {
-      const priceEl = document.getElementById(`price-${ticker}`);
-      if (priceEl && !priceEl.querySelector(".price-refreshing")) {
+    TACTICAL_PICKS.forEach(ticker => {
+      const priceEl = document.getElementById(`tactical-price-${ticker}`);
+      if (priceEl
+          && !priceEl.querySelector(".price-refreshing")
+          && !priceEl.innerHTML.includes("pick-price-value")) {
         priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
       }
     });
@@ -1677,8 +1690,8 @@ async function loadTacticalPicks() {
 
   // Use cached fileIsStale — don't call isPickPricesStale() again
   const needsProxy = fileIsStale
-    ? Q2_PICKS.filter(ticker => {
-        const cached = loadPrice(`q2_${ticker}`);
+    ? TACTICAL_PICKS.filter(ticker => {       // ← was Q2_PICKS
+        const cached = loadPrice(`tac_${ticker}`); // ← was q2_${ticker}
         return !cached;
       })
     : stillNeeded;
@@ -1688,8 +1701,16 @@ async function loadTacticalPicks() {
   }
 
   console.log(`Tactical — ${TACTICAL_PICKS.length - stillNeeded.length} from cache/file, ${needsProxy.length} need proxy`);
-  
+
   if (needsProxy.length === 0) {
+    // Clean up any refreshing indicators before returning
+    TACTICAL_PICKS.forEach(ticker => {
+      const priceEl = document.getElementById(`tactical-price-${ticker}`);
+      if (priceEl) {
+        const refreshEl = priceEl.querySelector(".price-refreshing");
+        if (refreshEl) refreshEl.remove();
+      }
+    });
     console.log(fileIsStale
       ? "✅ All tactical picks served from session cache — no proxy needed!"
       : "✅ All tactical picks loaded from fresh file — no proxy needed!");
