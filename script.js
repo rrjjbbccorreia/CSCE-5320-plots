@@ -7,38 +7,47 @@
 (function detectHardRefresh() {
   let isHardRefresh = false;
 
-  // Modern browsers
   if (window.performance && performance.getEntriesByType) {
     const nav = performance.getEntriesByType("navigation")[0];
-    if (nav && nav.type === "reload") {  // ← remove "navigate"
+    if (nav && nav.type === "reload") {
       isHardRefresh = true;
     }
   }
 
-  // Fallback for older browsers
   if (!isHardRefresh && window.performance && performance.navigation) {
-    if (performance.navigation.type === 1) { // 1 = reload only
+    if (performance.navigation.type === 1) {
       isHardRefresh = true;
     }
   }
 
   if (isHardRefresh) {
-    // Clear refresh stamps
+    // Always clear stamps
     sessionStorage.removeItem("last_proxy_refresh");
     sessionStorage.removeItem("last_price_refresh");
     sessionStorage.removeItem("last_price_refresh_source");
 
-    // Also clear all price cache entries so proxies run fresh
+    // Only clear price cache if prices are older than 15 minutes
+    // This allows immediate re-refresh to use recently fetched prices
+    const MAX_CACHE_AGE_MS = 15 * 60 * 1000;
     const keysToRemove = [];
+
     for (let i = 0; i < sessionStorage.length; i++) {
       const key = sessionStorage.key(i);
-      if (key && key.startsWith("price_cache_")) {
-        keysToRemove.push(key);
+      if (!key || !key.startsWith("price_cache_")) continue;
+      try {
+        const data   = JSON.parse(sessionStorage.getItem(key));
+        const ageMs  = Date.now() - data.savedAt;
+        if (ageMs > MAX_CACHE_AGE_MS) {
+          keysToRemove.push(key);
+        }
+      } catch (e) {
+        keysToRemove.push(key); // corrupt entry — remove it
       }
     }
+
     keysToRemove.forEach(key => sessionStorage.removeItem(key));
 
-    console.log(`Hard refresh detected — stamps and ${keysToRemove.length} price caches cleared`);
+    console.log(`Hard refresh — stamps cleared, ${keysToRemove.length} stale price caches cleared`);
   }
 })();
 
