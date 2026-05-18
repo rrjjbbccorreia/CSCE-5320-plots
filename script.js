@@ -1258,6 +1258,23 @@ function applyFilePriceToTacticalCard(ticker) {
   return true;
 }
 
+// ============ CHECK IF FILE PRICES ARE FROM TODAY ============
+function isFilePriceFromToday() {
+  if (!pickPricesUpdated) return false;
+  try {
+    const fileTime = new Date(
+      pickPricesUpdated
+        .replace(" UTC", "")
+        .replace(" ", "T")
+        + "Z"
+    );
+    return fileTime.toDateString() === new Date().toDateString();
+  } catch (e) {
+    return false;
+  }
+}
+
+
 // ============ Q2 FUNDAMENTAL PICKS ============
 const Q2_PICKS = [
   "ALB", "SPG", "ETR", "COST", "MU",
@@ -1431,15 +1448,23 @@ async function loadQ2Picks() {
     if (Date.now() - proxyStart > PROXY_TIMEOUT_MS) {
       console.warn(`Q2 — 30s passed, ${failedTickers.length} still missing — applying file prices as interim...`);
 
+      // 30s interim fallback
       failedTickers.forEach(ticker => {
-        const applied = applyFilePriceToQ2Card(ticker);
-        if (applied) {
-          console.log(`${ticker} — interim file price applied`);
+        const el = document.getElementById(`price-${ticker}`);
+        if (isFilePriceFromToday()) {                    // ← add check
+          const applied = applyFilePriceToQ2Card(ticker);
+          if (applied) {
+            console.log(`${ticker} — interim file price applied`);
+          } else {
+            if (el) el.innerHTML =
+              `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          }
         } else {
-          // No file price — show a neutral waiting message
-          const el = document.getElementById(`price-${ticker}`);
-          if (el) el.innerHTML =
-            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          // File is from a different day — don't show stale prices
+          if (el && !el.innerHTML.includes("pick-price-value")) {
+            el.innerHTML =
+              `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          }
         }
       });
 
@@ -1461,12 +1486,20 @@ async function loadQ2Picks() {
       console.warn(`⚠️ Q2 — no progress for ${maxRoundsNoProgress} rounds`);
       console.warn("Applying file prices as interim and pausing 2 minutes before retry...");
 
+      // maxRounds interim fallback
       failedTickers.forEach(ticker => {
-        const applied = applyFilePriceToQ2Card(ticker);
-        if (!applied) {
-          const el = document.getElementById(`price-${ticker}`);
-          if (el) el.innerHTML =
-            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+        const el = document.getElementById(`price-${ticker}`);
+        if (isFilePriceFromToday()) {                    // ← add check
+          const applied = applyFilePriceToQ2Card(ticker);
+          if (!applied) {
+            if (el) el.innerHTML =
+              `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          }
+        } else {
+          if (el && !el.innerHTML.includes("pick-price-value")) {
+            el.innerHTML =
+              `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          }
         }
       });
 
@@ -1765,7 +1798,7 @@ async function loadTacticalPicks() {
 
   await new Promise(resolve => setTimeout(resolve, needsProxy.length * 400 + 3000));
 
-  // ===== STEP 5: Retry loop — never gives up on Tactical =====
+// ===== STEP 5: Retry loop — never gives up on Tactical =====
   // Calculator depends on prices so we cannot end with Yahoo links
   let PROXY_TIMEOUT_MS      = 30000;
   let proxyStart            = Date.now();
@@ -1797,13 +1830,19 @@ async function loadTacticalPicks() {
       console.warn(`Tactical — 30s passed, ${failedTickers.length} still missing — applying file prices as interim...`);
 
       failedTickers.forEach(ticker => {
-        const applied = applyFilePriceToTacticalCard(ticker);
-        if (applied) {
-          console.log(`${ticker} — interim file price applied`);
+        const el = document.getElementById(`tactical-price-${ticker}`);
+        if (isFilePriceFromToday()) {
+          const applied = applyFilePriceToTacticalCard(ticker);
+          if (applied) {
+            console.log(`${ticker} — interim file price applied`);
+          } else {
+            if (el && !el.innerHTML.includes("pick-price-value"))
+              el.innerHTML = `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          }
         } else {
-          const el = document.getElementById(`tactical-price-${ticker}`);
-          if (el) el.innerHTML =
-            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          // File is from a different day — don't show stale prices
+          if (el && !el.innerHTML.includes("pick-price-value"))
+            el.innerHTML = `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
         }
       });
 
@@ -1826,11 +1865,17 @@ async function loadTacticalPicks() {
       console.warn("Applying file prices as interim and pausing 2 minutes before retry...");
 
       failedTickers.forEach(ticker => {
-        const applied = applyFilePriceToTacticalCard(ticker);
-        if (!applied) {
-          const el = document.getElementById(`tactical-price-${ticker}`);
-          if (el) el.innerHTML =
-            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+        const el = document.getElementById(`tactical-price-${ticker}`);
+        if (isFilePriceFromToday()) {
+          const applied = applyFilePriceToTacticalCard(ticker);
+          if (!applied) {
+            if (el && !el.innerHTML.includes("pick-price-value"))
+              el.innerHTML = `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+          }
+        } else {
+          // File is from a different day — don't show stale prices
+          if (el && !el.innerHTML.includes("pick-price-value"))
+            el.innerHTML = `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
         }
       });
 
