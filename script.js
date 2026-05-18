@@ -1400,66 +1400,95 @@ async function loadQ2Picks() {
 
   await new Promise(resolve => setTimeout(resolve, needsProxy.length * 400 + 3000));
 
-  // ===== STEP 5: 30 second timeout clock starts HERE =====
-  // Clock begins AFTER the first proxy attempt has had time to respond
-  const PROXY_TIMEOUT_MS = 30000;
-  const proxyStart       = Date.now();  // ← moved to here
-
+// ===== STEP 5: Retry loop — never gives up on Q2 =====
+  // Calculator depends on prices so we cannot end with Yahoo links
+  let PROXY_TIMEOUT_MS     = 30000;
+  let proxyStart           = Date.now();
   let retryRound           = 1;
   const maxRoundsNoProgress = 10;
   let roundsWithNoProgress  = 0;
-  let lastFailedCount       = stillNeeded.length;
+  let lastFailedCount       = needsProxy.length;
 
   while (true) {
     const failedTickers = Q2_PICKS.filter(ticker => {
       const el = document.getElementById(`price-${ticker}`);
       return el && (
         el.innerHTML.includes("Unavailable") ||
-        el.innerHTML.includes("Loading") ||
-        el.innerHTML.includes("refreshing") || 
-        el.innerHTML.includes("Retrying")       
+        el.innerHTML.includes("Loading")     ||
+        el.innerHTML.includes("refreshing")  ||
+        el.innerHTML.includes("Retrying")
       );
     });
 
+    // All done — exit loop
     if (failedTickers.length === 0) {
       console.log("✅ All Q2 picks loaded successfully!");
       break;
     }
 
-    // After 30 seconds of proxy attempts — fall back to file for remainders
+    // 30s passed — try file as interim but keep retrying
+    // Never show Yahoo link — calculator needs real prices
     if (Date.now() - proxyStart > PROXY_TIMEOUT_MS) {
-      console.log(`Q2 — 30s timeout reached, applying file prices for ${failedTickers.length} remaining...`);
+      console.warn(`Q2 — 30s passed, ${failedTickers.length} still missing — applying file prices as interim...`);
+
       failedTickers.forEach(ticker => {
         const applied = applyFilePriceToQ2Card(ticker);
-        if (!applied) {
+        if (applied) {
+          console.log(`${ticker} — interim file price applied`);
+        } else {
+          // No file price — show a neutral waiting message
           const el = document.getElementById(`price-${ticker}`);
-          if (el) el.innerHTML = `
-            <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
-               style="color:#00b4d8;font-size:11px;text-decoration:none;">
-               View on Yahoo →
-            </a>`;
+          if (el) el.innerHTML =
+            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
         }
       });
-      break;
+
+      // Reset clock and progress — keep trying
+      proxyStart           = Date.now();
+      roundsWithNoProgress = 0;
+      lastFailedCount      = failedTickers.length;
     }
 
+    // Check progress
     if (failedTickers.length >= lastFailedCount) {
       roundsWithNoProgress++;
     } else {
       roundsWithNoProgress = 0;
     }
 
+    // No progress for many rounds — pause 2 min then restart
     if (roundsWithNoProgress >= maxRoundsNoProgress) {
-      console.warn("⚠️ Q2 — stopping proxy retries, using file prices for remainder");
-      failedTickers.forEach(ticker => applyFilePriceToQ2Card(ticker));
-      break;
+      console.warn(`⚠️ Q2 — no progress for ${maxRoundsNoProgress} rounds`);
+      console.warn("Applying file prices as interim and pausing 2 minutes before retry...");
+
+      failedTickers.forEach(ticker => {
+        const applied = applyFilePriceToQ2Card(ticker);
+        if (!applied) {
+          const el = document.getElementById(`price-${ticker}`);
+          if (el) el.innerHTML =
+            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+        }
+      });
+
+      // Wait 2 minutes then reset and try again
+      await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000));
+      roundsWithNoProgress = 0;
+      lastFailedCount      = failedTickers.length;
+      proxyStart           = Date.now();
+      retryRound           = 1;
+      console.log("Q2 — resuming proxy retries after 2min pause...");
     }
 
     lastFailedCount = failedTickers.length;
 
+    // Show retrying status on failed cards
     failedTickers.forEach(ticker => {
       const el = document.getElementById(`price-${ticker}`);
-      if (el) el.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
+      // Only show retrying if not already showing a real price from file
+      if (el && !el.innerHTML.includes("pick-price-value")) {
+        el.innerHTML =
+          `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
+      }
     });
 
     const backoff = Math.min(3000 + retryRound * 500, 10000);
@@ -1609,7 +1638,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
       }
 
       // Keep retrying in background every 5 minutes regardless
-      setTimeout(() => fetchPickPrice(ticker, 0), 5 * 60 * 1000);
+      setTimeout(() => fetchPickPrice(ticker, 0), 2 * 60 * 1000);
     }
   }
 }
@@ -1736,63 +1765,93 @@ async function loadTacticalPicks() {
 
   await new Promise(resolve => setTimeout(resolve, needsProxy.length * 400 + 3000));
 
-  // ===== STEP 5: 30 second timeout clock starts HERE =====
-  // Clock begins AFTER the first proxy attempt has had time to respond
-  const PROXY_TIMEOUT_MS = 30000;
-  const proxyStart       = Date.now();  // ← moved to here
-
+  // ===== STEP 5: Retry loop — never gives up on Tactical =====
+  // Calculator depends on prices so we cannot end with Yahoo links
+  let PROXY_TIMEOUT_MS      = 30000;
+  let proxyStart            = Date.now();
   let retryRound            = 1;
-  const maxRoundsNoProgress = 5;
+  const maxRoundsNoProgress = 10;
   let roundsWithNoProgress  = 0;
-  let lastFailedCount       = stillNeeded.length;
+  let lastFailedCount       = needsProxy.length;
 
   while (true) {
     const failedTickers = TACTICAL_PICKS.filter(ticker => {
       const el = document.getElementById(`tactical-price-${ticker}`);
       return el && (
         el.innerHTML.includes("Unavailable") ||
-        el.innerHTML.includes("Loading")
+        el.innerHTML.includes("Loading")     ||
+        el.innerHTML.includes("refreshing")  ||
+        el.innerHTML.includes("Retrying")
       );
     });
 
+    // All done — exit loop
     if (failedTickers.length === 0) {
       console.log("✅ All tactical picks loaded successfully!");
       break;
     }
 
+    // 30s passed — try file as interim but keep retrying
+    // Never show Yahoo link — calculator needs real prices
     if (Date.now() - proxyStart > PROXY_TIMEOUT_MS) {
-      console.log(`Tactical — 30s timeout, applying file prices for ${failedTickers.length} remaining...`);
+      console.warn(`Tactical — 30s passed, ${failedTickers.length} still missing — applying file prices as interim...`);
+
       failedTickers.forEach(ticker => {
         const applied = applyFilePriceToTacticalCard(ticker);
-        if (!applied) {
+        if (applied) {
+          console.log(`${ticker} — interim file price applied`);
+        } else {
           const el = document.getElementById(`tactical-price-${ticker}`);
-          if (el) el.innerHTML = `
-            <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
-               style="color:#00b4d8;font-size:11px;text-decoration:none;">
-               View on Yahoo →
-            </a>`;
+          if (el) el.innerHTML =
+            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
         }
       });
-      break;
+
+      // Reset clock and progress — keep trying
+      proxyStart           = Date.now();
+      roundsWithNoProgress = 0;
+      lastFailedCount      = failedTickers.length;
     }
 
+    // Check progress
     if (failedTickers.length >= lastFailedCount) {
       roundsWithNoProgress++;
     } else {
       roundsWithNoProgress = 0;
     }
 
+    // No progress for many rounds — pause 2 min then restart
     if (roundsWithNoProgress >= maxRoundsNoProgress) {
-      console.warn("⚠️ Tactical — stopping proxy retries, using file prices");
-      failedTickers.forEach(ticker => applyFilePriceToTacticalCard(ticker));
-      break;
+      console.warn(`⚠️ Tactical — no progress for ${maxRoundsNoProgress} rounds`);
+      console.warn("Applying file prices as interim and pausing 2 minutes before retry...");
+
+      failedTickers.forEach(ticker => {
+        const applied = applyFilePriceToTacticalCard(ticker);
+        if (!applied) {
+          const el = document.getElementById(`tactical-price-${ticker}`);
+          if (el) el.innerHTML =
+            `<span style="color:#aaa;font-size:11px;">⟳ fetching...</span>`;
+        }
+      });
+
+      // Wait 2 minutes then reset and try again
+      await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000));
+      roundsWithNoProgress = 0;
+      lastFailedCount      = failedTickers.length;
+      proxyStart           = Date.now();
+      retryRound           = 1;
+      console.log("Tactical — resuming proxy retries after 2min pause...");
     }
 
     lastFailedCount = failedTickers.length;
 
+    // Show retrying status on failed cards
     failedTickers.forEach(ticker => {
       const el = document.getElementById(`tactical-price-${ticker}`);
-      if (el) el.innerHTML = `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
+      if (el && !el.innerHTML.includes("pick-price-value")) {
+        el.innerHTML =
+          `<span style="color:#aaa;font-size:11px;">Retrying (${retryRound})...</span>`;
+      }
     });
 
     const backoff = Math.min(3000 + retryRound * 500, 10000);
@@ -1966,7 +2025,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
       }
 
       // Keep retrying in background every 5 minutes regardless
-      setTimeout(() => fetchTacticalPrice(ticker, 0), 5 * 60 * 1000);
+      setTimeout(() => fetchTacticalPrice(ticker, 0), 2 * 60 * 1000);
     }
   }
 }
