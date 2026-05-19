@@ -1,12 +1,13 @@
 // ============ DETECT HARD REFRESH ============
-// Clears proxy refresh timestamp on hard page load
-// so stale prices always trigger a fresh proxy fetch
-// Uses performance.navigation for older browsers and
-// navigation entries for modern browsers
+// On hard refresh (F5 / browser refresh button):
+//   - If proxies ran within 5 minutes → keep price caches (immediate re-refresh)
+//   - If proxies ran more than 5 minutes ago → clear all price caches (stale)
+// On page navigation (clicking links) → nothing cleared, session cache preserved
 
 (function detectHardRefresh() {
   let isHardRefresh = false;
 
+  // Modern browsers
   if (window.performance && performance.getEntriesByType) {
     const nav = performance.getEntriesByType("navigation")[0];
     if (nav && nav.type === "reload") {
@@ -14,6 +15,7 @@
     }
   }
 
+  // Fallback for older browsers
   if (!isHardRefresh && window.performance && performance.navigation) {
     if (performance.navigation.type === 1) {
       isHardRefresh = true;
@@ -21,33 +23,34 @@
   }
 
   if (isHardRefresh) {
-    // Always clear stamps
-    sessionStorage.removeItem("last_proxy_refresh");
+    // Always clear file-based refresh stamps
     sessionStorage.removeItem("last_price_refresh");
     sessionStorage.removeItem("last_price_refresh_source");
 
-    // Only clear price cache if prices are older than 15 minutes
-    // This allows immediate re-refresh to use recently fetched prices
-    const MAX_CACHE_AGE_MS = 15 * 60 * 1000;
-    const keysToRemove = [];
+    // Check if proxies ran very recently (within 5 minutes)
+    const lastProxy   = sessionStorage.getItem("last_proxy_refresh");
+    const proxyRecent = lastProxy &&
+      Date.now() - parseInt(lastProxy) < 5 * 60 * 1000;
 
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (!key || !key.startsWith("price_cache_")) continue;
-      try {
-        const data   = JSON.parse(sessionStorage.getItem(key));
-        const ageMs  = Date.now() - data.savedAt;
-        if (ageMs > MAX_CACHE_AGE_MS) {
+    if (proxyRecent) {
+      // Proxies just ran — keep price caches so cards load instantly
+      // Clears the proxy stamp too so next staleness check runs fresh
+      sessionStorage.removeItem("last_proxy_refresh");
+      console.log("Hard refresh — proxies ran recently, keeping price caches for fast reload");
+    } else {
+      // Proxies haven't run recently — clear ALL price caches
+      // Forces fresh proxy fetch on stale or day-old data
+      sessionStorage.removeItem("last_proxy_refresh");
+      const keysToRemove = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith("price_cache_")) {
           keysToRemove.push(key);
         }
-      } catch (e) {
-        keysToRemove.push(key); // corrupt entry — remove it
       }
+      keysToRemove.forEach(key => sessionStorage.removeItem(key));
+      console.log(`Hard refresh — ${keysToRemove.length} price caches cleared`);
     }
-
-    keysToRemove.forEach(key => sessionStorage.removeItem(key));
-
-    console.log(`Hard refresh — stamps cleared, ${keysToRemove.length} stale price caches cleared`);
   }
 })();
 
