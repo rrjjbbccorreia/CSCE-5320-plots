@@ -1,0 +1,39 @@
+name: Process Email Subscribers
+
+on:
+  schedule:
+    # Run daily at 10pm ET (02:00 UTC next day) Mon-Fri
+    # Late evening to catch all signups from the day
+    - cron: '0 2 * * 2-6'
+    # Also run Saturday morning to catch Friday evening signups
+    - cron: '0 10 * * 6'
+  workflow_dispatch:  # Manual trigger from GitHub Actions tab
+
+jobs:
+  process-subscribers:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install python-docx requests
+
+      - name: Process email subscribers from docx
+        run: python scripts/process_email_subscribers.py
+
+      - name: Commit updated subscribers file
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/subscribers.json
+          git diff --staged --quiet || git commit -m "Update subscribers from email export $(date +'%Y-%m-%d')"
+          git push
