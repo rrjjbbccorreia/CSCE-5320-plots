@@ -1,4 +1,23 @@
 {
   "description": "Email subscribers who have opted in to receive tactical portfolio change notifications.",
-  "subscribers": []
+  "subscribers": [
+    {
+      "email": "kms0128@auburn.edu",
+      "subscribedAt": "2026-05-17T16:55:17Z",
+      "active": true,
+      "notifications": {
+        "tactical": true,
+        "q2": true
+      }
+    },
+    {
+      "email": "rcorreiab2@gmail.com",
+      "subscribedAt": "2026-05-09T06:25:59Z",
+      "active": true,
+      "notifications": {
+        "tactical": true,
+        "q2": true
+      }
+    }
+  ]
 }
