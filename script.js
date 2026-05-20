@@ -821,20 +821,79 @@ async function loadSpreadsheetPreview() {
 
     // Build sheet tabs
     tabsContainer.innerHTML = "";
+    // TO:
+    // Track first renderable sheet for default display
+    let firstRenderableSheet = null;
+
     workbook.SheetNames.forEach((name, index) => {
-      const tab = document.createElement("button");
-      tab.className = "preview-tab" + (index === 0 ? " active" : "");
+      const tab      = document.createElement("button");
+      const sheet    = workbook.Sheets[name];
+
+      // ===== Skip hidden sheets entirely =====
+      const sheetInfo = workbook.Workbook?.Sheets?.find(s => s.name === name);
+      const isHidden  = sheetInfo && sheetInfo.Hidden !== 0; // 0 = visible, 1 = hidden, 2 = very hidden
+      if (isHidden) {
+        console.log(`Skipping hidden sheet: ${name}`);
+        return; // skip — don't create a tab at all
+      }
+
+      let canRender  = true;
+
+      // Test if sheet can be rendered before wiring up tab
+      try {
+        XLSX.utils.sheet_to_html(sheet, { editable: false });
+      } catch (e) {
+        canRender = false;
+      }
+
+      tab.className   = "preview-tab" + (index === 0 ? " active" : "");
       tab.textContent = name;
-      tab.onclick = () => {
-        document.querySelectorAll(".preview-tab").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        renderSheet(workbook, name, sheetContainer);
-      };
+
+      if (!canRender) {
+        // Dim the tab — sheet has images or unsupported content
+        tab.style.opacity = "0.5";
+        tab.style.cursor  = "default";
+        tab.title         = "This sheet contains images or charts and cannot be previewed";
+        tab.onclick = () => {
+          document.querySelectorAll(".preview-tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          sheetContainer.innerHTML = `
+            <div style="text-align:center; padding:40px 20px;">
+              <div style="font-size:32px; margin-bottom:16px;">🖼️</div>
+              <p style="color:#aaa; font-size:15px; margin-bottom:8px;">
+                This sheet contains images or charts that cannot be previewed here.
+              </p>
+              <p style="color:#666; font-size:13px;">
+                Download the spreadsheet to view the full content including all visuals.
+              </p>
+            </div>
+          `;
+        };
+      } else {
+        // Normal renderable sheet
+        if (!firstRenderableSheet) firstRenderableSheet = name;
+        tab.onclick = () => {
+          document.querySelectorAll(".preview-tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          renderSheet(workbook, name, sheetContainer);
+        };
+      }
+
       tabsContainer.appendChild(tab);
     });
 
-    // Render first sheet by default
-    renderSheet(workbook, workbook.SheetNames[0], sheetContainer);
+    // Render first renderable sheet by default (skip image-only sheets)
+    if (firstRenderableSheet) {
+      renderSheet(workbook, firstRenderableSheet, sheetContainer);
+    } else {
+      sheetContainer.innerHTML = `
+        <div style="text-align:center; padding:40px 20px;">
+          <p style="color:#aaa; font-size:15px;">
+            No previewable sheets found in this workbook.
+          </p>
+        </div>
+      `;
+    }
 
   } catch (err) {
     console.error("Spreadsheet preview error:", err);
@@ -842,18 +901,46 @@ async function loadSpreadsheetPreview() {
   }
 }
 
+// TO:
 function renderSheet(workbook, sheetName, container) {
   const sheet = workbook.Sheets[sheetName];
-  const html = XLSX.utils.sheet_to_html(sheet, { editable: false });
-  container.innerHTML = html;
 
-  // Apply dark theme styling to generated table
-  const table = container.querySelector("table");
-  if (table) {
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
-    table.style.fontSize = "13px";
-    table.style.color = "#ccc";
+  if (!sheet) {
+    console.warn(`Sheet "${sheetName}" not found in workbook`);
+    container.innerHTML = `
+      <div style="text-align:center; padding:40px 20px;">
+        <p style="color:#aaa; font-size:15px;">Sheet not found.</p>
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    const html = XLSX.utils.sheet_to_html(sheet, { editable: false });
+    container.innerHTML = html;
+
+    // Apply dark theme styling to generated table
+    const table = container.querySelector("table");
+    if (table) {
+      table.style.borderCollapse = "collapse";
+      table.style.width          = "100%";
+      table.style.fontSize       = "13px";
+      table.style.color          = "#ccc";
+    }
+  } catch (e) {
+    // Sheet contains images or unsupported objects
+    console.warn(`Sheet "${sheetName}" cannot be previewed:`, e.message);
+    container.innerHTML = `
+      <div style="text-align:center; padding:40px 20px;">
+        <div style="font-size:32px; margin-bottom:16px;">🖼️</div>
+        <p style="color:#aaa; font-size:15px; margin-bottom:8px;">
+          This sheet contains images or charts that cannot be previewed here.
+        </p>
+        <p style="color:#666; font-size:13px;">
+          Download the spreadsheet to view the full content including all visuals.
+        </p>
+      </div>
+    `;
   }
 }
 
@@ -1593,7 +1680,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         break;
       } catch (e) {
         console.warn(`${ticker} Q2 — Proxy ${p + 1} failed: ${e.message}`);
-        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 1000));
+        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 2000));
       }
     }
 
