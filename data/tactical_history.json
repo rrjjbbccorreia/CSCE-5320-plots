@@ -123,6 +123,47 @@
         "GDX": 5.0
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-05-20",
+      "addedAt": "2026-05-20T23:50:05Z",
+      "picks": [
+        "CSGP",
+        "GS",
+        "TSLA",
+        "META",
+        "TER",
+        "GM",
+        "WM",
+        "NOW",
+        "CRM",
+        "DOW",
+        "XME",
+        "COPX",
+        "FEZ",
+        "SMH",
+        "FXI",
+        "EWG"
+      ],
+      "weights": {
+        "CSGP": 7.39,
+        "GS": 5.4,
+        "TSLA": 7.1,
+        "META": 5.07,
+        "TER": 5.01,
+        "GM": 5.27,
+        "WM": 5.19,
+        "NOW": 9.34,
+        "CRM": 5.78,
+        "DOW": 14.22,
+        "XME": 5.0,
+        "COPX": 5.16,
+        "FEZ": 5.02,
+        "SMH": 5.0,
+        "FXI": 5.04,
+        "EWG": 5.1
+      },
+      "note": "picks list changed"
     }
   ]
 }
