@@ -1660,7 +1660,6 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
-      // Proxy 4 — query2 via corsproxy
       async () => {
         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r     = await fetch(
@@ -1698,7 +1697,13 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
-    // savePriceRefreshTime("proxy");
+
+    // ===== Remove refreshing indicator before updating price =====
+    const priceElSuccess = document.getElementById(`price-${ticker}`);
+    if (priceElSuccess) {
+      const refreshEl = priceElSuccess.querySelector(".price-refreshing");
+      if (refreshEl) refreshEl.remove();
+    }
 
     document.getElementById(`price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
@@ -1725,7 +1730,6 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     }
 
     if (retryCount < maxRetries - 1) {
-      // Standard retry with backoff
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
@@ -1741,7 +1745,6 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         : false;
 
       if (appliedFromFile) {
-        // Show file price with ~ indicator
         if (priceEl) {
           priceEl.innerHTML =
             `<span class="pick-price-value" title="Price from last file update — refreshing">
@@ -1750,7 +1753,6 @@ async function fetchPickPrice(ticker, retryCount = 0) {
              <div class="price-refreshing" style="color:#888;">↻ retrying...</div>`;
         }
       } else if (!applyFilePriceToQ2Card(ticker)) {
-        // No file price available — show Yahoo link
         if (priceEl) {
           priceEl.innerHTML = `
             <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
@@ -1760,7 +1762,7 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         }
       }
 
-      // Keep retrying in background every 5 minutes regardless
+      // Keep retrying in background every 2 minutes
       setTimeout(() => fetchPickPrice(ticker, 0), 2 * 60 * 1000);
     }
   }
@@ -2059,7 +2061,6 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
-      // Proxy 4 — query2 via corsproxy
       async () => {
         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r     = await fetch(
@@ -2079,7 +2080,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         break;
       } catch (e) {
         console.warn(`${ticker} tactical — Proxy ${p + 1} failed: ${e.message}`);
-        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 1000));
+        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 2000)); // ← was 1000
       }
     }
 
@@ -2097,7 +2098,13 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const isPositive  = change >= 0;
 
     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
-    // savePriceRefreshTime("proxy");
+
+    // ===== Remove refreshing indicator before updating price =====
+    const priceElSuccess = document.getElementById(`tactical-price-${ticker}`);
+    if (priceElSuccess) {
+      const refreshEl = priceElSuccess.querySelector(".price-refreshing");
+      if (refreshEl) refreshEl.remove();
+    }
 
     document.getElementById(`tactical-price-${ticker}`).innerHTML =
       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
@@ -2124,7 +2131,6 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     }
 
     if (retryCount < maxRetries - 1) {
-      // Standard retry with backoff
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
     } else {
@@ -2140,7 +2146,6 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         : false;
 
       if (appliedFromFile) {
-        // Show file price with ~ indicator
         if (priceEl) {
           priceEl.innerHTML =
             `<span class="pick-price-value" title="Price from last file update — refreshing">
@@ -2149,7 +2154,6 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
              <div class="price-refreshing" style="color:#888;">↻ retrying...</div>`;
         }
       } else if (!applyFilePriceToTacticalCard(ticker)) {
-        // No file price available — show Yahoo link
         if (priceEl) {
           priceEl.innerHTML = `
             <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
@@ -2159,7 +2163,7 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         }
       }
 
-      // Keep retrying in background every 5 minutes regardless
+      // Keep retrying in background every 2 minutes
       setTimeout(() => fetchTacticalPrice(ticker, 0), 2 * 60 * 1000);
     }
   }
