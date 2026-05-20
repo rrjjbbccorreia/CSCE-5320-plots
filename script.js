@@ -1374,9 +1374,9 @@ const Q2_PICKS = [
 ];
 
 const TACTICAL_PICKS = [
-  "CSGP", "NOW", "TER", "TSLA", "CRM",
-  "WM", "LYB", "GS", "ADSK", "CFG",
-  "COPX", "FEZ", "XME", "VGK", "BRK-B", "GDX"
+  "CSGP", "GS", "TSLA", "META", "TER",
+  "GM", "WM", "NOW", "CRM", "DOW",
+  "XME", "COPX", "FEZ", "SMH", "FXI", "EWG"
 ];
 
 async function loadQ2Picks() {
