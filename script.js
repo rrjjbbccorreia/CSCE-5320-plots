@@ -1763,7 +1763,15 @@ async function fetchPickPrice(ticker, retryCount = 0) {
       }
 
       // Keep retrying in background every 2 minutes
-      setTimeout(() => fetchPickPrice(ticker, 0), 2 * 60 * 1000);
+      setTimeout(() => {
+        // Only retry if still not showing a real price
+        const el = document.getElementById(`price-${ticker}`);
+        if (el && !el.innerHTML.includes("pick-price-value")) {
+          fetchPickPrice(ticker, 0);
+        } else {
+          console.log(`${ticker} — background retry cancelled, price already loaded`);
+        }
+      }, 2 * 60 * 1000);
     }
   }
 }
@@ -2164,7 +2172,14 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
       }
 
       // Keep retrying in background every 2 minutes
-      setTimeout(() => fetchTacticalPrice(ticker, 0), 2 * 60 * 1000);
+      setTimeout(() => {
+        const el = document.getElementById(`tactical-price-${ticker}`);
+        if (el && !el.innerHTML.includes("pick-price-value")) {
+          fetchTacticalPrice(ticker, 0);
+        } else {
+          console.log(`${ticker} tactical — background retry cancelled, price already loaded`);
+        }
+      }, 2 * 60 * 1000);
     }
   }
 }
