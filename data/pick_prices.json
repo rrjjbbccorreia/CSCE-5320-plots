@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-25 17:48 UTC",
+  "updated": "2026-05-25 19:49 UTC",
   "marketOpen": true,
   "q2Picks": [
     "ALB",
@@ -38,39 +38,46 @@
     "EWG"
   ],
   "prices": {
-    "SMH": {
-      "price": 576.32,
-      "prev": 567.88,
-      "change": 8.44,
-      "changePct": 1.4862,
-      "isPositive": true
-    },
-    "FXI": {
-      "price": 35.52,
-      "prev": 35.89,
-      "change": -0.37,
-      "changePct": -1.0309,
+    "MU": {
+      "price": 751.0,
+      "prev": 762.1,
+      "change": -11.1,
+      "changePct": -1.4565,
       "isPositive": false
     },
-    "SPG": {
-      "price": 204.41,
-      "prev": 204.9,
-      "change": -0.49,
-      "changePct": -0.2391,
+    "EWG": {
+      "price": 42.91,
+      "prev": 43.05,
+      "change": -0.14,
+      "changePct": -0.3252,
       "isPositive": false
     },
-    "TER": {
-      "price": 358.44,
-      "prev": 353.44,
-      "change": 5.0,
-      "changePct": 1.4147,
+    "GS": {
+      "price": 996.73,
+      "prev": 988.17,
+      "change": 8.56,
+      "changePct": 0.8662,
       "isPositive": true
     },
-    "NOW": {
-      "price": 102.13,
-      "prev": 99.69,
-      "change": 2.44,
-      "changePct": 2.4476,
+    "AMCR": {
+      "price": 38.38,
+      "prev": 38.5,
+      "change": -0.12,
+      "changePct": -0.3117,
+      "isPositive": false
+    },
+    "COPX": {
+      "price": 83.35,
+      "prev": 83.02,
+      "change": 0.33,
+      "changePct": 0.3975,
+      "isPositive": true
+    },
+    "DECK": {
+      "price": 106.67,
+      "prev": 102.62,
+      "change": 4.05,
+      "changePct": 3.9466,
       "isPositive": true
     },
     "XME": {
@@ -80,19 +87,26 @@
       "changePct": 1.4647,
       "isPositive": true
     },
-    "WM": {
-      "price": 217.9,
-      "prev": 217.75,
-      "change": 0.15,
-      "changePct": 0.0689,
+    "ACN": {
+      "price": 179.24,
+      "prev": 177.87,
+      "change": 1.37,
+      "changePct": 0.7702,
       "isPositive": true
     },
-    "MU": {
-      "price": 751.0,
-      "prev": 762.1,
-      "change": -11.1,
-      "changePct": -1.4565,
-      "isPositive": false
+    "CSGP": {
+      "price": 33.95,
+      "prev": 33.93,
+      "change": 0.02,
+      "changePct": 0.0589,
+      "isPositive": true
+    },
+    "ETR": {
+      "price": 112.4,
+      "prev": 112.27,
+      "change": 0.13,
+      "changePct": 0.1158,
+      "isPositive": true
     },
     "ALB": {
       "price": 171.58,
@@ -108,47 +122,26 @@
       "changePct": -2.1143,
       "isPositive": false
     },
-    "GS": {
-      "price": 996.73,
-      "prev": 988.17,
-      "change": 8.56,
-      "changePct": 0.8662,
+    "TSLA": {
+      "price": 426.01,
+      "prev": 417.85,
+      "change": 8.16,
+      "changePct": 1.9529,
       "isPositive": true
     },
-    "CSGP": {
-      "price": 33.95,
-      "prev": 33.93,
-      "change": 0.02,
-      "changePct": 0.0589,
+    "WM": {
+      "price": 217.9,
+      "prev": 217.75,
+      "change": 0.15,
+      "changePct": 0.0689,
       "isPositive": true
     },
-    "COPX": {
-      "price": 83.35,
-      "prev": 83.02,
-      "change": 0.33,
-      "changePct": 0.3975,
+    "NOW": {
+      "price": 102.13,
+      "prev": 99.69,
+      "change": 2.44,
+      "changePct": 2.4476,
       "isPositive": true
-    },
-    "PSX": {
-      "price": 177.69,
-      "prev": 174.05,
-      "change": 3.64,
-      "changePct": 2.0914,
-      "isPositive": true
-    },
-    "DECK": {
-      "price": 106.67,
-      "prev": 102.62,
-      "change": 4.05,
-      "changePct": 3.9466,
-      "isPositive": true
-    },
-    "AMCR": {
-      "price": 38.38,
-      "prev": 38.5,
-      "change": -0.12,
-      "changePct": -0.3117,
-      "isPositive": false
     },
     "PLTR": {
       "price": 136.88,
@@ -156,6 +149,104 @@
       "change": -0.535,
       "changePct": -0.3893,
       "isPositive": false
+    },
+    "CEG": {
+      "price": 294.07,
+      "prev": 285.83,
+      "change": 8.24,
+      "changePct": 2.8828,
+      "isPositive": true
+    },
+    "FXI": {
+      "price": 35.52,
+      "prev": 35.89,
+      "change": -0.37,
+      "changePct": -1.0309,
+      "isPositive": false
+    },
+    "FDS": {
+      "price": 232.0,
+      "prev": 225.01,
+      "change": 6.99,
+      "changePct": 3.1065,
+      "isPositive": true
+    },
+    "EXPD": {
+      "price": 158.48,
+      "prev": 157.19,
+      "change": 1.29,
+      "changePct": 0.8207,
+      "isPositive": true
+    },
+    "SPG": {
+      "price": 204.41,
+      "prev": 204.9,
+      "change": -0.49,
+      "changePct": -0.2391,
+      "isPositive": false
+    },
+    "NRG": {
+      "price": 137.65,
+      "prev": 136.92,
+      "change": 0.73,
+      "changePct": 0.5332,
+      "isPositive": true
+    },
+    "META": {
+      "price": 610.26,
+      "prev": 607.38,
+      "change": 2.88,
+      "changePct": 0.4742,
+      "isPositive": true
+    },
+    "SMH": {
+      "price": 576.32,
+      "prev": 567.88,
+      "change": 8.44,
+      "changePct": 1.4862,
+      "isPositive": true
+    },
+    "DOW": {
+      "price": 36.01,
+      "prev": 35.91,
+      "change": 0.1,
+      "changePct": 0.2785,
+      "isPositive": true
+    },
+    "TER": {
+      "price": 358.44,
+      "prev": 353.44,
+      "change": 5.0,
+      "changePct": 1.4147,
+      "isPositive": true
+    },
+    "CTAS": {
+      "price": 172.93,
+      "prev": 172.36,
+      "change": 0.57,
+      "changePct": 0.3307,
+      "isPositive": true
+    },
+    "CRM": {
+      "price": 180.07,
+      "prev": 176.31,
+      "change": 3.76,
+      "changePct": 2.1326,
+      "isPositive": true
+    },
+    "FEZ": {
+      "price": 67.19,
+      "prev": 67.49,
+      "change": -0.3,
+      "changePct": -0.4445,
+      "isPositive": false
+    },
+    "PSX": {
+      "price": 177.69,
+      "prev": 174.05,
+      "change": 3.64,
+      "changePct": 2.0914,
+      "isPositive": true
     },
     "GM": {
       "price": 78.79,
@@ -169,97 +260,6 @@
       "prev": 47.85,
       "change": 0.52,
       "changePct": 1.0867,
-      "isPositive": true
-    },
-    "FEZ": {
-      "price": 67.19,
-      "prev": 67.49,
-      "change": -0.3,
-      "changePct": -0.4445,
-      "isPositive": false
-    },
-    "CEG": {
-      "price": 294.07,
-      "prev": 285.83,
-      "change": 8.24,
-      "changePct": 2.8828,
-      "isPositive": true
-    },
-    "TSLA": {
-      "price": 426.01,
-      "prev": 417.85,
-      "change": 8.16,
-      "changePct": 1.9529,
-      "isPositive": true
-    },
-    "CRM": {
-      "price": 180.07,
-      "prev": 176.31,
-      "change": 3.76,
-      "changePct": 2.1326,
-      "isPositive": true
-    },
-    "NRG": {
-      "price": 137.65,
-      "prev": 136.92,
-      "change": 0.73,
-      "changePct": 0.5332,
-      "isPositive": true
-    },
-    "EXPD": {
-      "price": 158.48,
-      "prev": 157.19,
-      "change": 1.29,
-      "changePct": 0.8207,
-      "isPositive": true
-    },
-    "ETR": {
-      "price": 112.4,
-      "prev": 112.27,
-      "change": 0.13,
-      "changePct": 0.1158,
-      "isPositive": true
-    },
-    "META": {
-      "price": 610.26,
-      "prev": 607.38,
-      "change": 2.88,
-      "changePct": 0.4742,
-      "isPositive": true
-    },
-    "DOW": {
-      "price": 36.01,
-      "prev": 35.91,
-      "change": 0.1,
-      "changePct": 0.2785,
-      "isPositive": true
-    },
-    "CTAS": {
-      "price": 172.93,
-      "prev": 172.36,
-      "change": 0.57,
-      "changePct": 0.3307,
-      "isPositive": true
-    },
-    "EWG": {
-      "price": 42.91,
-      "prev": 43.05,
-      "change": -0.14,
-      "changePct": -0.3252,
-      "isPositive": false
-    },
-    "FDS": {
-      "price": 232.0,
-      "prev": 225.01,
-      "change": 6.99,
-      "changePct": 3.1065,
-      "isPositive": true
-    },
-    "ACN": {
-      "price": 179.24,
-      "prev": 177.87,
-      "change": 1.37,
-      "changePct": 0.7702,
       "isPositive": true
     }
   }
