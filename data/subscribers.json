@@ -18,6 +18,15 @@
         "tactical": true,
         "q2": true
       }
+    },
+    {
+      "email": "jchrisnajork@swbell.net",
+      "subscribedAt": "2026-05-27T19:58:23Z",
+      "active": true,
+      "notifications": {
+        "tactical": true,
+        "q2": true
+      }
     }
   ]
 }
