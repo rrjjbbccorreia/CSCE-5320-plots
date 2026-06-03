@@ -20,9 +20,9 @@ Q2_PICKS = [
 ]
 
 TACTICAL_PICKS = [
-    "CSGP", "GS", "TSLA", "META", "TER",
-    "GM", "WM", "NOW", "CRM", "DOW",
-    "XME", "COPX", "FEZ", "SMH", "FXI", "EWG"
+    "AIG", "TSLA", "GEV", "DOW", "TRMB",
+    "CSGP", "WM", "STE", "ADSK", "FCX",
+    "BRK-B", "BX", "SLV", "GLD", "GDX", "UCO"
 ]
 
 # =============================================================
