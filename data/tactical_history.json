@@ -164,6 +164,47 @@
         "EWG": 5.1
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-06-04",
+      "addedAt": "2026-06-04T16:14:26Z",
+      "picks": [
+        "AIG",
+        "TSLA",
+        "GEV",
+        "DOW",
+        "TRMB",
+        "CSGP",
+        "WM",
+        "STE",
+        "ADSK",
+        "FCX",
+        "BRK-B",
+        "BX",
+        "SLV",
+        "GLD",
+        "GDX",
+        "UCO"
+      ],
+      "weights": {
+        "AIG": 5.2,
+        "TSLA": 9.05,
+        "GEV": 5.0,
+        "DOW": 10.44,
+        "TRMB": 5.0,
+        "CSGP": 9.45,
+        "WM": 5.01,
+        "STE": 5.36,
+        "ADSK": 5.37,
+        "FCX": 7.85,
+        "BRK-B": 6.67,
+        "BX": 5.08,
+        "SLV": 5.29,
+        "GLD": 5.22,
+        "GDX": 5.01,
+        "UCO": 5.0
+      },
+      "note": "picks list changed"
     }
   ]
 }
