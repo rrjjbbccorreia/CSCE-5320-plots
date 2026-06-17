@@ -205,6 +205,47 @@
         "UCO": 5.0
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-06-17",
+      "addedAt": "2026-06-17T16:31:45Z",
+      "picks": [
+        "GLW",
+        "STX",
+        "DASH",
+        "ALB",
+        "SMCI",
+        "COHR",
+        "CVNA",
+        "CEG",
+        "LITE",
+        "WSM",
+        "SEB",
+        "CIBR",
+        "XLE",
+        "XLK",
+        "XLI",
+        "BX"
+      ],
+      "weights": {
+        "GLW": 6.44,
+        "STX": 5.0,
+        "DASH": 536,
+        "ALB": 6.0,
+        "SMCI": 5.03,
+        "COHR": 5.32,
+        "CVNA": 5.02,
+        "CEG": 5.75,
+        "LITE": 5.54,
+        "WSM": 5.05,
+        "SEB": 9.28,
+        "CIBR": 5.7,
+        "XLE": 8.27,
+        "XLK": 5.2,
+        "XLI": 7.54,
+        "BX": 9.5
+      },
+      "note": "picks list changed"
     }
   ]
 }
