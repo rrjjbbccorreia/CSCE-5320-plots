@@ -14,7 +14,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Q2 Fundamental Picks Calculator — Correia Investment Solutions</title>
+  <title>Q Fundamental Picks Calculator — Correia Investment Solutions</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -408,15 +408,15 @@
          onerror="this.style.display='none'" />
     <div>
       <div class="header-title">Correia Investment Solutions</div>
-      <div class="header-sub">Q2 Fundamental Picks — Share Calculator</div>
+      <div class="header-sub">Q Fundamental Picks — Share Calculator</div>
     </div>
   </header>
 
   <main class="main">
 
-    <h1 class="page-title">Q2 Fundamental Picks Calculator</h1>
+    <h1 class="page-title">Q Fundamental Picks Calculator</h1>
     <p class="page-subtitle">
-      Enter the total dollar amount you want to allocate to your Q2 fundamental picks.
+      Enter the total dollar amount you want to allocate to your Q fundamental picks.
       The calculator will distribute that amount optimally across all securities and calculate
       the exact number of whole shares to purchase for each position. Share counts are
       rounded down to preserve capital — any remainder per position is shown for reference.
@@ -427,7 +427,7 @@
       <div class="section-label">Allocation Settings</div>
 
       <div class="amount-row">
-        <span class="amount-label">Total allocation for Q2 picks:</span>
+        <span class="amount-label">Total allocation for Q picks:</span>
         <div class="amount-input-wrap">
           <input type="number" class="amount-input" id="portfolioAmount"
                  placeholder="50000" min="1" step="100" />
@@ -448,7 +448,7 @@
 
       <div class="table-wrap">
         <div class="table-heading">
-          🎯 Q2 Fundamental Picks — Share Allocation
+          🎯 Q Fundamental Picks — Share Allocation
         </div>
         <table class="shares-table">
           <thead>
@@ -498,34 +498,34 @@
     const tickers = Object.keys(priceMap);
 
     // ==================== ALLOCATION WEIGHTS ====================
-    // Define percentage allocation for each Q2 ticker here.
+    // Define percentage allocation for each Q ticker here.
     // Values should add up to 100.
     // If a ticker is not listed here, it falls back to equal weight.
     // Example: ALB gets 8% of the total allocation, SPG gets 6%, etc.
     const Q2_WEIGHTS = {
-      ALB:  5.2,
-      SPG:  5.1,
-      ETR:  6.4,
-      COST: 5.9,
-      MU:   5.0,
-      EXPD: 5.7,
-      CEG:  5.0,
-      NRG:  5.0,
-      ARE:  5.1,
-      CTAS: 5.0,
-      DECK: 5.0,
-      AMCR: 5.0,
-      ACN:  6.8,
-      FDS:  5.5,
-      PLTR: 7.2,
-      PSX:  17.1,
+      ALB:  6.25,
+      SPG:  6.25,
+      ETR:  6.25,
+      COST: 6.25,
+      CEG:  6.25,
+      ARE:  6.25,
+      IFF:  6.25,
+      CTAS: 6.25,
+      PLTR: 6.25,
+      PSX:  6.25,
+      LITE: 6.25,
+      ECHO: 6.25,
+      SNDK: 6.25,
+      WBD:  6.25,
+      GRMN: 6.25,
+      BR:   6.25,
     };
     // ============================================================
 
     // Validate weights — warn if they don't add to 100
     const totalWeight = Object.values(Q2_WEIGHTS).reduce((s, v) => s + v, 0);
     if (Math.abs(totalWeight - 100) > 0.01) {
-      console.warn(`Q2 weights sum to ${totalWeight.toFixed(2)}% — should be 100%. 
+      console.warn(`Q weights sum to ${totalWeight.toFixed(2)}% — should be 100%. 
         Normalizing automatically.`);
     }
 

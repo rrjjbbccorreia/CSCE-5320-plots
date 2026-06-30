@@ -1367,16 +1367,17 @@ function isFilePriceFromToday() {
 
 // ============ Q2 FUNDAMENTAL PICKS ============
 const Q2_PICKS = [
-  "ALB", "SPG", "ETR", "COST", "MU",
-  "EXPD", "CEG", "NRG", "ARE",
-  "CTAS", "DECK", "AMCR", "ACN",
-  "FDS", "PLTR", "PSX"
+  "ALB", "SPG", "ETR", "COST",
+  "CEG", "ARE","IFF",
+  "CTAS", "PLTR", "PSX",
+  "LITE", "ECHO", "SNDK", "WBD",
+  "GRMN", "BR"
 ];
 
 const TACTICAL_PICKS = [
-  "GLW", "STX", "DASH", "ALB", "SMCI",
-  "COHR", "CVNA", "CEG", "LITE", "WSM",
-  "SEB", "CIBR", "XLE", "XLK", "XLI", "BX"
+  "HPE", "DELL", "DECK", "RCL", "ULTA",
+  "ECHO", "SNDK", "STX", "ALB", "CPAY",
+  "VPL", "EIS", "ETHE", "TMV"
 ];
 
 async function loadQ2Picks() {
@@ -1480,8 +1481,8 @@ async function loadQ2Picks() {
       }
     });
     console.log(fileIsStale
-      ? "✅ All Q2 picks served from session cache — no proxy needed!"
-      : "✅ All Q2 picks loaded from fresh file — no proxy needed!");
+      ? "✅ All Q picks served from session cache — no proxy needed!"
+      : "✅ All Q picks loaded from fresh file — no proxy needed!");
     return;
   }
 
@@ -1536,7 +1537,7 @@ async function loadQ2Picks() {
     // 30s passed — try file as interim but keep retrying
     // Never show Yahoo link — calculator needs real prices
     if (Date.now() - proxyStart > PROXY_TIMEOUT_MS) {
-      console.warn(`Q2 — 30s passed, ${failedTickers.length} still missing — applying file prices as interim...`);
+      console.warn(`Q — 30s passed, ${failedTickers.length} still missing — applying file prices as interim...`);
 
       // 30s interim fallback
       failedTickers.forEach(ticker => {
@@ -1573,7 +1574,7 @@ async function loadQ2Picks() {
 
     // No progress for many rounds — pause 2 min then restart
     if (roundsWithNoProgress >= maxRoundsNoProgress) {
-      console.warn(`⚠️ Q2 — no progress for ${maxRoundsNoProgress} rounds`);
+      console.warn(`⚠️ Q — no progress for ${maxRoundsNoProgress} rounds`);
       console.warn("Applying file prices as interim and pausing 2 minutes before retry...");
 
       // maxRounds interim fallback
@@ -1599,7 +1600,7 @@ async function loadQ2Picks() {
       lastFailedCount      = failedTickers.length;
       proxyStart           = Date.now();
       retryRound           = 1;
-      console.log("Q2 — resuming proxy retries after 2min pause...");
+      console.log("Q — resuming proxy retries after 2min pause...");
     }
 
     lastFailedCount = failedTickers.length;
@@ -2220,7 +2221,7 @@ function updateQ2CalcButton() {
     btn.disabled      = false;
     btn.style.opacity = "1";
     btn.style.cursor  = "pointer";
-    statusEl.innerHTML = `✅ All ${Q2_PICKS.length} Q2 prices loaded — ready to calculate!`;
+    statusEl.innerHTML = `✅ All ${Q2_PICKS.length} Q prices loaded — ready to calculate!`;
     statusEl.style.color = "#00c896";
   } else {
     btn.disabled      = true;

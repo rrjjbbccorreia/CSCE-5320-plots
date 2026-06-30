@@ -16,33 +16,34 @@ from datetime import datetime, timezone
 # Edit these when the Q2 portfolio changes each quarter
 
 CURRENT_PICKS = [
-    "ALB", "SPG", "ETR", "COST", "MU",
-    "EXPD", "CEG", "NRG", "ARE",
-    "CTAS", "DECK", "AMCR", "ACN",
-    "FDS", "PLTR", "PSX"
+    "ALB", "SPG", "ETR", "COST",
+    "CEG", "ARE","IFF",
+    "CTAS", "PLTR", "PSX",
+    "LITE", "ECHO", "SNDK", "WBD",
+    "GRMN", "BR"
 ]
 
 CURRENT_WEIGHTS = {
-    "ALB":  5.2,
-    "SPG":  5.1,
-    "ETR":  6.4,
-    "COST": 5.9,
-    "MU":   5.0,
-    "EXPD": 5.7,
-    "CEG":  5.0,
-    "NRG":  5.0,
-    "ARE":  5.1,
-    "CTAS": 5.0,
-    "DECK": 5.0,
-    "AMCR": 5.0,
-    "ACN":  6.0,
-    "FDS":  5.5,
-    "PLTR": 7.2,
-    "PSX":  17.1,
+    "ALB":  6.25,
+    "SPG":  6.25,
+    "ETR":  6.25,
+    "COST": 6.25,
+    "CEG":  6.25,
+    "ARE":  6.25,
+    "IFF":  6.25,
+    "CTAS": 6.25,
+    "PLTR": 6.25,
+    "PSX":  6.25,
+    "LITE": 6.25,
+    "ECHO": 6.25,
+    "SNDK": 6.25,
+    "WBD":  6.25,
+    "GRMN": 6.25,
+    "BR":   6.25,
 }
 
 # Entry date for this quarter's picks
-ENTRY_DATE = "2026-03-16"
+ENTRY_DATE = "2026-06-30"
 
 # ==============================================================
 
