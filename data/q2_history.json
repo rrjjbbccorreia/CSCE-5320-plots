@@ -84,6 +84,48 @@
         "PSX": 17.1
       },
       "note": "weight changed for ALB: 6.5 \u2192 5.2"
+    },
+    {
+      "date": "2026-07-01",
+      "addedAt": "2026-07-01T15:37:02Z",
+      "entryDate": "2026-06-30",
+      "picks": [
+        "ALB",
+        "SPG",
+        "ETR",
+        "COST",
+        "CEG",
+        "ARE",
+        "IFF",
+        "CTAS",
+        "PLTR",
+        "PSX",
+        "LITE",
+        "ECHO",
+        "SNDK",
+        "WBD",
+        "GRMN",
+        "BR"
+      ],
+      "weights": {
+        "ALB": 6.25,
+        "SPG": 6.25,
+        "ETR": 6.25,
+        "COST": 6.25,
+        "CEG": 6.25,
+        "ARE": 6.25,
+        "IFF": 6.25,
+        "CTAS": 6.25,
+        "PLTR": 6.25,
+        "PSX": 6.25,
+        "LITE": 6.25,
+        "ECHO": 6.25,
+        "SNDK": 6.25,
+        "WBD": 6.25,
+        "GRMN": 6.25,
+        "BR": 6.25
+      },
+      "note": "picks list changed"
     }
   ]
 }

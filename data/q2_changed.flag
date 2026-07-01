@@ -1,4 +1,4 @@
-changed:2026-05-11
-reason:weight changed for ALB: 6.5 → 5.2
-entryDate:2026-03-16
-picks:ALB,SPG,ETR,COST,MU,EXPD,CEG,NRG,ARE,CTAS,DECK,AMCR,ACN,FDS,PLTR,PSX
+changed:2026-07-01
+reason:picks list changed
+entryDate:2026-06-30
+picks:ALB,SPG,ETR,COST,CEG,ARE,IFF,CTAS,PLTR,PSX,LITE,ECHO,SNDK,WBD,GRMN,BR
