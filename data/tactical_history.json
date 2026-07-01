@@ -246,6 +246,43 @@
         "BX": 9.5
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-07-01",
+      "addedAt": "2026-07-01T15:33:17Z",
+      "picks": [
+        "HPE",
+        "DELL",
+        "DECK",
+        "RCL",
+        "ULTA",
+        "ECHO",
+        "SNDK",
+        "STX",
+        "ALB",
+        "CPAY",
+        "VPL",
+        "EIS",
+        "ETHE",
+        "TMV"
+      ],
+      "weights": {
+        "HPE": 7.14,
+        "DELL": 7.14,
+        "DECK": 7.14,
+        "RCL": 7.14,
+        "ULTA": 7.14,
+        "ECHO": 7.14,
+        "SNDK": 7.14,
+        "STX": 7.14,
+        "ALB": 7.14,
+        "CPAY": 7.14,
+        "VPL": 7.14,
+        "EIS": 7.14,
+        "ETHE": 7.14,
+        "TMV": 7.18
+      },
+      "note": "picks list changed"
     }
   ]
 }
