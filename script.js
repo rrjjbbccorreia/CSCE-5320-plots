@@ -55,7 +55,7 @@
 })();
 
 // ==================== CONFIG ====================
-const DATA_PATH = "data/merged_predictions_v2_web_032526.csv";
+const DATA_PATH = "data/merged_predictions_v2_web_063026.csv";
 let globalData = [];
 let currentTicker = null;
 let currentTarget = "T1";
@@ -710,7 +710,7 @@ async function drawChart(ticker, target) {
 
   const trueDateFiltered = validTrueIndices.map((i) => tgtDate[i]);
   const truePriceFiltered = validTrueIndices.map((i) =>
-    entryPrice[i] * Math.exp(yTrue[i])
+  entryPrice[i] * yTrue[i]
   );
 
 
