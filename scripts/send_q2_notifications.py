@@ -70,7 +70,7 @@ def send_email_sendgrid(to_email, from_email, api_key, portfolio):
         for ticker in picks
     ])
 
-    subject = "Q2 Fundamental Portfolio Update — Correia Investment Solutions"
+    subject = "Q Fundamental Portfolio Update — Correia Investment Solutions"
 
     body_text = f"""Dear Investor,
 
@@ -115,7 +115,7 @@ To unsubscribe, reply with "unsubscribe" in the subject line.
         Correia Investment Solutions
       </h1>
       <p style="color: #6080a0; font-size: 13px; margin: 6px 0 0 0;">
-        Q2 Fundamental Portfolio Update
+        Q Fundamental Portfolio Update
       </p>
     </div>
 
@@ -125,7 +125,7 @@ To unsubscribe, reply with "unsubscribe" in the subject line.
         Dear Investor,
       </p>
       <p style="color: #333; font-size: 15px; line-height: 1.6;">
-        The <strong>Q2 Fundamental Analysis portfolio</strong> has been updated
+        The <strong>Q Fundamental Analysis portfolio</strong> has been updated
         as of <strong>{date}</strong>.
       </p>
 
@@ -142,7 +142,7 @@ To unsubscribe, reply with "unsubscribe" in the subject line.
                   padding: 20px; margin: 24px 0;">
         <h3 style="color: #0d1a2e; font-size: 14px; text-transform: uppercase;
                    letter-spacing: 1px; margin: 0 0 16px 0;">
-          Q2 Portfolio Allocation
+          Q Portfolio Allocation
         </h3>
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
@@ -193,7 +193,7 @@ To unsubscribe, reply with "unsubscribe" in the subject line.
                   background: linear-gradient(135deg, #f0a500, #c47f00);
                   color: white; text-decoration: none; border-radius: 8px;
                   font-size: 15px; font-weight: 600; letter-spacing: 0.3px;">
-          View Full Q2 Analysis →
+          View Full Q Analysis →
         </a>
       </div>
 

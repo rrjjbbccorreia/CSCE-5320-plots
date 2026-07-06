@@ -2,9 +2,9 @@ name: Monitor Q2 Fundamental Portfolio Changes
 
 on:
   schedule:
-    # Run daily at 9:00am ET (13:00 UTC) on weekdays
-    - cron: '0 13 * * 1-5'
-  workflow_dispatch:  # manual trigger
+    # Run at 9:05am ET (13:05 UTC) — 5 minutes after tactical at 13:00
+    - cron: '5 13 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   check-and-notify:
@@ -45,7 +45,7 @@ jobs:
       - name: Log result
         run: |
           if [ "${{ steps.check.outputs.portfolio_changed }}" == "true" ]; then
-            echo "✅ Q2 portfolio changed — history updated and notifications sent"
+            echo "✅ Q portfolio changed — history updated and notifications sent"
           else
-            echo "✓ No Q2 changes detected"
+            echo "✓ No Q changes detected"
           fi
