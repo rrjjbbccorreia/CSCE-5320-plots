@@ -283,6 +283,43 @@
         "TMV": 7.18
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-07-15",
+      "addedAt": "2026-07-15T14:30:21Z",
+      "picks": [
+        "SNDK",
+        "GLW",
+        "STX",
+        "APP",
+        "COHR",
+        "COIN",
+        "ALGN",
+        "CIEN",
+        "AMAT",
+        "CVNA",
+        "BX",
+        "URA",
+        "XME",
+        "EWZ"
+      ],
+      "weights": {
+        "SNDK": 5.0,
+        "GLW": 5.0,
+        "STX": 5.0,
+        "APP": 5.0,
+        "COHR": 5.0,
+        "COIN": 6.4,
+        "ALGN": 6.8,
+        "CIEN": 5.1,
+        "AMAT": 5.0,
+        "CVNA": 7.1,
+        "BX": 12.7,
+        "URA": 11.1,
+        "XME": 5.4,
+        "EWZ": 15.4
+      },
+      "note": "picks list changed"
     }
   ]
 }
