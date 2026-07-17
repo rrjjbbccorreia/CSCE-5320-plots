@@ -1,29 +1,29 @@
 {
-  "updated": "2026-07-17 20:08 UTC",
+  "updated": "2026-07-17 21:57 UTC",
   "market_open": false,
   "prices": {
     "SGOV": 100.58,
-    "BIL": 91.56,
+    "BIL": 91.55,
     "SHV": 110.25,
     "USFR": 50.46,
     "BOXX": 117.49,
     "SHY": 81.99,
     "VGSH": 58.13,
-    "SCHO": 24.09,
+    "SCHO": 24.1,
     "IEI": 116.98,
     "IEF": 93.84,
     "VGIT": 58.68,
-    "SCHR": 24.54,
+    "SCHR": 24.55,
     "SPTI": 28.25,
-    "GOVT": 22.62,
-    "TLH": 98.67,
+    "GOVT": 22.63,
+    "TLH": 98.68,
     "TLT": 84.52,
     "VGLT": 54.1,
-    "SPTL": 25.72,
+    "SPTL": 25.73,
     "IBTG": 22.87,
     "IBTH": 22.36,
     "IBTI": 22.11,
     "IBTJ": 21.59,
-    "IBTP": 25.21
+    "IBTP": 25.2
   }
 }
