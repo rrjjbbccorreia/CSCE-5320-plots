@@ -21,10 +21,9 @@ Q2_PICKS = [
 ]
 
 TACTICAL_PICKS = [
-    "SNDK", "GLW", "STX", "APP",
-    "COHR", "COIN", "ALGN", "CIEN",
-    "AMAT", "CVNA", "BX", "URA",
-    "XME", "EWZ"
+    "NFLX", "SNDK", "ECHO", "FCX",
+    "GS", "WDC", "BN", "URA",
+    "APO", "COPX", "EWY", "SMH"
 ]
 
 # =============================================================
