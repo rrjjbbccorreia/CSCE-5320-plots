@@ -1031,16 +1031,16 @@ function loadPrice(key) {
 // Tracks when proxies last ran successfully
 // Prevents duplicate proxy runs within 30 minutes
 
-function saveProxyRefreshTime() {
-  sessionStorage.setItem("last_proxy_refresh", Date.now().toString());
-}
+// function saveProxyRefreshTime() {
+//   sessionStorage.setItem("last_proxy_refresh", Date.now().toString());
+// }
 
-function wasProxyRefreshedRecently() {
-  const last = sessionStorage.getItem("last_proxy_refresh");
-  if (!last) return false;
-  const ageMs = Date.now() - parseInt(last);
-  return ageMs < 30 * 60 * 1000;
-}
+// function wasProxyRefreshedRecently() {
+//   const last = sessionStorage.getItem("last_proxy_refresh");
+//   if (!last) return false;
+//   const ageMs = Date.now() - parseInt(last);
+//   return ageMs < 30 * 60 * 1000;
+// }
 
 // ============ FILE + CACHE FRESHNESS TRACKER ============
 // During market hours — 15 min is fresh enough
@@ -1179,8 +1179,8 @@ function isPickPricesStale() {
 
     // Outside market hours
     if (ageMs > OUTSIDE_FRESH_MS) {
-      if (wasProxyRefreshedRecently()) {
-        console.log(`File old but proxy ran recently — skipping`);
+      if (wasPricesRefreshedRecently()) {       // ← use new unified function
+        console.log(`File old but prices refreshed recently — skipping`);
         return false;
       }
       console.warn(`⚠️ File is ${ageMin}min old outside market hours`);
@@ -1206,16 +1206,27 @@ let lastPriceRefresh   = Date.now();
 async function refreshPickPrices() {
   console.log("🔄 Refreshing pick prices...");
 
-  // Clear session cache
-  Q2_PICKS.forEach(ticker => {
-    sessionStorage.removeItem(`price_cache_q2_${ticker}`);
-  });
-  TACTICAL_PICKS.forEach(ticker => {
-    sessionStorage.removeItem(`price_cache_tac_${ticker}`);
-  });
+  // // Clear session cache
+  // Q2_PICKS.forEach(ticker => {
+  //   sessionStorage.removeItem(`price_cache_q2_${ticker}`);
+  // });
+  // TACTICAL_PICKS.forEach(ticker => {
+  //   sessionStorage.removeItem(`price_cache_tac_${ticker}`);
+  // });
 
-  // Re-fetch the file
+  // // Re-fetch the file
+  // await loadPickPricesFromFile();
+
+
+  // Clear SESSION cache (browser sessionStorage — per-ticker prices)
+  Q2_PICKS.forEach(ticker => sessionStorage.removeItem(`price_cache_q2_${ticker}`));
+  TACTICAL_PICKS.forEach(ticker => sessionStorage.removeItem(`price_cache_tac_${ticker}`));
+
+  // loadPickPricesFromFile will also clear pickPricesCache (in-memory file prices) if stale
   await loadPickPricesFromFile();
+
+
+
 
   if (isPickPricesStale()) {
     // File is stale — GitHub Action missed its window
@@ -1248,6 +1259,7 @@ async function refreshPickPrices() {
   Q2_PICKS.forEach(ticker      => applyFilePriceToQ2Card(ticker));
   TACTICAL_PICKS.forEach(ticker => applyFilePriceToTacticalCard(ticker));
 
+  savePriceRefreshTime("file");   // ← add this — was missing
   lastPriceRefresh = Date.now();
   console.log(`✅ Prices refreshed at ${new Date().toLocaleTimeString()}`);
 }
@@ -1468,7 +1480,9 @@ async function loadQ2Picks() {
     console.warn(`pick_prices.json is stale — ${needsProxy.length} Q2 picks need proxy, ${Q2_PICKS.length - needsProxy.length} served from session cache`);
   }
 
-  console.log(`Q2 — ${Q2_PICKS.length - stillNeeded.length} loaded from cache/file, ${needsProxy.length} need proxy fetch`);
+  // console.log(`Q2 — ${Q2_PICKS.length - stillNeeded.length} loaded from cache/file, ${needsProxy.length} need proxy fetch`);
+  const cachedCount = Q2_PICKS.length - needsProxy.length;
+  console.log(`Q2 — ${cachedCount} from cache/file, ${needsProxy.length} need proxy fetch`);
 
   // If everything loaded from cache — skip proxy entirely
   if (needsProxy.length === 0) {
@@ -1488,17 +1502,6 @@ async function loadQ2Picks() {
 
   // ===== STEP 4: Proxy fetch =====
 
-  // If file is stale — show refreshing indicator on all cards
-  if (fileIsStale) {
-    needsProxy.forEach(ticker => {
-      const priceEl = document.getElementById(`price-${ticker}`);
-      //if (priceEl) {
-      //  const currentHtml = priceEl.innerHTML;
-      //  priceEl.innerHTML = currentHtml +
-      //    `<div class="price-refreshing">⟳ refreshing...</div>`;
-      //}
-    });
-  }
 
 
   for (let i = 0; i < needsProxy.length; i++) {
@@ -1736,11 +1739,12 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     } else {
       // All standard retries exhausted — try file cache as last resort
       const fileData    = pickPricesCache[ticker];
-      const today       = new Date().toDateString();
-      const fileUpdated = pickPricesUpdated
-        ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
-        : null;
-      const isSameDay   = fileUpdated === today;
+      // const today       = new Date().toDateString();
+      // const fileUpdated = pickPricesUpdated
+      //   ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
+      //   : null;
+      // const isSameDay   = fileUpdated === today;
+      const isSameDay   = isFilePriceFromToday(); // use existing function
       const appliedFromFile = isSameDay && fileData?.price
         ? applyFilePriceToQ2Card(ticker)
         : false;
@@ -1810,6 +1814,7 @@ async function loadTacticalPicks() {
   TACTICAL_PICKS.forEach(ticker => {
     const cached = loadPrice(`tac_${ticker}`);
     if (cached) {
+      console.log(`${ticker} tactical — loaded from session cache`); // ← add this
       document.getElementById(`tactical-price-${ticker}`).innerHTML =
         `<span class="pick-price-value">$${cached.price.toFixed(2)}</span>`;
       document.getElementById(`tactical-change-${ticker}`).innerHTML = `
@@ -1863,7 +1868,11 @@ async function loadTacticalPicks() {
     console.warn(`pick_prices.json is stale — ${needsProxy.length} Tactical picks need proxy, ${TACTICAL_PICKS.length - needsProxy.length} served from session cache`);
   }
 
-  console.log(`Tactical — ${TACTICAL_PICKS.length - stillNeeded.length} from cache/file, ${needsProxy.length} need proxy`);
+  // console.log(`Tactical — ${TACTICAL_PICKS.length - stillNeeded.length} from cache/file, ${needsProxy.length} need proxy`);
+  const cachedCount = TACTICAL_PICKS.length - needsProxy.length;
+  console.log(`Q2 — ${cachedCount} from cache/file, ${needsProxy.length} need proxy fetch`);
+
+
 
   if (needsProxy.length === 0) {
     // Clean up any refreshing indicators before returning
@@ -1882,15 +1891,7 @@ async function loadTacticalPicks() {
 
   // ===== STEP 4: Proxy fetch for missing =====
 
-  // Add refreshing indicator to any not already showing it
-  if (fileIsStale) {
-    needsProxy.forEach(ticker => {
-      const priceEl = document.getElementById(`tactical-price-${ticker}`); 
-      //if (priceEl && !priceEl.querySelector(".price-refreshing")) {
-      //  priceEl.innerHTML += `<div class="price-refreshing">⟳ refreshing...</div>`;
-      //}
-    });
-  }
+
 
   for (let i = 0; i < needsProxy.length; i++) {
     await new Promise(resolve => setTimeout(resolve, i * 400));
@@ -2145,11 +2146,12 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     } else {
       // All standard retries exhausted — try file cache as last resort
       const fileData    = pickPricesCache[ticker];
-      const today       = new Date().toDateString();
-      const fileUpdated = pickPricesUpdated
-        ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
-        : null;
-      const isSameDay   = fileUpdated === today;
+      // const today       = new Date().toDateString();
+      // const fileUpdated = pickPricesUpdated
+      //   ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
+      //   : null;
+      // const isSameDay   = fileUpdated === today;
+      const isSameDay   = isFilePriceFromToday(); // ← use existing function
       const appliedFromFile = isSameDay && fileData?.price
         ? applyFilePriceToTacticalCard(ticker)
         : false;
