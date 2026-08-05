@@ -320,6 +320,39 @@
         "EWZ": 15.4
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-07-30",
+      "addedAt": "2026-07-30T14:57:39Z",
+      "picks": [
+        "NFLX",
+        "SNDK",
+        "ECHO",
+        "FCX",
+        "GS",
+        "WDC",
+        "BN",
+        "URA",
+        "APO",
+        "COPX",
+        "EWY",
+        "SMH"
+      ],
+      "weights": {
+        "NFLX": 11.78,
+        "SNDK": 1.05,
+        "ECHO": 8.2,
+        "FCX": 13.1,
+        "GS": 9.57,
+        "WDC": 2.03,
+        "BN": 10.71,
+        "URA": 12.33,
+        "APO": 8.91,
+        "COPX": 11.77,
+        "EWY": 5.13,
+        "SMH": 5.4
+      },
+      "note": "picks list changed"
     }
   ]
 }
