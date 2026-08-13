@@ -386,6 +386,41 @@
         "CINF": 10.26
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-08-13",
+      "addedAt": "2026-08-13T18:53:48Z",
+      "picks": [
+        "SNDK",
+        "NCLH",
+        "BA",
+        "IRM",
+        "APP",
+        "IBKR",
+        "CPT",
+        "CTVA",
+        "URA",
+        "UCO",
+        "IGV",
+        "CINF",
+        "DDOG"
+      ],
+      "weights": {
+        "SNDK": 2.42,
+        "NCLH": 8.57,
+        "BA": 11.24,
+        "IRM": 10.44,
+        "APP": 2.87,
+        "IBKR": 8.9,
+        "CPT": 7.39,
+        "CTVA": 9.13,
+        "URA": 12.12,
+        "UCO": 7.33,
+        "IGV": 9.34,
+        "CINF": 10.26,
+        "DDOG": 0.0
+      },
+      "note": "picks list changed"
     }
   ]
 }
