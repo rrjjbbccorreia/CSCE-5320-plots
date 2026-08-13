@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 CURRENT_PICKS = [
     "SNDK", "NCLH", "BA", "IRM",
     "APP", "IBKR", "CPT", "CTVA",
-    "URA", "UCO", "IGV", "CINF"
+    "URA", "UCO", "IGV", "CINF", "DDOG"
 ]
 
 CURRENT_WEIGHTS = {
@@ -34,6 +34,7 @@ CURRENT_WEIGHTS = {
     "UCO": 7.33,
     "IGV": 9.34,
     "CINF": 10.26,
+    "DDOG": 0.0,
 }
 
 # ====================================================================
