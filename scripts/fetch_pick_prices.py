@@ -21,9 +21,9 @@ Q2_PICKS = [
 ]
 
 TACTICAL_PICKS = [
-    "SNDK", "NCLH", "BA", "IRM",
-    "APP", "IBKR", "CPT", "CTVA",
-    "URA", "UCO", "IGV", "CINF" 
+    "SNDK", "DELL", "VRT", "APP",
+    "STLD", "MOH", "CIEN", "SMCI",
+    "AMD", "TXN", "GDX", "EWY"
 ]
 
 # =============================================================

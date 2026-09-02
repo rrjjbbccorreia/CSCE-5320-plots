@@ -1387,9 +1387,9 @@ const Q2_PICKS = [
 ];
 
 const TACTICAL_PICKS = [
-  "SNDK", "NCLH", "BA", "IRM",
-  "APP", "IBKR", "CPT", "CTVA",
-  "URA", "UCO", "IGV", "CINF"
+  "SNDK", "DELL", "VRT", "APP",
+  "STLD", "MOH", "CIEN", "SMCI",
+  "AMD", "TXN", "GDX", "EWY"
 ];
 
 async function loadQ2Picks() {
