@@ -1689,3 +1689,68 @@ html {
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 1;   }
 }
+
+/* ===== Planner Screenshots ===== */
+.planner-screenshots {
+  width: 100%;
+  margin: 32px 0;
+}
+
+.screenshots-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #00b4d8;
+  margin-bottom: 8px;
+}
+
+.screenshots-desc {
+  font-size: 14px;
+  color: #888;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.screenshots-stack {
+  display: flex;
+  flex-direction: column;  /* ← stacked vertically */
+  gap: 28px;
+}
+
+.screenshot-card {
+  width: 100%;
+  background: #1e1e24;
+  border: 1px solid #2a2a35;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.screenshot-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #00b4d8;
+  padding: 14px 20px 10px;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.screenshot-img {
+  width: 100%;
+  height: auto;          /* ← full natural height, no cropping */
+  display: block;
+  border-top: 1px solid #2a2a35;
+  border-bottom: 1px solid #2a2a35;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.screenshot-img:hover {
+  opacity: 0.85;
+}
+
+.screenshot-caption {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.7;
+  padding: 12px 20px 16px;
+  margin: 0;
+}
