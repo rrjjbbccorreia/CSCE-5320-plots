@@ -421,6 +421,39 @@
         "DDOG": 0.0
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-09-02",
+      "addedAt": "2026-09-02T15:05:13Z",
+      "picks": [
+        "SNDK",
+        "DELL",
+        "VRT",
+        "APP",
+        "STLD",
+        "MOH",
+        "CIEN",
+        "SMCI",
+        "AMD",
+        "TXN",
+        "GDX",
+        "EWY"
+      ],
+      "weights": {
+        "SNDK": 1.25,
+        "DELL": 8.0,
+        "VRT": 11.69,
+        "APP": 13.56,
+        "STLD": 12.02,
+        "MOH": 8.0,
+        "CIEN": 9.44,
+        "SMCI": 6.96,
+        "AMD": 7.69,
+        "TXN": 8.99,
+        "GDX": 8.3,
+        "EWY": 4.11
+      },
+      "note": "picks list changed"
     }
   ]
 }
