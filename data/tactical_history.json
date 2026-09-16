@@ -454,6 +454,39 @@
         "EWY": 4.11
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-09-16",
+      "addedAt": "2026-09-16T17:19:35Z",
+      "picks": [
+        "MU",
+        "MRVL",
+        "SMCI",
+        "SNDK",
+        "AMAT",
+        "KMX",
+        "POOL",
+        "ROL",
+        "STLD",
+        "IBIT",
+        "EWY",
+        "IGV"
+      ],
+      "weights": {
+        "MU": 6.83,
+        "MRVL": 6.8,
+        "SMCI": 3.38,
+        "SNDK": 1.93,
+        "AMAT": 12.82,
+        "KMX": 11.63,
+        "POOL": 12.25,
+        "ROL": 8.01,
+        "STLD": 12.47,
+        "IBIT": 6.86,
+        "EWY": 5.68,
+        "IGV": 11.33
+      },
+      "note": "picks list changed"
     }
   ]
 }
