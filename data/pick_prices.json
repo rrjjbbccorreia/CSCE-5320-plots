@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17 20:34 UTC",
+  "updated": "2026-09-17 23:07 UTC",
   "marketOpen": false,
   "q2Picks": [
     "ALB",
@@ -34,20 +34,6 @@
     "IGV"
   ],
   "prices": {
-    "MU": {
-      "price": 977.5,
-      "prev": 926.55,
-      "change": 50.95,
-      "changePct": 5.4989,
-      "isPositive": true
-    },
-    "STLD": {
-      "price": 245.35,
-      "prev": 238.23,
-      "change": 7.12,
-      "changePct": 2.9887,
-      "isPositive": true
-    },
     "COST": {
       "price": 893.93,
       "prev": 893.74,
@@ -55,12 +41,26 @@
       "changePct": 0.0213,
       "isPositive": true
     },
-    "CTAS": {
-      "price": 197.96,
-      "prev": 199.46,
-      "change": -1.5,
-      "changePct": -0.752,
+    "GRMN": {
+      "price": 275.35,
+      "prev": 276.93,
+      "change": -1.58,
+      "changePct": -0.5705,
       "isPositive": false
+    },
+    "BR": {
+      "price": 164.31,
+      "prev": 167.09,
+      "change": -2.78,
+      "changePct": -1.6638,
+      "isPositive": false
+    },
+    "MRVL": {
+      "price": 240.76,
+      "prev": 229.71,
+      "change": 11.05,
+      "changePct": 4.8104,
+      "isPositive": true
     },
     "IGV": {
       "price": 105.78,
@@ -69,39 +69,11 @@
       "changePct": 0.7813,
       "isPositive": true
     },
-    "SMCI": {
-      "price": 40.35,
-      "prev": 36.85,
-      "change": 3.5,
-      "changePct": 9.498,
-      "isPositive": true
-    },
-    "SNDK": {
-      "price": 1614.39,
-      "prev": 1519.97,
-      "change": 94.42,
-      "changePct": 6.212,
-      "isPositive": true
-    },
-    "ROL": {
-      "price": 33.0,
-      "prev": 33.53,
-      "change": -0.53,
-      "changePct": -1.5807,
-      "isPositive": false
-    },
-    "POOL": {
-      "price": 167.65,
-      "prev": 167.76,
-      "change": -0.11,
-      "changePct": -0.0656,
-      "isPositive": false
-    },
-    "AMAT": {
-      "price": 417.4,
-      "prev": 415.38,
-      "change": 2.02,
-      "changePct": 0.4863,
+    "MU": {
+      "price": 977.5,
+      "prev": 926.55,
+      "change": 50.95,
+      "changePct": 5.4989,
       "isPositive": true
     },
     "IFF": {
@@ -111,39 +83,25 @@
       "changePct": 0.6043,
       "isPositive": true
     },
-    "ARE": {
-      "price": 56.34,
-      "prev": 53.52,
-      "change": 2.82,
-      "changePct": 5.2691,
-      "isPositive": true
-    },
-    "BR": {
-      "price": 164.31,
-      "prev": 167.09,
-      "change": -2.78,
-      "changePct": -1.6638,
+    "CTAS": {
+      "price": 197.96,
+      "prev": 199.46,
+      "change": -1.5,
+      "changePct": -0.752,
       "isPositive": false
     },
-    "LITE": {
-      "price": 893.61,
-      "prev": 919.4,
-      "change": -25.79,
-      "changePct": -2.8051,
-      "isPositive": false
-    },
-    "ETR": {
-      "price": 103.31,
-      "prev": 102.32,
-      "change": 0.99,
-      "changePct": 0.9676,
+    "PSX": {
+      "price": 274.21,
+      "prev": 264.63,
+      "change": 9.58,
+      "changePct": 3.6201,
       "isPositive": true
     },
-    "GRMN": {
-      "price": 275.35,
-      "prev": 276.93,
-      "change": -1.58,
-      "changePct": -0.5705,
+    "POOL": {
+      "price": 167.65,
+      "prev": 167.76,
+      "change": -0.11,
+      "changePct": -0.0656,
       "isPositive": false
     },
     "EWY": {
@@ -160,18 +118,39 @@
       "changePct": 5.0973,
       "isPositive": true
     },
-    "MRVL": {
-      "price": 240.76,
-      "prev": 229.71,
-      "change": 11.05,
-      "changePct": 4.8104,
+    "WBD": {
+      "price": 28.24,
+      "prev": 28.07,
+      "change": 0.17,
+      "changePct": 0.6056,
       "isPositive": true
     },
-    "CEG": {
-      "price": 262.8,
-      "prev": 259.53,
-      "change": 3.27,
-      "changePct": 1.26,
+    "LITE": {
+      "price": 893.61,
+      "prev": 919.4,
+      "change": -25.79,
+      "changePct": -2.8051,
+      "isPositive": false
+    },
+    "ECHO": {
+      "price": 94.08,
+      "prev": 93.46,
+      "change": 0.62,
+      "changePct": 0.6634,
+      "isPositive": true
+    },
+    "AMAT": {
+      "price": 417.4,
+      "prev": 415.38,
+      "change": 2.02,
+      "changePct": 0.4863,
+      "isPositive": true
+    },
+    "SMCI": {
+      "price": 40.35,
+      "prev": 36.85,
+      "change": 3.5,
+      "changePct": 9.498,
       "isPositive": true
     },
     "KMX": {
@@ -180,20 +159,6 @@
       "change": -0.42,
       "changePct": -0.7143,
       "isPositive": false
-    },
-    "PSX": {
-      "price": 274.21,
-      "prev": 264.63,
-      "change": 9.58,
-      "changePct": 3.6201,
-      "isPositive": true
-    },
-    "PLTR": {
-      "price": 176.24,
-      "prev": 174.34,
-      "change": 1.9,
-      "changePct": 1.0898,
-      "isPositive": true
     },
     "IBIT": {
       "price": 43.3,
@@ -209,18 +174,53 @@
       "changePct": 0.7539,
       "isPositive": true
     },
-    "ECHO": {
-      "price": 94.08,
-      "prev": 93.46,
-      "change": 0.62,
-      "changePct": 0.6634,
+    "SNDK": {
+      "price": 1614.39,
+      "prev": 1519.97,
+      "change": 94.42,
+      "changePct": 6.212,
       "isPositive": true
     },
-    "WBD": {
-      "price": 28.24,
-      "prev": 28.07,
-      "change": 0.17,
-      "changePct": 0.6056,
+    "CEG": {
+      "price": 262.8,
+      "prev": 259.53,
+      "change": 3.27,
+      "changePct": 1.26,
+      "isPositive": true
+    },
+    "ETR": {
+      "price": 103.31,
+      "prev": 102.32,
+      "change": 0.99,
+      "changePct": 0.9676,
+      "isPositive": true
+    },
+    "STLD": {
+      "price": 245.35,
+      "prev": 238.23,
+      "change": 7.12,
+      "changePct": 2.9887,
+      "isPositive": true
+    },
+    "ROL": {
+      "price": 33.0,
+      "prev": 33.53,
+      "change": -0.53,
+      "changePct": -1.5807,
+      "isPositive": false
+    },
+    "ARE": {
+      "price": 56.34,
+      "prev": 53.52,
+      "change": 2.82,
+      "changePct": 5.2691,
+      "isPositive": true
+    },
+    "PLTR": {
+      "price": 176.24,
+      "prev": 174.34,
+      "change": 1.9,
+      "changePct": 1.0898,
       "isPositive": true
     }
   }
