@@ -1754,3 +1754,43 @@ html {
   padding: 12px 20px 16px;
   margin: 0;
 }
+
+/* ===== Prior Quarter Performance Section ===== */
+.prior-quarter-section {
+  margin-bottom: 36px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #2a2a35;
+  border-radius: 14px;
+  padding: 28px 32px;
+}
+
+.prior-quarter-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #00b4d8;
+  margin: 0 0 10px 0;
+}
+
+.prior-quarter-desc {
+  font-size: 14px;
+  color: #888;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.prior-quarter-image-wrap {
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #2a2a35;
+  display: flex;              /* ← add this */
+  justify-content: center;   /* ← add this */
+}
+
+.prior-quarter-img {
+  width: 50%;                /* ← was 100%, reduce to taste */
+  height: auto;
+  display: block;
+  border-radius: 10px;       /* ← add this so corners match wrapper */
+}

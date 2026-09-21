@@ -13,11 +13,10 @@ from datetime import datetime
 # Edit these lists when picks change each quarter / rotation
 
 Q2_PICKS = [
-    "ALB", "SPG", "ETR", "COST",
-    "CEG", "ARE","IFF",
-    "CTAS", "PLTR", "PSX",
-    "LITE", "ECHO", "SNDK", "WBD",
-    "GRMN", "BR"
+    "INTC", "FIX", "SNDK", "PSX",
+    "FOXA", "FANG", "APO", "CF",
+    "EOG", "FLEX", "BR", "GRMN",
+    "ECHO", "LITE", "IFF", "CEG"
 ]
 
 TACTICAL_PICKS = [

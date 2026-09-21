@@ -55,7 +55,7 @@
 })();
 
 // ==================== CONFIG ====================
-const DATA_PATH = "data/merged_predictions_v2_web_063026.csv";
+const DATA_PATH = "data/merged_predictions_v2_web_093026.csv";
 let globalData = [];
 let currentTicker = null;
 let currentTarget = "T1";
@@ -1379,11 +1379,10 @@ function isFilePriceFromToday() {
 
 // ============ Q2 FUNDAMENTAL PICKS ============
 const Q2_PICKS = [
-  "ALB", "SPG", "ETR", "COST",
-  "CEG", "ARE","IFF",
-  "CTAS", "PLTR", "PSX",
-  "LITE", "ECHO", "SNDK", "WBD",
-  "GRMN", "BR"
+  "INTC", "FIX", "SNDK", "PSX",
+  "FOXA", "FANG", "APO", "CF",
+  "EOG", "FLEX", "BR", "GRMN",
+  "ECHO", "LITE", "IFF", "CEG"
 ];
 
 const TACTICAL_PICKS = [
