@@ -126,6 +126,48 @@
         "BR": 6.25
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-09-21",
+      "addedAt": "2026-09-21T18:37:08Z",
+      "entryDate": "2026-09-15",
+      "picks": [
+        "INTC",
+        "FIX",
+        "SNDK",
+        "PSX",
+        "FOXA",
+        "FANG",
+        "APO",
+        "CF",
+        "EOG",
+        "FLEX",
+        "BR",
+        "GRMN",
+        "ECHO",
+        "LITE",
+        "IFF",
+        "CEG"
+      ],
+      "weights": {
+        "INTC": 3.16,
+        "FIX": 5.27,
+        "SNDK": 3.3,
+        "PSX": 7.65,
+        "FOXA": 7.13,
+        "FANG": 7.75,
+        "APO": 5.67,
+        "CF": 7.94,
+        "EOG": 8.46,
+        "FLEX": 2.55,
+        "BR": 8.38,
+        "GRMN": 8.62,
+        "ECHO": 6.37,
+        "LITE": 4.41,
+        "IFF": 7.99,
+        "CEG": 5.34
+      },
+      "note": "picks list changed"
     }
   ]
 }
