@@ -20,9 +20,9 @@ Q2_PICKS = [
 ]
 
 TACTICAL_PICKS = [
-    "MU", "MRVL", "SMCI", "SNDK",
-    "AMAT", "KMX", "POOL", "ROL",
-    "STLD", "IBIT", "EWY", "IGV"
+    "MU", "TRGP", "HII", "ADBE",
+    "MRVL", "BA", "KMX", "HWM",
+    "IBIT", "ITA"
 ]
 
 # =============================================================

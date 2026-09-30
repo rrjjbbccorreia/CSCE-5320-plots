@@ -1386,9 +1386,9 @@ const Q2_PICKS = [
 ];
 
 const TACTICAL_PICKS = [
-  "MU", "MRVL", "SMCI", "SNDK",
-  "AMAT", "KMX", "POOL", "ROL",
-  "STLD", "IBIT", "EWY", "IGV"
+    "MU", "TRGP", "HII", "ADBE",
+    "MRVL", "BA", "KMX", "HWM",
+    "IBIT", "ITA"
 ];
 
 async function loadQ2Picks() {
