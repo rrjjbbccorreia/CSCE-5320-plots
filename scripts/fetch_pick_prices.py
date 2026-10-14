@@ -20,9 +20,9 @@ Q2_PICKS = [
 ]
 
 TACTICAL_PICKS = [
-    "MU", "TRGP", "HII", "ADBE",
-    "MRVL", "BA", "KMX", "HWM",
-    "IBIT", "ITA"
+    "SNDK", "KLAC", "HPE", "BALL",
+    "CPT", "ITW", "RSG", "DIS",
+    "JPM", "ITA", "SMH"
 ]
 
 # =============================================================
