@@ -487,6 +487,35 @@
         "IGV": 11.33
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-09-30",
+      "addedAt": "2026-09-30T18:10:05Z",
+      "picks": [
+        "MU",
+        "TRGP",
+        "HII",
+        "ADBE",
+        "MRVL",
+        "BA",
+        "KMX",
+        "HWM",
+        "IBIT",
+        "ITA"
+      ],
+      "weights": {
+        "MU": 12.25,
+        "TRGP": 11.89,
+        "HII": 12.14,
+        "ADBE": 8.02,
+        "MRVL": 2.56,
+        "BA": 12.86,
+        "KMX": 8.91,
+        "HWM": 11.92,
+        "IBIT": 8.05,
+        "ITA": 11.41
+      },
+      "note": "picks list changed"
     }
   ]
 }
