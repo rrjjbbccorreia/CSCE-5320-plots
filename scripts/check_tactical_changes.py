@@ -16,23 +16,26 @@ from datetime import datetime, timezone
 # Edit these when the tactical portfolio changes
 
 CURRENT_PICKS = [
-        "SNDK", "KLAC", "HPE", "BALL",
-        "CPT", "ITW", "RSG", "DIS",
-        "JPM", "ITA", "SMH"
+        "MPC", "HWM", "JBL", "HPE",
+        "AME", "GOOGL", "BRK-B", "BEN",
+        "AON", "ETN", "CL", "TECH",
+        "XME"
 ]
 
 CURRENT_WEIGHTS = {
-        "SNDK" : 3.21,
-        "KLAC" : 6.58,
-        "HPE" : 4.35,
-        "BALL" : 12.96,
-        "CPT" : 8.80,
-        "ITW" : 10.99,
-        "RSG" : 13.77,
-        "DIS" : 13.96,
-        "JPM" : 11.32,
-        "ITA" : 8.59,
-        "SMH" : 5.47,
+        "MPC" : 11.46,
+        "HWM" : 2.25,
+        "JBL" : 6.68,
+        "HPE" : 3.23,
+        "AME" : 10.60,
+        "GOOGL" : 9.42,
+        "BRK-B" : 12.21,
+        "BEN" : 4.80,
+        "AON" : 5.89,
+        "ETN" : 7.65,
+        "CL" : 11.72,
+        "TECH" : 9.06,
+        "XME" : 5.04,
 }
 
 # ====================================================================

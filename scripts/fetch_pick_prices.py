@@ -20,9 +20,10 @@ Q2_PICKS = [
 ]
 
 TACTICAL_PICKS = [
-    "SNDK", "KLAC", "HPE", "BALL",
-    "CPT", "ITW", "RSG", "DIS",
-    "JPM", "ITA", "SMH"
+    "MPC", "HWM", "JBL", "HPE",
+    "AME", "GOOGL", "BRK-B", "BEN",
+    "AON", "ETN", "CL", "TECH",
+    "XME"
 ]
 
 # =============================================================

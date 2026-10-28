@@ -1386,9 +1386,10 @@ const Q2_PICKS = [
 ];
 
 const TACTICAL_PICKS = [
-    "SNDK", "KLAC", "HPE", "BALL",
-    "CPT", "ITW", "RSG", "DIS",
-    "JPM", "ITA", "SMH"
+  "MPC", "HWM", "JBL", "HPE",
+  "AME", "GOOGL", "BRK-B", "BEN",
+  "AON", "ETN", "CL", "TECH",
+  "XME"
 ];
 
 async function loadQ2Picks() {
@@ -1630,12 +1631,186 @@ async function loadQ2Picks() {
   }
 }
 
+// async function fetchPickPrice(ticker, retryCount = 0) {
+//   const maxRetries = 3;
+//   try {
+//     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+
+//     const proxies = [
+//       async () => {
+//         const r = await fetch(
+//           `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+//           { signal: AbortSignal.timeout(15000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         const j = await r.json();
+//         return JSON.parse(j.contents);
+//       },
+//       async () => {
+//         const r = await fetch(
+//           `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+//           { signal: AbortSignal.timeout(15000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         return r.json();
+//       },
+//       async () => {
+//         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+//         const r     = await fetch(
+//           `https://api.allorigins.win/get?url=${encodeURIComponent(v2Url)}`,
+//           { signal: AbortSignal.timeout(20000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         const j = await r.json();
+//         return JSON.parse(j.contents);
+//       },
+//       async () => {
+//         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+//         const r     = await fetch(
+//           `https://corsproxy.io/?${encodeURIComponent(v2Url)}`,
+//           { signal: AbortSignal.timeout(20000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         return r.json();
+//       },
+//     ];
+
+//     let data = null;
+//     for (let p = 0; p < proxies.length; p++) {
+//       try {
+//         data = await proxies[p]();
+//         console.log(`${ticker} Q2 — Proxy ${p + 1} succeeded`);
+//         break;
+//       } catch (e) {
+//         console.warn(`${ticker} Q2 — Proxy ${p + 1} failed: ${e.message}`);
+//         if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 2000));
+//       }
+//     }
+
+//     if (!data) throw new Error("All proxies failed");
+
+//     const result      = data.chart.result[0];
+//     const meta        = result.meta || {};
+//     const closes      = result.indicators.quote[0].close;
+//     const validCloses = closes.filter(v => v !== null && !isNaN(v));
+
+//     const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+//     const prevPrice   = validCloses[0] || meta.chartPreviousClose;
+//     const change      = latestPrice - prevPrice;
+//     const changePct   = (change / prevPrice) * 100;
+//     const isPositive  = change >= 0;
+
+//     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
+
+//     // ===== Remove refreshing indicator before updating price =====
+//     const priceElSuccess = document.getElementById(`price-${ticker}`);
+//     if (priceElSuccess) {
+//       const refreshEl = priceElSuccess.querySelector(".price-refreshing");
+//       if (refreshEl) refreshEl.remove();
+//     }
+
+//     document.getElementById(`price-${ticker}`).innerHTML =
+//       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
+//     document.getElementById(`change-${ticker}`).innerHTML = `
+//       <span class="pick-change-value ${isPositive ? "positive" : "negative"}">
+//         ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)}
+//         (${isPositive ? "+" : ""}${changePct.toFixed(2)}%)
+//       </span>`;
+
+//     const card = document.getElementById(`pick-${ticker}`);
+//     if (card) {
+//       card.classList.remove("pick-positive", "pick-negative");
+//       card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+//     }
+
+//   } catch (err) {
+//     const priceEl  = document.getElementById(`price-${ticker}`);
+//     const changeEl = document.getElementById(`change-${ticker}`);
+
+//     // Remove refreshing indicator
+//     if (priceEl) {
+//       const refreshEl = priceEl.querySelector(".price-refreshing");
+//       if (refreshEl) refreshEl.remove();
+//     }
+
+//     if (retryCount < maxRetries - 1) {
+//       const waitTime = (retryCount + 1) * 3000;
+//       setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
+//     } else {
+//       // All standard retries exhausted — try file cache as last resort
+//       const fileData    = pickPricesCache[ticker];
+//       // const today       = new Date().toDateString();
+//       // const fileUpdated = pickPricesUpdated
+//       //   ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
+//       //   : null;
+//       // const isSameDay   = fileUpdated === today;
+//       const isSameDay   = isFilePriceFromToday(); // use existing function
+//       const appliedFromFile = isSameDay && fileData?.price
+//         ? applyFilePriceToQ2Card(ticker)
+//         : false;
+
+//       if (appliedFromFile) {
+//         if (priceEl) {
+//           priceEl.innerHTML =
+//             `<span class="pick-price-value" title="Price from last file update — refreshing">
+//               ~$${fileData.price.toFixed(2)}
+//              </span>
+//              <div class="price-refreshing" style="color:#888;">↻ retrying...</div>`;
+//         }
+//       } else if (!applyFilePriceToQ2Card(ticker)) {
+//         if (priceEl) {
+//           priceEl.innerHTML = `
+//             <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
+//                style="color:#00b4d8;font-size:11px;text-decoration:none;">
+//               View on Yahoo →
+//             </a>`;
+//         }
+//       }
+
+//       // Keep retrying in background every 2 minutes
+//       setTimeout(() => {
+//         // Only retry if still not showing a real price
+//         const el = document.getElementById(`price-${ticker}`);
+//         if (el && !el.innerHTML.includes("pick-price-value")) {
+//           fetchPickPrice(ticker, 0);
+//         } else {
+//           console.log(`${ticker} — background retry cancelled, price already loaded`);
+//         }
+//       }, 2 * 60 * 1000);
+//     }
+//   }
+// }
+
 async function fetchPickPrice(ticker, retryCount = 0) {
   const maxRetries = 3;
   try {
     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
 
+    // Finnhub uses BRK.B not BRK-B
+    const finnhubTicker = ticker.replace('-', '.');
+    const FINNHUB_KEY   = 'd98hjmpr01qpjfjdu7hgd98hjmpr01qpjfjdu7i0';
+
     const proxies = [
+
+      // ── Proxy 0: Finnhub (primary, no CORS proxy needed) ──────────────────
+      async () => {
+        const r = await fetch(
+          `https://finnhub.io/api/v1/quote?symbol=${finnhubTicker}&token=${FINNHUB_KEY}`,
+          { signal: AbortSignal.timeout(10000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const q = await r.json();
+        if (!q.c || q.c === 0) throw new Error('No price returned');
+        return {
+          _finnhub: true,
+          currentPrice: q.c,
+          change:       q.d,
+          changePct:    q.dp,
+          prevClose:    q.pc,
+        };
+      },
+
+      // ── Proxy 1: allorigins → Yahoo query1 ────────────────────────────────
       async () => {
         const r = await fetch(
           `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
@@ -1645,6 +1820,8 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
+
+      // ── Proxy 2: corsproxy.io → Yahoo query1 ──────────────────────────────
       async () => {
         const r = await fetch(
           `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
@@ -1653,6 +1830,8 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       },
+
+      // ── Proxy 3: allorigins → Yahoo query2 ────────────────────────────────
       async () => {
         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r     = await fetch(
@@ -1663,6 +1842,8 @@ async function fetchPickPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
+
+      // ── Proxy 4: corsproxy.io → Yahoo query2 ──────────────────────────────
       async () => {
         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r     = await fetch(
@@ -1688,20 +1869,30 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
     if (!data) throw new Error("All proxies failed");
 
-    const result      = data.chart.result[0];
-    const meta        = result.meta || {};
-    const closes      = result.indicators.quote[0].close;
-    const validCloses = closes.filter(v => v !== null && !isNaN(v));
+    // ── Parse result — handle Finnhub shape vs Yahoo shape ────────────────
+    let latestPrice, prevPrice, change, changePct, isPositive;
 
-    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
-    const prevPrice   = validCloses[0] || meta.chartPreviousClose;
-    const change      = latestPrice - prevPrice;
-    const changePct   = (change / prevPrice) * 100;
-    const isPositive  = change >= 0;
+    if (data._finnhub) {
+      latestPrice = data.currentPrice;
+      prevPrice   = data.prevClose;
+      change      = data.change;
+      changePct   = data.changePct;
+      isPositive  = change >= 0;
+    } else {
+      const result      = data.chart.result[0];
+      const meta        = result.meta || {};
+      const closes      = result.indicators.quote[0].close;
+      const validCloses = closes.filter(v => v !== null && !isNaN(v));
+      latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+      prevPrice   = validCloses[0] || meta.chartPreviousClose;
+      change      = latestPrice - prevPrice;
+      changePct   = (change / prevPrice) * 100;
+      isPositive  = change >= 0;
+    }
 
     savePrice(`q2_${ticker}`, latestPrice, change, changePct, isPositive);
 
-    // ===== Remove refreshing indicator before updating price =====
+    // ── Remove refreshing indicator before updating price ──────────────────
     const priceElSuccess = document.getElementById(`price-${ticker}`);
     if (priceElSuccess) {
       const refreshEl = priceElSuccess.querySelector(".price-refreshing");
@@ -1736,14 +1927,8 @@ async function fetchPickPrice(ticker, retryCount = 0) {
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchPickPrice(ticker, retryCount + 1), waitTime);
     } else {
-      // All standard retries exhausted — try file cache as last resort
-      const fileData    = pickPricesCache[ticker];
-      // const today       = new Date().toDateString();
-      // const fileUpdated = pickPricesUpdated
-      //   ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
-      //   : null;
-      // const isSameDay   = fileUpdated === today;
-      const isSameDay   = isFilePriceFromToday(); // use existing function
+      const fileData        = pickPricesCache[ticker];
+      const isSameDay       = isFilePriceFromToday();
       const appliedFromFile = isSameDay && fileData?.price
         ? applyFilePriceToQ2Card(ticker)
         : false;
@@ -1768,7 +1953,6 @@ async function fetchPickPrice(ticker, retryCount = 0) {
 
       // Keep retrying in background every 2 minutes
       setTimeout(() => {
-        // Only retry if still not showing a real price
         const el = document.getElementById(`price-${ticker}`);
         if (el && !el.innerHTML.includes("pick-price-value")) {
           fetchPickPrice(ticker, 0);
@@ -1779,6 +1963,8 @@ async function fetchPickPrice(ticker, retryCount = 0) {
     }
   }
 }
+
+
 
 // ============ TACTICAL ROTATION PICKS ============
 
@@ -2037,12 +2223,187 @@ async function waitForFundamentalPicksComplete() {
 }
 
 // ============ FETCH TACTICAL PICK PRICE ============
+// async function fetchTacticalPrice(ticker, retryCount = 0) {
+//   const maxRetries = 3;
+//   try {
+//     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+
+//     const proxies = [
+//       async () => {
+//         const r = await fetch(
+//           `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+//           { signal: AbortSignal.timeout(15000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         const j = await r.json();
+//         return JSON.parse(j.contents);
+//       },
+//       async () => {
+//         const r = await fetch(
+//           `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+//           { signal: AbortSignal.timeout(15000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         return r.json();
+//       },
+//       async () => {
+//         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+//         const r     = await fetch(
+//           `https://api.allorigins.win/get?url=${encodeURIComponent(v2Url)}`,
+//           { signal: AbortSignal.timeout(20000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         const j = await r.json();
+//         return JSON.parse(j.contents);
+//       },
+//       async () => {
+//         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+//         const r     = await fetch(
+//           `https://corsproxy.io/?${encodeURIComponent(v2Url)}`,
+//           { signal: AbortSignal.timeout(20000) }
+//         );
+//         if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//         return r.json();
+//       },
+//     ];
+
+//     let data = null;
+//     for (let p = 0; p < proxies.length; p++) {
+//       try {
+//         data = await proxies[p]();
+//         console.log(`${ticker} tactical — Proxy ${p + 1} succeeded`);
+//         break;
+//       } catch (e) {
+//         console.warn(`${ticker} tactical — Proxy ${p + 1} failed: ${e.message}`);
+//         if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 2000)); // ← was 1000
+//       }
+//     }
+
+//     if (!data) throw new Error("All proxies failed");
+
+//     const result      = data.chart.result[0];
+//     const meta        = result.meta || {};
+//     const closes      = result.indicators.quote[0].close;
+//     const validCloses = closes.filter(v => v !== null && !isNaN(v));
+
+//     const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+//     const prevPrice   = validCloses[0] || meta.chartPreviousClose;
+//     const change      = latestPrice - prevPrice;
+//     const changePct   = (change / prevPrice) * 100;
+//     const isPositive  = change >= 0;
+
+//     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
+
+//     // ===== Remove refreshing indicator before updating price =====
+//     const priceElSuccess = document.getElementById(`tactical-price-${ticker}`);
+//     if (priceElSuccess) {
+//       const refreshEl = priceElSuccess.querySelector(".price-refreshing");
+//       if (refreshEl) refreshEl.remove();
+//     }
+
+//     document.getElementById(`tactical-price-${ticker}`).innerHTML =
+//       `<span class="pick-price-value">$${latestPrice.toFixed(2)}</span>`;
+//     document.getElementById(`tactical-change-${ticker}`).innerHTML = `
+//       <span class="pick-change-value ${isPositive ? "positive" : "negative"}">
+//         ${isPositive ? "▲" : "▼"} $${Math.abs(change).toFixed(2)}
+//         (${isPositive ? "+" : ""}${changePct.toFixed(2)}%)
+//       </span>`;
+
+//     const card = document.getElementById(`tactical-pick-${ticker}`);
+//     if (card) {
+//       card.classList.remove("pick-positive", "pick-negative");
+//       card.classList.add(isPositive ? "pick-positive" : "pick-negative");
+//     }
+
+//   } catch (err) {
+//     const priceEl  = document.getElementById(`tactical-price-${ticker}`);
+//     const changeEl = document.getElementById(`tactical-change-${ticker}`);
+
+//     // Remove refreshing indicator
+//     if (priceEl) {
+//       const refreshEl = priceEl.querySelector(".price-refreshing");
+//       if (refreshEl) refreshEl.remove();
+//     }
+
+//     if (retryCount < maxRetries - 1) {
+//       const waitTime = (retryCount + 1) * 3000;
+//       setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
+//     } else {
+//       // All standard retries exhausted — try file cache as last resort
+//       const fileData    = pickPricesCache[ticker];
+//       // const today       = new Date().toDateString();
+//       // const fileUpdated = pickPricesUpdated
+//       //   ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
+//       //   : null;
+//       // const isSameDay   = fileUpdated === today;
+//       const isSameDay   = isFilePriceFromToday(); // ← use existing function
+//       const appliedFromFile = isSameDay && fileData?.price
+//         ? applyFilePriceToTacticalCard(ticker)
+//         : false;
+
+//       if (appliedFromFile) {
+//         if (priceEl) {
+//           priceEl.innerHTML =
+//             `<span class="pick-price-value" title="Price from last file update — refreshing">
+//               ~$${fileData.price.toFixed(2)}
+//              </span>
+//              <div class="price-refreshing" style="color:#888;">↻ retrying...</div>`;
+//         }
+//       } else if (!applyFilePriceToTacticalCard(ticker)) {
+//         if (priceEl) {
+//           priceEl.innerHTML = `
+//             <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank"
+//                style="color:#00b4d8;font-size:11px;text-decoration:none;">
+//               View on Yahoo →
+//             </a>`;
+//         }
+//       }
+
+//       // Keep retrying in background every 2 minutes
+//       setTimeout(() => {
+//         const el = document.getElementById(`tactical-price-${ticker}`);
+//         if (el && !el.innerHTML.includes("pick-price-value")) {
+//           fetchTacticalPrice(ticker, 0);
+//         } else {
+//           console.log(`${ticker} tactical — background retry cancelled, price already loaded`);
+//         }
+//       }, 2 * 60 * 1000);
+//     }
+//   }
+// }
+
 async function fetchTacticalPrice(ticker, retryCount = 0) {
   const maxRetries = 3;
   try {
     const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
 
+    // Finnhub uses BRK.B not BRK-B
+    const finnhubTicker = ticker.replace('-', '.');
+    const FINNHUB_KEY   = 'd98hjmpr01qpjfjdu7hgd98hjmpr01qpjfjdu7i0';
+
     const proxies = [
+
+      // ── Proxy 0: Finnhub (primary, no CORS proxy needed) ──────────────────
+      async () => {
+        const r = await fetch(
+          `https://finnhub.io/api/v1/quote?symbol=${finnhubTicker}&token=${FINNHUB_KEY}`,
+          { signal: AbortSignal.timeout(10000) }
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const q = await r.json();
+        // Finnhub returns { c: current, d: change, dp: changePct, pc: prevClose }
+        if (!q.c || q.c === 0) throw new Error('No price returned');
+        // Normalize to the shape the rest of the function expects
+        return {
+          _finnhub: true,
+          currentPrice: q.c,
+          change:       q.d,
+          changePct:    q.dp,
+          prevClose:    q.pc,
+        };
+      },
+
+      // ── Proxy 1: allorigins → Yahoo query1 ────────────────────────────────
       async () => {
         const r = await fetch(
           `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
@@ -2052,6 +2413,8 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
+
+      // ── Proxy 2: corsproxy.io → Yahoo query1 ──────────────────────────────
       async () => {
         const r = await fetch(
           `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
@@ -2060,6 +2423,8 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       },
+
+      // ── Proxy 3: allorigins → Yahoo query2 ────────────────────────────────
       async () => {
         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r     = await fetch(
@@ -2070,6 +2435,8 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         const j = await r.json();
         return JSON.parse(j.contents);
       },
+
+      // ── Proxy 4: corsproxy.io → Yahoo query2 ──────────────────────────────
       async () => {
         const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
         const r     = await fetch(
@@ -2089,26 +2456,35 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         break;
       } catch (e) {
         console.warn(`${ticker} tactical — Proxy ${p + 1} failed: ${e.message}`);
-        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 2000)); // ← was 1000
+        if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 2000));
       }
     }
 
     if (!data) throw new Error("All proxies failed");
 
-    const result      = data.chart.result[0];
-    const meta        = result.meta || {};
-    const closes      = result.indicators.quote[0].close;
-    const validCloses = closes.filter(v => v !== null && !isNaN(v));
+    // ── Parse result — handle Finnhub shape vs Yahoo shape ────────────────
+    let latestPrice, prevPrice, change, changePct, isPositive;
 
-    const latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
-    const prevPrice   = validCloses[0] || meta.chartPreviousClose;
-    const change      = latestPrice - prevPrice;
-    const changePct   = (change / prevPrice) * 100;
-    const isPositive  = change >= 0;
+    if (data._finnhub) {
+      latestPrice = data.currentPrice;
+      prevPrice   = data.prevClose;
+      change      = data.change;
+      changePct   = data.changePct;
+      isPositive  = change >= 0;
+    } else {
+      const result      = data.chart.result[0];
+      const meta        = result.meta || {};
+      const closes      = result.indicators.quote[0].close;
+      const validCloses = closes.filter(v => v !== null && !isNaN(v));
+      latestPrice = meta.regularMarketPrice || validCloses[validCloses.length - 1];
+      prevPrice   = validCloses[0] || meta.chartPreviousClose;
+      change      = latestPrice - prevPrice;
+      changePct   = (change / prevPrice) * 100;
+      isPositive  = change >= 0;
+    }
 
     savePrice(`tac_${ticker}`, latestPrice, change, changePct, isPositive);
 
-    // ===== Remove refreshing indicator before updating price =====
     const priceElSuccess = document.getElementById(`tactical-price-${ticker}`);
     if (priceElSuccess) {
       const refreshEl = priceElSuccess.querySelector(".price-refreshing");
@@ -2133,7 +2509,6 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     const priceEl  = document.getElementById(`tactical-price-${ticker}`);
     const changeEl = document.getElementById(`tactical-change-${ticker}`);
 
-    // Remove refreshing indicator
     if (priceEl) {
       const refreshEl = priceEl.querySelector(".price-refreshing");
       if (refreshEl) refreshEl.remove();
@@ -2143,14 +2518,8 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
       const waitTime = (retryCount + 1) * 3000;
       setTimeout(() => fetchTacticalPrice(ticker, retryCount + 1), waitTime);
     } else {
-      // All standard retries exhausted — try file cache as last resort
-      const fileData    = pickPricesCache[ticker];
-      // const today       = new Date().toDateString();
-      // const fileUpdated = pickPricesUpdated
-      //   ? new Date(pickPricesUpdated.replace(" UTC","").replace(" ","T") + "Z").toDateString()
-      //   : null;
-      // const isSameDay   = fileUpdated === today;
-      const isSameDay   = isFilePriceFromToday(); // ← use existing function
+      const fileData        = pickPricesCache[ticker];
+      const isSameDay       = isFilePriceFromToday();
       const appliedFromFile = isSameDay && fileData?.price
         ? applyFilePriceToTacticalCard(ticker)
         : false;
@@ -2173,7 +2542,6 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
         }
       }
 
-      // Keep retrying in background every 2 minutes
       setTimeout(() => {
         const el = document.getElementById(`tactical-price-${ticker}`);
         if (el && !el.innerHTML.includes("pick-price-value")) {
@@ -2185,6 +2553,8 @@ async function fetchTacticalPrice(ticker, retryCount = 0) {
     }
   }
 }
+
+
 
 function loadChart(ticker) {
   // Switch the main chart dropdown to selected ticker
