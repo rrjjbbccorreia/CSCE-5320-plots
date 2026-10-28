@@ -547,6 +547,41 @@
         "SMH": 5.47
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-10-28",
+      "addedAt": "2026-10-28T18:32:15Z",
+      "picks": [
+        "MPC",
+        "HWM",
+        "JBL",
+        "HPE",
+        "AME",
+        "GOOGL",
+        "BRK-B",
+        "BEN",
+        "AON",
+        "ETN",
+        "CL",
+        "TECH",
+        "XME"
+      ],
+      "weights": {
+        "MPC": 11.46,
+        "HWM": 2.25,
+        "JBL": 6.68,
+        "HPE": 3.23,
+        "AME": 10.6,
+        "GOOGL": 9.42,
+        "BRK-B": 12.21,
+        "BEN": 4.8,
+        "AON": 5.89,
+        "ETN": 7.65,
+        "CL": 11.72,
+        "TECH": 9.06,
+        "XME": 5.04
+      },
+      "note": "picks list changed"
     }
   ]
 }
