@@ -1386,10 +1386,10 @@ const Q2_PICKS = [
 ];
 
 const TACTICAL_PICKS = [
-  "MPC", "HWM", "JBL", "HPE",
-  "AME", "GOOGL", "BRK-B", "BEN",
-  "AON", "ETN", "CL", "TECH",
-  "XME"
+  "SMCI", "MPC", "MRVL", "VEEV",
+  "LYB", "WDC", "VLO", "PFG",
+  "IFF", "ALLE", "KO", "LMT",
+  "TMV"
 ];
 
 async function loadQ2Picks() {
