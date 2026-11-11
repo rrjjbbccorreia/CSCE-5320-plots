@@ -582,6 +582,41 @@
         "XME": 5.04
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-11-11",
+      "addedAt": "2026-11-11T19:53:49Z",
+      "picks": [
+        "SMCI",
+        "MPC",
+        "MRVL",
+        "VEEV",
+        "LYB",
+        "WDC",
+        "VLO",
+        "PFG",
+        "IFF",
+        "ALLE",
+        "KO",
+        "LMT",
+        "TMV"
+      ],
+      "weights": {
+        "SMCI": 1.58,
+        "MPC": 4.23,
+        "MRVL": 3.16,
+        "VEEV": 8.0,
+        "LYB": 7.45,
+        "WDC": 6.93,
+        "VLO": 4.58,
+        "PFG": 10.92,
+        "IFF": 10.07,
+        "ALLE": 11.82,
+        "KO": 11.1,
+        "LMT": 11.82,
+        "TMV": 8.35
+      },
+      "note": "picks list changed"
     }
   ]
 }
