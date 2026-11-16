@@ -27,6 +27,15 @@
         "tactical": true,
         "q2": true
       }
+    },
+    {
+      "email": "rssllfstr@gmail.com",
+      "subscribedAt": "2026-11-09T22:05:56Z",
+      "active": true,
+      "notifications": {
+        "tactical": true,
+        "q2": true
+      }
     }
   ]
 }
