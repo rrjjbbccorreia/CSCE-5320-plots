@@ -168,6 +168,42 @@
         "CEG": 5.34
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-11-25",
+      "addedAt": "2026-11-25T19:08:34Z",
+      "entryDate": "2026-09-15",
+      "picks": [
+        "ECHO",
+        "FLEX",
+        "INTC",
+        "EXR",
+        "REG",
+        "CSCO",
+        "APH",
+        "ES",
+        "CHRW",
+        "TFC",
+        "CSGP",
+        "ON",
+        "WELL"
+      ],
+      "weights": {
+        "ECHO": 6.36,
+        "FLEX": 4.62,
+        "INTC": 2.03,
+        "EXR": 9.17,
+        "REG": 9.65,
+        "CSCO": 7.34,
+        "APH": 10.67,
+        "ES": 9.82,
+        "CHRW": 8.54,
+        "TFC": 8.43,
+        "CSGP": 10.28,
+        "ON": 2.92,
+        "WELL": 10.18
+      },
+      "note": "picks list changed"
     }
   ]
 }
