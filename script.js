@@ -621,70 +621,215 @@ async function drawChart(ticker, target) {
     (v) => v === null || v === 0 || isNaN(v)
   );
 
+  // if (hasMissingEntryPrices) {
+  //   try {
+  //     const proxyUrl = "https://api.allorigins.win/get?url=";
+
+  //     // Fetch last 6 months of daily prices to cover all possible entry dates
+  //     const yahooUrl = encodeURIComponent(
+  //       `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`
+  //     );
+  //     const response = await fetch(proxyUrl + yahooUrl);
+  //     const json = await response.json();
+  //     const yahooData = JSON.parse(json.contents);
+  //     const result = yahooData.chart.result[0];
+
+  //     const timestamps = result.timestamp;
+  //     const closes = result.indicators.quote[0].close;
+
+  //     // Build a map of date string -> closing price for quick lookup
+  //     const priceByDate = {};
+  //     timestamps.forEach((ts, i) => {
+  //       if (closes[i] !== null && !isNaN(closes[i])) {
+  //         const dateStr = new Date(ts * 1000).toISOString().split("T")[0];
+  //         priceByDate[dateStr] = closes[i];
+  //       }
+  //     });
+
+  //     // Get the latest available price as fallback for future entry dates
+  //     const latestPrice = [...closes].reverse().find(
+  //       (v) => v !== null && !isNaN(v)
+  //     );
+
+  //     // Fill in missing entry prices
+  //     for (let i = 0; i < entryPrice.length; i++) {
+  //       if (entryPrice[i] === null || entryPrice[i] === 0 || isNaN(entryPrice[i])) {
+          
+  //         const entryDateObj = entryDate[i];
+  //         const entryDateStr = entryDateObj.toISOString().split("T")[0];
+
+  //         if (entryDateObj <= today) {
+  //           // Entry date is in the past — find exact or closest date in history
+  //           if (priceByDate[entryDateStr]) {
+  //             // Exact match found
+  //             entryPrice[i] = priceByDate[entryDateStr];
+  //             console.log(`${ticker} row ${i}: exact price on ${entryDateStr} = $${entryPrice[i].toFixed(2)}`);
+  //           } else {
+  //             // Find closest available trading date
+  //             const allDates = Object.keys(priceByDate).sort();
+  //             const closest = allDates.reduce((prev, curr) => {
+  //               return Math.abs(new Date(curr) - entryDateObj) 
+  //                 Math.abs(new Date(prev) - entryDateObj)
+  //                 ? curr
+  //                 : prev;
+  //             });
+  //             entryPrice[i] = priceByDate[closest];
+  //             console.log(`${ticker} row ${i}: no exact match for ${entryDateStr}, using closest date ${closest} = $${entryPrice[i].toFixed(2)}`);
+  //           }
+  //         } else {
+  //           // Entry date is in the future — use latest available price
+  //           entryPrice[i] = latestPrice;
+  //           console.log(`${ticker} row ${i}: future entry date ${entryDateStr}, using latest price = $${latestPrice.toFixed(2)}`);
+  //         }
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.warn(`Could not fetch historical prices for ${ticker}:`, err);
+  //   }
+  // }
   if (hasMissingEntryPrices) {
     try {
-      const proxyUrl = "https://api.allorigins.win/get?url=";
+      const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`;
 
-      // Fetch last 6 months of daily prices to cover all possible entry dates
-      const yahooUrl = encodeURIComponent(
-        `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`
-      );
-      const response = await fetch(proxyUrl + yahooUrl);
-      const json = await response.json();
-      const yahooData = JSON.parse(json.contents);
-      const result = yahooData.chart.result[0];
+      // Finnhub uses BRK.B not BRK-B
+      const finnhubTicker = ticker.replace('-', '.');
+      const FINNHUB_KEY   = 'd98hjmpr01qpjfjdu7hgd98hjmpr01qpjfjdu7i0';
 
-      const timestamps = result.timestamp;
-      const closes = result.indicators.quote[0].close;
+      const proxies = [
 
-      // Build a map of date string -> closing price for quick lookup
-      const priceByDate = {};
-      timestamps.forEach((ts, i) => {
-        if (closes[i] !== null && !isNaN(closes[i])) {
-          const dateStr = new Date(ts * 1000).toISOString().split("T")[0];
-          priceByDate[dateStr] = closes[i];
+        // ── Proxy 0: Finnhub (primary, no CORS proxy needed) ──────────────
+        async () => {
+          const r = await fetch(
+            `https://finnhub.io/api/v1/quote?symbol=${finnhubTicker}&token=${FINNHUB_KEY}`,
+            { signal: AbortSignal.timeout(10000) }
+          );
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const q = await r.json();
+          if (!q.c || q.c === 0) throw new Error('No price returned');
+          return { _finnhub: true, currentPrice: q.c };
+        },
+
+        // ── Proxy 1: allorigins → Yahoo query1 ─────────────────────────────
+        async () => {
+          const r = await fetch(
+            `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+            { signal: AbortSignal.timeout(15000) }
+          );
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const j = await r.json();
+          return JSON.parse(j.contents);
+        },
+
+        // ── Proxy 2: corsproxy.io → Yahoo query1 ───────────────────────────
+        async () => {
+          const r = await fetch(
+            `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+            { signal: AbortSignal.timeout(15000) }
+          );
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        },
+
+        // ── Proxy 3: allorigins → Yahoo query2 ─────────────────────────────
+        async () => {
+          const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`;
+          const r     = await fetch(
+            `https://api.allorigins.win/get?url=${encodeURIComponent(v2Url)}`,
+            { signal: AbortSignal.timeout(20000) }
+          );
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const j = await r.json();
+          return JSON.parse(j.contents);
+        },
+
+        // ── Proxy 4: corsproxy.io → Yahoo query2 ───────────────────────────
+        async () => {
+          const v2Url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`;
+          const r     = await fetch(
+            `https://corsproxy.io/?${encodeURIComponent(v2Url)}`,
+            { signal: AbortSignal.timeout(20000) }
+          );
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        },
+      ];
+
+      let data = null;
+      for (let p = 0; p < proxies.length; p++) {
+        try {
+          data = await proxies[p]();
+          console.log(`${ticker} entry-price backfill — Proxy ${p} succeeded`);
+          break;
+        } catch (e) {
+          console.warn(`${ticker} entry-price backfill — Proxy ${p} failed: ${e.message}`);
+          if (p < proxies.length - 1) await new Promise(r => setTimeout(r, 1000));
         }
-      });
+      }
 
-      // Get the latest available price as fallback for future entry dates
-      const latestPrice = [...closes].reverse().find(
-        (v) => v !== null && !isNaN(v)
-      );
+      if (!data) throw new Error("All proxies failed for entry price backfill");
 
-      // Fill in missing entry prices
+      // ── Build priceByDate map and latestPrice depending on source ──────
+      let priceByDate = {};
+      let latestPrice = null;
+
+      if (data._finnhub) {
+        // Finnhub only gives the current quote, no historical series —
+        // use it purely as the live "most recent price" fallback
+        latestPrice = data.currentPrice;
+      } else {
+        // Yahoo chart response — build full historical map
+        const result     = data.chart.result[0];
+        const timestamps = result.timestamp;
+        const closes     = result.indicators.quote[0].close;
+
+        timestamps.forEach((ts, i) => {
+          if (closes[i] !== null && !isNaN(closes[i])) {
+            const dateStr = new Date(ts * 1000).toISOString().split("T")[0];
+            priceByDate[dateStr] = closes[i];
+          }
+        });
+
+        latestPrice = [...closes].reverse().find(
+          (v) => v !== null && !isNaN(v)
+        );
+      }
+
+      // ── Fill in missing entry prices ───────────────────────────────────
       for (let i = 0; i < entryPrice.length; i++) {
         if (entryPrice[i] === null || entryPrice[i] === 0 || isNaN(entryPrice[i])) {
-          
+
           const entryDateObj = entryDate[i];
           const entryDateStr = entryDateObj.toISOString().split("T")[0];
 
           if (entryDateObj <= today) {
             // Entry date is in the past — find exact or closest date in history
             if (priceByDate[entryDateStr]) {
-              // Exact match found
               entryPrice[i] = priceByDate[entryDateStr];
               console.log(`${ticker} row ${i}: exact price on ${entryDateStr} = $${entryPrice[i].toFixed(2)}`);
-            } else {
-              // Find closest available trading date
+            } else if (Object.keys(priceByDate).length > 0) {
               const allDates = Object.keys(priceByDate).sort();
               const closest = allDates.reduce((prev, curr) => {
-                return Math.abs(new Date(curr) - entryDateObj) 
+                return Math.abs(new Date(curr) - entryDateObj) <
                   Math.abs(new Date(prev) - entryDateObj)
                   ? curr
                   : prev;
               });
               entryPrice[i] = priceByDate[closest];
               console.log(`${ticker} row ${i}: no exact match for ${entryDateStr}, using closest date ${closest} = $${entryPrice[i].toFixed(2)}`);
+            } else {
+              // Only Finnhub succeeded (no historical data) — use live price
+              entryPrice[i] = latestPrice;
+              console.log(`${ticker} row ${i}: no historical data available, using live price = $${latestPrice.toFixed(2)}`);
             }
           } else {
-            // Entry date is in the future — use latest available price
+            // Entry date is in the future — always use the most current live price
             entryPrice[i] = latestPrice;
-            console.log(`${ticker} row ${i}: future entry date ${entryDateStr}, using latest price = $${latestPrice.toFixed(2)}`);
+            console.log(`${ticker} row ${i}: future entry date ${entryDateStr}, using most current price = $${latestPrice.toFixed(2)}`);
           }
         }
       }
     } catch (err) {
-      console.warn(`Could not fetch historical prices for ${ticker}:`, err);
+      console.warn(`Could not fetch historical prices for ${ticker}:`, err.message);
     }
   }
 
