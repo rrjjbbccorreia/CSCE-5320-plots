@@ -16,29 +16,26 @@ from datetime import datetime, timezone
 # Edit these when the Q2 portfolio changes each quarter
 
 CURRENT_PICKS = [
-    "INTC", "FIX", "SNDK", "PSX",
-    "FOXA", "FANG", "APO", "CF",
-    "EOG", "FLEX", "BR", "GRMN",
-    "ECHO", "LITE", "IFF", "CEG"
+    "ECHO", "FLEX", "INTC", "EXR",
+    "REG", "CSCO", "APH", "ES",
+    "CHRW", "TFC", "CSGP", "ON",
+    "WELL"
 ]
 
 CURRENT_WEIGHTS = {
-    "INTC": 3.16,
-    "FIX": 5.27,
-    "SNDK": 3.30,
-    "PSX": 7.65,
-    "FOXA": 7.13,
-    "FANG": 7.75,
-    "APO": 5.67,
-    "CF": 7.94,
-    "EOG": 8.46,
-    "FLEX": 2.55,
-    "BR": 8.38,
-    "GRMN": 8.62,
-    "ECHO": 6.37,
-    "LITE": 4.41,
-    "IFF": 7.99,
-    "CEG": 5.34,
+    "ECHO" : 6.36,
+    "FLEX" : 4.62,
+    "INTC" : 2.03,
+    "EXR" : 9.17,
+    "REG" : 9.65,
+    "CSCO" : 7.34,
+    "APH" : 10.67,
+    "ES" : 9.82,
+    "CHRW" : 8.54,
+    "TFC" : 8.43,
+    "CSGP" : 10.28,
+    "ON" : 2.92,
+    "WELL" : 10.18,
 }
 
 # Entry date for this quarter's picks

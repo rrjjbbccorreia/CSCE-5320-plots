@@ -55,7 +55,7 @@
 })();
 
 // ==================== CONFIG ====================
-const DATA_PATH = "data/merged_predictions_v2_web_093026.csv";
+const DATA_PATH = "data/merged_predictions_v2_web_113026.csv";
 let globalData = [];
 let currentTicker = null;
 let currentTarget = "T1";
@@ -1379,17 +1379,16 @@ function isFilePriceFromToday() {
 
 // ============ Q2 FUNDAMENTAL PICKS ============
 const Q2_PICKS = [
-  "INTC", "FIX", "SNDK", "PSX",
-  "FOXA", "FANG", "APO", "CF",
-  "EOG", "FLEX", "BR", "GRMN",
-  "ECHO", "LITE", "IFF", "CEG"
+  "ECHO", "FLEX", "INTC", "EXR",
+  "REG", "CSCO", "APH", "ES",
+  "CHRW", "TFC", "CSGP", "ON",
+  "WELL"
 ];
 
 const TACTICAL_PICKS = [
-  "SMCI", "MPC", "MRVL", "VEEV",
-  "LYB", "WDC", "VLO", "PFG",
-  "IFF", "ALLE", "KO", "LMT",
-  "TMV"
+  "VEEV", "MPC", "EQT", "NCLH",
+  "MRVL", "DECK", "DE", "XEL",
+  "HAS", "XME", "ETHE"
 ];
 
 async function loadQ2Picks() {
