@@ -617,6 +617,37 @@
         "TMV": 8.35
       },
       "note": "picks list changed"
+    },
+    {
+      "date": "2026-11-25",
+      "addedAt": "2026-11-25T19:08:48Z",
+      "picks": [
+        "VEEV",
+        "MPC",
+        "EQT",
+        "NCLH",
+        "MRVL",
+        "DECK",
+        "DE",
+        "XEL",
+        "HAS",
+        "XME",
+        "ETHE"
+      ],
+      "weights": {
+        "VEEV": 5.28,
+        "MPC": 8.65,
+        "EQT": 12.24,
+        "NCLH": 12.27,
+        "MRVL": 3.48,
+        "DECK": 11.76,
+        "DE": 13.54,
+        "XEL": 11.07,
+        "HAS": 7.96,
+        "XME": 8.25,
+        "ETHE": 5.51
+      },
+      "note": "picks list changed"
     }
   ]
 }
