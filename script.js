@@ -602,6 +602,79 @@ async function fetchCompanyProfile(ticker, retryCount = 0) {
 }
 
 
+
+// ============ FETCH LATEST PRICE (Finnhub primary, Yahoo fallback) ============
+async function fetchLatestPrice(ticker) {
+  const finnhubTicker = ticker.replace("-", ".");
+  const FINNHUB_KEY   = "d98hjmpr01qpjfjdu7hgd98hjmpr01qpjfjdu7i0";
+  const yahooV1 = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+  const yahooV2 = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=2d`;
+
+  const yahooPrice = (data) => {
+    const result = data.chart.result[0];
+    return result.meta?.regularMarketPrice ||
+      [...result.indicators.quote[0].close].reverse().find(v => v !== null && !isNaN(v));
+  };
+
+  const sources = [
+    async () => {
+      const r = await fetch(
+        `https://finnhub.io/api/v1/quote?symbol=${finnhubTicker}&token=${FINNHUB_KEY}`,
+        { signal: AbortSignal.timeout(10000) }
+      );
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const q = await r.json();
+      if (!q.c) throw new Error("No price returned");
+      return q.c;
+    },
+    async () => {
+      const r = await fetch(
+        `https://api.allorigins.win/get?url=${encodeURIComponent(yahooV1)}`,
+        { signal: AbortSignal.timeout(15000) }
+      );
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return yahooPrice(JSON.parse((await r.json()).contents));
+    },
+    async () => {
+      const r = await fetch(
+        `https://corsproxy.io/?${encodeURIComponent(yahooV1)}`,
+        { signal: AbortSignal.timeout(15000) }
+      );
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return yahooPrice(await r.json());
+    },
+    async () => {
+      const r = await fetch(
+        `https://api.allorigins.win/get?url=${encodeURIComponent(yahooV2)}`,
+        { signal: AbortSignal.timeout(20000) }
+      );
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return yahooPrice(JSON.parse((await r.json()).contents));
+    },
+    async () => {
+      const r = await fetch(
+        `https://corsproxy.io/?${encodeURIComponent(yahooV2)}`,
+        { signal: AbortSignal.timeout(20000) }
+      );
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return yahooPrice(await r.json());
+    },
+  ];
+
+  for (let s = 0; s < sources.length; s++) {
+    try {
+      const price = await sources[s]();
+      if (price && price > 0) {
+        console.log(`${ticker} latest price — source ${s} succeeded: $${price.toFixed(2)}`);
+        return price;
+      }
+    } catch (e) {
+      console.warn(`${ticker} latest price — source ${s} failed: ${e.message}`);
+    }
+  }
+  return null;
+}
+
 // ============ DRAW CHART ============
 async function drawChart(ticker, target) {
   fetchStockTable(ticker); 
@@ -687,6 +760,8 @@ async function drawChart(ticker, target) {
   //     console.warn(`Could not fetch historical prices for ${ticker}:`, err);
   //   }
   // }
+  let liveLatestPrice = null;   // ← add this line
+
   if (hasMissingEntryPrices) {
     try {
       const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=6mo`;
@@ -794,6 +869,8 @@ async function drawChart(ticker, target) {
         );
       }
 
+      liveLatestPrice = latestPrice;   // ← add this line
+
       // ── Fill in missing entry prices ───────────────────────────────────
       for (let i = 0; i < entryPrice.length; i++) {
         if (entryPrice[i] === null || entryPrice[i] === 0 || isNaN(entryPrice[i])) {
@@ -833,6 +910,11 @@ async function drawChart(ticker, target) {
     }
   }
 
+  // Always make sure we have the most recent price for the Real Price line
+  if (!liveLatestPrice) {
+    liveLatestPrice = await fetchLatestPrice(ticker);
+  }
+
   // Plot only valid entry prices
   const validEntryIndices = entryPrice
     .map((v, i) => (v !== null && v !== 0 && !isNaN(v) ? i : null))
@@ -858,7 +940,17 @@ async function drawChart(ticker, target) {
   entryPrice[i] * yTrue[i]
   );
 
+  // ===== STEP 3 — ADD THIS BLOCK HERE =====
+  // Extend the Real Price line to today's most recent price
+  const trueDatesPlot  = [...trueDateFiltered];
+  const truePricesPlot = [...truePriceFiltered];
+  const lastTrueDate   = trueDatesPlot[trueDatesPlot.length - 1];
 
+  if (liveLatestPrice && (!lastTrueDate || today >= lastTrueDate)) {
+    trueDatesPlot.push(today);
+    truePricesPlot.push(liveLatestPrice);
+  }
+  // ===== END STEP 3 =====
 
   const predPrice = entryPrice.map((v, i) => v * Math.exp(mu[i]));
   //const truePrice = entryPrice.map((v, i) => v * Math.exp(yTrue[i]));
@@ -900,12 +992,25 @@ async function drawChart(ticker, target) {
     line: { color: "black", width: 2 },
   };
 
+  // const trueTrace = {
+  //   x: trueDateFiltered,
+  //   y: truePriceFiltered,
+  //   mode: "lines+markers",
+  //   name: `Real Price  (${target})`,
+  //   line: { color: target === "T1" ? "green" : "blue" },
+  // };
+
   const trueTrace = {
-    x: trueDateFiltered,
-    y: truePriceFiltered,
+    x: trueDatesPlot,                 // ← was trueDateFiltered
+    y: truePricesPlot,                // ← was truePriceFiltered
     mode: "lines+markers",
     name: `Real Price  (${target})`,
     line: { color: target === "T1" ? "green" : "blue" },
+    // Make the final "latest price" point stand out
+    marker: {
+      size:   truePricesPlot.map((_, i) => i === truePricesPlot.length - 1 && liveLatestPrice ? 11 : 6),
+      symbol: truePricesPlot.map((_, i) => i === truePricesPlot.length - 1 && liveLatestPrice ? "diamond" : "circle"),
+    },
   };
 
   const predTrace = {
